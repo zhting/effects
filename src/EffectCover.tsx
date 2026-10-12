@@ -248,6 +248,23 @@ export function EffectCover({ effect }: Props) {
             <rect x="208" y="82" width="46" height="64" rx="2" fill="#bae6fd" fillOpacity="0.82" stroke="#0f172a" strokeWidth="2" />
             <line x1="231" y1="82" x2="231" y2="146" stroke="#0f172a" strokeWidth="1.8" />
 
+            {/* 屋檐下小猫剪影 */}
+            <circle cx="198" cy="144" r="3.5" fill="#f8fafc" />
+            <ellipse cx="195" cy="147" rx="5" ry="3.2" fill="#f8fafc" />
+
+            {/* 街角撑透明伞的角色剪影 (v2) */}
+            <g transform="translate(226, 126)">
+              <path
+                d="M-16 6 Q0 -10 16 6 Z"
+                fill="rgba(224, 242, 254, 0.55)"
+                stroke="#e0f2fe"
+                strokeWidth="1.2"
+              />
+              <line x1="0" y1="-2" x2="0" y2="16" stroke="#bae6fd" strokeWidth="1.2" />
+              <circle cx="-2" cy="10" r="4" fill="#fde68a" />
+              <path d="M-7 25 L-4 14 L1 14 L4 25 Z" fill="#38bdf8" />
+            </g>
+
             {/* 街角路灯与冷色光锥 */}
             <line x1="68" y1="42" x2="68" y2="152" stroke="#475569" strokeWidth="3.5" strokeLinecap="round" />
             <path d="M68 42 Q82 40 88 46" stroke="#64748b" strokeWidth="3" strokeLinecap="round" />
