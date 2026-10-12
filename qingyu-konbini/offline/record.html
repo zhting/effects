@@ -5,26 +5,33 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>晴雨便利店</title>
 <style>
-  :root { --void: #060a13; --vig: rgba(2, 4, 10, .6); color-scheme: dark; }
+  :root { --void: #060a13; --vig: rgba(2, 4, 10, .6); --joy-ring: rgba(200, 220, 255, .28); --joy-knob: rgba(235, 242, 255, .55); color-scheme: dark; }
   html, body { height: 100%; margin: 0; background: var(--void); overflow: hidden; }
   #stage { position: fixed; inset: 0; }
   #stage canvas { display: block; width: 100%; height: 100%; touch-action: none; outline: none; cursor: grab; }
   #stage canvas:active { cursor: grabbing; }
+  #joy { position: fixed; width: 112px; height: 112px; margin: -56px 0 0 -56px; border-radius: 50%; border: 1.5px solid var(--joy-ring); pointer-events: none; }
+  #joy-knob { position: absolute; left: 50%; top: 50%; width: 44px; height: 44px; border-radius: 50%; background: var(--joy-knob); transform: translate(-50%, -50%); }
   .vig { position: fixed; inset: 0; pointer-events: none; background: radial-gradient(ellipse 75% 70% at 50% 52%, transparent 55%, var(--vig) 100%); }
 </style>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@500;700;900&family=ZCOOL+QingKe+HuangYou&display=swap">
 <script>
-window.__t=0; (function(){let a=12345;Math.random=function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};})(); performance.now=()=>window.__t; Date.now=()=>window.__t;
-let __raf=null; window.requestAnimationFrame=cb=>{__raf=cb;return 1;};
-window.__ready=()=>!!__raf;
-window.__step=(ms)=>{window.__t+=ms; const c=__raf; __raf=null; if(c) c(window.__t);};
+window.__externalCamera = true;
+window.__t = 0; performance.now = () => window.__t; Date.now = () => window.__t;
+(function () { let a = 12345; Math.random = function () { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; })();
+let __raf = null; window.requestAnimationFrame = cb => { __raf = cb; return 1; };
+window.__ready = () => !!__raf;
+window.__step = ms => { window.__t += ms; const c = __raf; __raf = null; if (c) c(window.__t); };
 </script>
 </head>
 <body>
 <div id="stage"></div>
 <div class="vig"></div>
+<div id="joy" hidden><div id="joy-knob"></div></div>
+<input type="file" id="vrm-file" accept=".vrm,.glb" hidden>
 <script src="lib/build/three.min.js"></script>
-<script src="lib/examples/js/controls/OrbitControls.js"></script>
+<script src="lib/examples/js/loaders/GLTFLoader.js"></script>
+<script src="lib/three-vrm/three-vrm.min.js"></script>
 <script src="lib/examples/js/objects/Reflector.js"></script>
 <script src="lib/examples/js/shaders/CopyShader.js"></script>
 <script src="lib/examples/js/shaders/LuminosityHighPassShader.js"></script>
@@ -77,16 +84,8 @@ const camDir = new THREE.Vector3(0.66, 0.29, 0.69).normalize();
 function fitDist() { const a = innerWidth / innerHeight; return 40 * Math.max(1, 1.2 / a); }
 const target0 = new THREE.Vector3(-1.2, 2.2, -1.6);
 camera.position.copy(target0).addScaledVector(camDir, fitDist());
+window.__cam = { camera, controls: { target: new THREE.Vector3() } };
 
-const controls = new THREE.OrbitControls(camera, renderer.domElement);
-controls.target.copy(target0);
-controls.enableDamping = true; controls.dampingFactor = 0.07;
-controls.rotateSpeed = 0.55; controls.zoomSpeed = 0.8; controls.panSpeed = 0.6;
-controls.minDistance = 8; controls.maxDistance = Math.max(80, fitDist() * 1.4);
-controls.maxPolarAngle = PI * 0.485; controls.minPolarAngle = 0.08;
-controls.screenSpacePanning = true;
-controls.update(); window.__cam={camera,controls};
-const TMIN = new THREE.Vector3(-9, 0.3, -9), TMAX = new THREE.Vector3(9, 7, 9);
 
 // ---------- toon kit ----------
 const grad = new THREE.DataTexture(new Uint8Array([78, 78, 78, 255, 160, 160, 160, 255, 225, 225, 225, 255, 255, 255, 255, 255]), 4, 1, THREE.RGBAFormat);
@@ -983,8 +982,8 @@ box(root, .9, 2.0, .06, toon(0x5f6f7a), -1.95, 0, Z0 - .05);
 // ============ LIGHTS ============
 scene.add(new THREE.HemisphereLight(0x4a5f92, 0x0d1220, 0.46));
 const moon = new THREE.DirectionalLight(0x7f9ad2, 0.42); moon.position.set(-12, 22, 10); scene.add(moon);
-const warm = 0xffd8a0;
-for (const [x, z] of [[-6.6, -6.2], [-2.4, -6.2], [-5.6, -1.6], [-0.4, -2.0]]) { const l = new THREE.PointLight(warm, .78, 8, 1); l.position.set(x, 2.35, z); scene.add(l); }
+const warm = 0xffd8a0; const shopLights = [];
+for (const [x, z] of [[-6.6, -6.2], [-2.4, -6.2], [-5.6, -1.6], [-0.4, -2.0]]) { const l = new THREE.PointLight(warm, .42, 7.5, 1.2); l.position.set(x, 2.35, z); shopLights.push(l); scene.add(l); }
 const spillF = new THREE.PointLight(0xffc888, .9, 4.2, 1.2); spillF.position.set(-3.6, 1.1, 2.3); scene.add(spillF);
 const spillS = new THREE.PointLight(0xffc888, .6, 3.6, 1.3); spillS.position.set(4.9, 1.0, -4.6); scene.add(spillS);
 const doorLight = new THREE.PointLight(0xffd29a, .5, 3.5, 1.4); doorLight.position.set(.7, 1.0, 2.3); scene.add(doorLight);
@@ -1058,6 +1057,412 @@ steam(customer.g.position.x + .3, 1.38, customer.g.position.z, 4, .05, .4, .18, 
 steam(2.52 - .05, 1.22, -5.25, 3, .03, .3, .12, .25);
 steam(-8.0, .02, 7.2, 6, .6, 1.3, 1.0, .1);
 
+// ============ PLAYER · 第三人称角色 ============
+const smooth = (a, b, x) => { const k = Math.max(0, Math.min(1, (x - a) / (b - a))); return k * k * (3 - 2 * k); };
+const mix = (a, b, k) => a + (b - a) * k;
+const angDiff = (a, b) => { let d = a - b; while (d > PI) d -= 2 * PI; while (d < -PI) d += 2 * PI; return d; };
+const holder = new THREE.Group(); root.add(holder);
+const player = { pos: new THREE.Vector3(-3.3, 0, 3.05), heading: PI, speed: 0, phase: 0, stepK: 0, umb: 1, rig: null, blinkT: 2.5, blink: 0, joy: 0, look: new THREE.Vector3(-3.3, 1.3, 1) };
+
+// ---- collision (XZ) ----
+const RECTS = [
+  [X0 - 1, X0 + .2, Z0 - 1, Z1 + .12], [X0 - 1, X1 + .12, Z0 - 1, Z0 + .2], [X1 - .12, X1 + .12, Z0 - 1, Z1 + .12],
+  [X0 - 1, -0.42, Z1 - .12, Z1 + .12], [1.82, X1 + .12, Z1 - .12, Z1 + .12],
+  [-9.3, -2.5, Z0, -8.38], [-1.4, 2.95, Z0, -6.98], [X0, -8.36, -8.3, -2.7], [-6.84, -5.76, -6.95, -2.3], [-4.44, -3.36, -6.95, -2.3],
+  [-2.25, -1.25, -5.42, -3.58], [2.22, X1, -5.6, -1.2], [-6.72, -2.88, .48, Z1],
+  [-9.5, -7.32, Z1 + .02, Z1 + .88], [3.85, 5.35, -6.55, -5.05]
+];
+const CIRCS = [[-7.0, Z1 + .3, .22], [-6.52, Z1 + .3, .22], [-5.9, Z1 + .75, .28], [-0.95, Z1 + .75, .3], [2.45, Z1 + .55, .27], [3.6, Z1 - .25, .24],
+  [5.85, 4.25, .14], [5.95, -8.7, .1], [-9.45, 4.3, .2], [X1 + .09, Z0 + .3, .08], [X0 + .3, Z1 + .09, .08],
+  [1.85, -4.4, .22], [1.85, -3.2, .38], [1.85, -2.0, .22]];
+const DOOR_RECT = [-0.44, 1.84, Z1 - .12, Z1 + .12];
+function pushRect(p, r, x0, x1, z0, z1) {
+  const cx = Math.max(x0, Math.min(p.x, x1)), cz = Math.max(z0, Math.min(p.z, z1));
+  const dx = p.x - cx, dz = p.z - cz, d2 = dx * dx + dz * dz;
+  if (d2 >= r * r) return;
+  if (d2 > 1e-9) { const d = Math.sqrt(d2), k = (r - d) / d; p.x += dx * k; p.z += dz * k; return; }
+  const l = p.x - x0, rt = x1 - p.x, b = p.z - z0, f = z1 - p.z, m = Math.min(l, rt, b, f);
+  if (m === l) p.x = x0 - r; else if (m === rt) p.x = x1 + r; else if (m === b) p.z = z0 - r; else p.z = z1 + r;
+}
+function collide(p, r) {
+  for (let it = 0; it < 2; it++) {
+    for (const q of RECTS) pushRect(p, r, q[0], q[1], q[2], q[3]);
+    if (doorOpen < .72) pushRect(p, r, DOOR_RECT[0], DOOR_RECT[1], DOOR_RECT[2], DOOR_RECT[3]);
+    for (const c of CIRCS) { const dx = p.x - c[0], dz = p.z - c[1], d = Math.hypot(dx, dz), m = r + c[2]; if (d < m && d > 1e-6) { p.x = c[0] + dx / d * m; p.z = c[1] + dz / d * m; } }
+    p.x = Math.max(-9.72, Math.min(9.72, p.x)); p.z = Math.max(-9.72, Math.min(9.72, p.z));
+  }
+}
+const inStore = (x, z) => x > X0 && x < X1 && z > Z0 && z < Z1;
+const inPuddle = (x, z) => PUDDLES.some(q => ((x - q[0]) / q[2]) ** 2 + ((z - q[1]) / q[3]) ** 2 < .8);
+
+// ---- rigs: shared humanoid bone names (VRM 0.x normalized: rest = identity, faces -Z, left = -X) ----
+const FINGER_NAMES = [];
+for (const s of ['left', 'right']) for (const f of ['Thumb', 'Index', 'Middle', 'Ring', 'Little']) for (const j of ['Proximal', 'Intermediate', 'Distal']) FINGER_NAMES.push(s + f + j);
+const BONE_NAMES = ['hips', 'spine', 'chest', 'upperChest', 'neck', 'head', 'leftShoulder', 'rightShoulder', 'leftUpperArm', 'rightUpperArm', 'leftLowerArm', 'rightLowerArm', 'leftHand', 'rightHand',
+  'leftUpperLeg', 'rightUpperLeg', 'leftLowerLeg', 'rightLowerLeg', 'leftFoot', 'rightFoot', 'leftToes', 'rightToes'].concat(FINGER_NAMES);
+
+function buildPlaceholder() {
+  const r = new THREE.Group(), B = {};
+  const G = (name, parent, x, y, z) => { const g = new THREE.Group(); g.position.set(x, y, z); parent.add(g); B[name] = g; return g; };
+  const sweater = toon(0xf0e4cc, .06), skirtM = toon(0x2f4a68, .04), skinM = toon(0xf6d9c4, .1), hairM = toon(0x4b2f28, .04, { side: THREE.DoubleSide }), sock = toon(0xf3f0ea, .05), shoeM = toon(0x3a2a24, .02);
+  const vseg = (b, len, mat, r0, r1) => { const m = new THREE.Mesh(new THREE.CylinderGeometry(r0, r1, len, 12), mat); m.position.y = -len / 2; hull(m, 1.07); b.add(m); };
+  const hseg = (b, dir, len, mat, r0, r1) => { const m = new THREE.Mesh(new THREE.CylinderGeometry(r0, r1, len, 10), mat); m.rotation.z = PI / 2; m.position.x = dir * len / 2; hull(m, 1.08); b.add(m); };
+  const hips = G('hips', r, 0, .82, 0);
+  const sk = new THREE.Mesh(new THREE.CylinderGeometry(.13, .26, .3, 20), skirtM); sk.position.y = -.08; hull(sk, 1.05); hips.add(sk);
+  const spine = G('spine', hips, 0, .05, 0), chest = G('chest', spine, 0, .12, 0);
+  const tor = new THREE.Mesh(new THREE.CylinderGeometry(.11, .135, .34, 16), sweater); tor.position.y = .01; hull(tor, 1.06); chest.add(tor);
+  const neck = G('neck', chest, 0, .18, 0), head = G('head', neck, 0, .05, 0);
+  const hd = new THREE.Mesh(new THREE.SphereGeometry(.15, 22, 18), skinM); hd.position.y = .12; hull(hd, 1.06); head.add(hd);
+  const cap = new THREE.Mesh(new THREE.SphereGeometry(.163, 22, 16, 0, PI * 2, 0, PI * .5), hairM); cap.position.set(0, .135, .012); cap.rotation.x = .3; head.add(cap);
+  const bob = new THREE.Mesh(new THREE.SphereGeometry(.172, 22, 16, -.35, PI + .7, 0, PI * .74), hairM); bob.position.set(0, .12, .0); head.add(bob);
+  for (const s of [-1, 1]) {
+    box(head, .034, .056, .01, basic(0x2a2433), s * .056, .1, -.142, { edge: false, c: true });
+    box(head, .012, .014, .01, basic(0xffffff), s * .056 + .008, .115, -.148, { edge: false, c: true });
+    sph(head, .022, basic(0xf3a6a0, { transparent: true, opacity: .5 }), s * .085, .06, -.125, { s: [1, .55, .4] });
+  }
+  for (const s of [-1, 1]) {
+    const n = s < 0 ? 'left' : 'right';
+    const sh = G(n + 'Shoulder', chest, s * .05, .13, 0);
+    const ua = G(n + 'UpperArm', sh, s * .07, 0, 0); hseg(ua, s, .21, sweater, .044, .05);
+    const la = G(n + 'LowerArm', ua, s * .21, 0, 0); hseg(la, s, .19, sweater, .036, .044);
+    const hand = G(n + 'Hand', la, s * .19, 0, 0); sph(hand, .036, skinM, s * .03, 0, 0, { hull: 1.1 });
+    G(n + 'MiddleProximal', hand, s * .06, 0, 0);
+    const ul = G(n + 'UpperLeg', hips, s * .075, -.05, 0); vseg(ul, .36, skinM, .056, .045);
+    const ll = G(n + 'LowerLeg', ul, 0, -.36, 0); vseg(ll, .37, sock, .045, .035);
+    const ft = G(n + 'Foot', ll, 0, -.37, 0); box(ft, .085, .07, .17, shoeM, 0, -.03, -.035, { c: true });
+  }
+  r.rotation.y = PI;
+  return { root: r, bones: B, hipsY: .82, isVRM: false };
+}
+
+function rigFromVRM(vrm) {
+  const B = {};
+  for (const n of BONE_NAMES) { const b = vrm.humanoid.getBoneNode(n); if (b) B[n] = b; }
+  vrm.scene.rotation.y = PI;
+  vrm.scene.traverse(o => { if (o.isMesh) o.frustumCulled = false; });
+  return { root: vrm.scene, bones: B, hipsY: B.hips.position.y, isVRM: true, vrm };
+}
+function setRig(rig) {
+  if (player.rig) {
+    holder.remove(player.rig.root);
+    if (player.rig.isVRM && THREE_VRM.VRMUtils && THREE_VRM.VRMUtils.deepDispose) THREE_VRM.VRMUtils.deepDispose(player.rig.root);
+  }
+  holder.add(rig.root); player.rig = rig;
+  if (rig.isVRM && rig.vrm.lookAt) rig.vrm.lookAt.target = lookObj;
+}
+const lookObj = new THREE.Object3D(); root.add(lookObj);
+setRig(buildPlaceholder());
+
+// ---- procedural animation ----
+const EU = new THREE.Euler();
+function setR(b, x, y, z) { if (b) b.quaternion.setFromEuler(EU.set(x, y, z, 'XYZ')); }
+function animateRig(rig, s) {
+  const B = rig.bones, ph = s.phase, w = s.walk, rn = s.run, t = s.t, h = s.hold;
+  const sL = Math.sin(ph), cL = Math.cos(ph);
+  const amp = .36 * w + .2 * rn;
+  const aL = sL * amp, aR = -aL;
+  const kAmp = .5 * w + .6 * rn, kB = .05 * w + .1 * rn;
+  const kL = -(kB + kAmp * Math.max(0, cL)), kR = -(kB + kAmp * Math.max(0, -cL));
+  const br = Math.sin(t * 1.7) * .016 * (1 - w * .7);
+  // legs
+  setR(B.leftUpperLeg, aL + .08 * rn, 0, .02); setR(B.rightUpperLeg, aR + .08 * rn, 0, -.02);
+  setR(B.leftLowerLeg, kL, 0, 0); setR(B.rightLowerLeg, kR, 0, 0);
+  setR(B.leftFoot, -(aL + kL) * .55 + .1 * Math.max(0, -sL) * w, 0, 0);
+  setR(B.rightFoot, -(aR + kR) * .55 + .1 * Math.max(0, sL) * w, 0, 0);
+  // hips & torso
+  if (B.hips) {
+    B.hips.position.y = rig.hipsY - (.014 * w + .03 * rn) * (1 - Math.cos(2 * ph)) * .5 - .04 * rn - .004 * (1 - w);
+    const twist = sL * (.11 * w + .06 * rn);
+    setR(B.hips, 0, -twist, cL * .025 * w + s.lean * .4);
+    setR(B.spine, -(.03 * w + .12 * rn) + br, twist * .5, -s.lean * .2);
+    setR(B.chest, br * .6 - .02 * rn, twist * .4, -s.lean * .2);
+    if (B.upperChest) setR(B.upperChest, br * .4, 0, 0);
+  }
+  // head look
+  setR(B.neck, s.lookP * .35 + .03 * rn, s.lookY * .4, 0);
+  setR(B.head, s.lookP * .55 + Math.sin(t * .9) * .015 * (1 - w), s.lookY * .6, Math.sin(t * .5) * .03 * (1 - w));
+  // arms
+  const dn = 1.22, sw = .3 * w + .42 * rn;
+  const swL = -sL * sw, swR = sL * sw * (1 - .5 * (1 - h) * (s.carry ? 1 : 0));
+  setR(B.leftShoulder, 0, 0, .02);
+  setR(B.leftUpperArm, swL + .02, 0, dn - .05 * rn);
+  setR(B.leftLowerArm, 0, -(.2 + .5 * rn + Math.max(0, swL) * .5), 0);
+  setR(B.leftHand, 0, 0, .12);
+  // right arm: relaxed swing ↔ holding the umbrella shaft in front of the chest
+  const rx = mix(swR + .02, .58, h), rz = mix(-dn + .05 * rn, -1.12, h), rly = mix(.2 + .5 * rn + Math.max(0, swR) * .5, 1.62, h);
+  setR(B.rightShoulder, 0, 0, -.02 - .06 * h);
+  setR(B.rightUpperArm, rx, mix(0, -.15, h), rz);
+  setR(B.rightLowerArm, 0, rly, 0);
+  setR(B.rightHand, mix(0, -.25, h), 0, mix(-.12, .2, h));
+  // fingers: left relaxed curl, right grips the umbrella
+  for (const n of FINGER_NAMES) {
+    const b = B[n]; if (!b) continue;
+    const left = n.startsWith('left'), thumb = n.includes('Thumb');
+    const c = left ? .28 : (s.carry ? 1.05 : .3);
+    if (thumb) setR(b, 0, (left ? -1 : 1) * c * .35, 0);
+    else setR(b, 0, 0, (left ? 1 : -1) * c * (n.endsWith('Proximal') ? .8 : 1));
+  }
+}
+
+// ---- umbrella (clear vinyl, classic rainy-night prop) ----
+const U_LEN = .7;
+const umb = new THREE.Group(); root.add(umb);
+{
+  const shaftM = toon(0xd9dde3, .1), handleM = toon(0x2f3640, .05);
+  rod(umb, [0, -.04, 0], [0, U_LEN, 0], .007, shaftM);
+  rod(umb, [0, -.07, 0], [0, .07, 0], .013, handleM);
+  const hk = new THREE.Mesh(new THREE.TorusGeometry(.032, .011, 6, 14, PI), handleM); hk.position.set(.032, -.07, 0); hk.rotation.z = PI; umb.add(hk);
+}
+const canopy = new THREE.Group(); canopy.position.y = U_LEN; umb.add(canopy);
+{
+  const prof = [[.004, 0], [.13, -.035], [.26, -.1], [.37, -.18], [.46, -.27], [.52, -.34]].map(p => new THREE.Vector2(p[0], p[1]));
+  const cg = new THREE.LatheGeometry(prof, 8);
+  const cm = new THREE.Mesh(cg, new THREE.MeshBasicMaterial({ color: 0xcfe0f5, transparent: true, opacity: .26, side: THREE.DoubleSide, depthWrite: false }));
+  cm.renderOrder = 6; canopy.add(cm);
+  const pts = [];
+  for (let k = 0; k < 8; k++) {
+    const a = k * PI / 4, a2 = (k + 1) * PI / 4;
+    for (let i = 0; i < prof.length - 1; i++) pts.push(Math.sin(a) * prof[i].x, prof[i].y, Math.cos(a) * prof[i].x, Math.sin(a) * prof[i + 1].x, prof[i + 1].y, Math.cos(a) * prof[i + 1].x);
+    const R = prof[prof.length - 1].x, Y = prof[prof.length - 1].y;
+    pts.push(Math.sin(a) * R, Y, Math.cos(a) * R, Math.sin(a2) * R, Y, Math.cos(a2) * R);
+  }
+  const lg = new THREE.BufferGeometry(); lg.setAttribute('position', new THREE.Float32BufferAttribute(pts, 3));
+  canopy.add(new THREE.LineSegments(lg, new THREE.LineBasicMaterial({ color: 0xeef4fb, transparent: true, opacity: .8 })));
+  cyl(canopy, .008, .006, .06, toon(0xd9dde3, .1), 0, 0, 0);
+}
+const umbC = new THREE.Vector3(); let umbR = 0;
+// drips off the rib tips
+const rimDrops = [];
+for (let i = 0; i < 18; i++) { const m = new THREE.Mesh(dropGeo, dropMat); m.visible = false; m.scale.set(.42, .95, .42); root.add(m); rimDrops.push({ m, v: 0, on: false }); }
+let rimAcc = 0, rimIdx = 0;
+// blob shadow
+const blob = new THREE.Mesh(new THREE.PlaneGeometry(.8, .8), new THREE.MeshBasicMaterial({ map: softTex, color: 0x000000, transparent: true, opacity: .5, depthWrite: false }));
+blob.rotation.x = -PI / 2; blob.renderOrder = 2; root.add(blob);
+
+// ---- input ----
+const keys = {};
+addEventListener('keydown', e => {
+  if (e.code === 'KeyL') { fileInput.click(); return; }
+  keys[e.code] = true; if (/Arrow|Space/.test(e.code)) e.preventDefault(); cam.intro = false;
+});
+addEventListener('keyup', e => { keys[e.code] = false; });
+addEventListener('blur', () => { for (const k in keys) keys[k] = false; joy = null; joyEl.hidden = true; });
+
+const cam = { theta: .78, phi: 1.26, dist: fitDist(), thetaT: .32, phiT: 1.2, distT: 5.2, intro: true, target: new THREE.Vector3(-1, 2.2, -1.6) };
+const DIORAMA_C = new THREE.Vector3(-1, 2.2, -1.6);
+const cv = renderer.domElement;
+const ptrs = new Map();
+let joy = null, pinch0 = 0, lp = null;
+const joyEl = document.getElementById('joy'), joyKnob = document.getElementById('joy-knob');
+cv.addEventListener('contextmenu', e => e.preventDefault());
+cv.addEventListener('pointerdown', e => {
+  cam.intro = false;
+  try { cv.setPointerCapture(e.pointerId); } catch (_) {}
+  if (e.pointerType === 'touch' && !joy && e.clientX < innerWidth * .45) {
+    joy = { id: e.pointerId, x0: e.clientX, y0: e.clientY, x: 0, y: 0 };
+    joyEl.style.left = e.clientX + 'px'; joyEl.style.top = e.clientY + 'px'; joyKnob.style.transform = 'translate(-50%,-50%)'; joyEl.hidden = false;
+    return;
+  }
+  ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  if (ptrs.size === 2) { const [a, b] = [...ptrs.values()]; pinch0 = Math.hypot(a.x - b.x, a.y - b.y); }
+  lp = e.pointerType === 'touch' ? { id: e.pointerId, x: e.clientX, y: e.clientY, t: performance.now() } : null;
+});
+cv.addEventListener('pointermove', e => {
+  if (joy && e.pointerId === joy.id) {
+    let dx = e.clientX - joy.x0, dy = e.clientY - joy.y0; const d = Math.hypot(dx, dy), R = 56;
+    if (d > R) { dx *= R / d; dy *= R / d; }
+    joy.x = dx / R; joy.y = dy / R; joyKnob.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
+    return;
+  }
+  const p = ptrs.get(e.pointerId); if (!p) return;
+  if (lp && lp.id === e.pointerId && Math.hypot(e.clientX - lp.x, e.clientY - lp.y) > 12) lp = null;
+  if (ptrs.size === 1) {
+    cam.thetaT -= (e.clientX - p.x) * .0065;
+    cam.phiT = Math.max(.22, Math.min(1.5, cam.phiT - (e.clientY - p.y) * .005));
+  }
+  p.x = e.clientX; p.y = e.clientY;
+  if (ptrs.size === 2) {
+    const [a, b] = [...ptrs.values()]; const d = Math.hypot(a.x - b.x, a.y - b.y);
+    if (pinch0 > 0) cam.distT = Math.max(1.4, Math.min(46, cam.distT * pinch0 / d));
+    pinch0 = d;
+  }
+});
+function endPtr(e) {
+  if (joy && e.pointerId === joy.id) { joy = null; joyEl.hidden = true; return; }
+  if (lp && lp.id === e.pointerId && e.type === 'pointerup' && performance.now() - lp.t > 650) fileInput.click();
+  lp = null;
+  ptrs.delete(e.pointerId); pinch0 = 0;
+}
+cv.addEventListener('pointerup', endPtr); cv.addEventListener('pointercancel', endPtr);
+cv.addEventListener('wheel', e => { e.preventDefault(); cam.intro = false; cam.distT = Math.max(1.4, Math.min(46, cam.distT * Math.pow(1.0013, e.deltaY))); }, { passive: false });
+
+// ---- VRM loading: drag & drop / file picker / ./character.vrm, remembered in this browser ----
+const fileInput = document.getElementById('vrm-file');
+const gltfLoader = new THREE.GLTFLoader();
+function loadVRMBuffer(buf, remember) {
+  return new Promise(resolve => {
+    try {
+      gltfLoader.parse(buf, '', gltf => {
+        if (THREE_VRM.VRMUtils && THREE_VRM.VRMUtils.removeUnnecessaryJoints) THREE_VRM.VRMUtils.removeUnnecessaryJoints(gltf.scene);
+        THREE_VRM.VRM.from(gltf).then(vrm => {
+          setRig(rigFromVRM(vrm));
+          if (remember) idbSet('vrm', buf);
+          resolve(true);
+        }).catch(err => { console.warn('VRM 解析失败', err); resolve(false); });
+      }, err => { console.warn('VRM 读取失败', err); resolve(false); });
+    } catch (err) { console.warn('VRM 读取失败', err); resolve(false); }
+  });
+}
+function idbOpen() { return new Promise((res, rej) => { const r = indexedDB.open('qingyu-konbini', 1); r.onupgradeneeded = () => r.result.createObjectStore('files'); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); }); }
+async function idbSet(k, v) { try { const db = await idbOpen(); db.transaction('files', 'readwrite').objectStore('files').put(v, k); } catch (_) {} }
+async function idbGet(k) { try { const db = await idbOpen(); return await new Promise(res => { const q = db.transaction('files').objectStore('files').get(k); q.onsuccess = () => res(q.result || null); q.onerror = () => res(null); }); } catch (_) { return null; } }
+const isGLB = buf => buf && buf.byteLength > 12 && new Uint8Array(buf, 0, 4).every((c, i) => c === [103, 108, 84, 70][i]);
+fileInput.addEventListener('change', async () => { const f = fileInput.files && fileInput.files[0]; if (f) { const b = await f.arrayBuffer(); if (isGLB(b)) loadVRMBuffer(b, true); } fileInput.value = ''; });
+addEventListener('dragover', e => { e.preventDefault(); });
+addEventListener('drop', async e => {
+  e.preventDefault();
+  const f = [...(e.dataTransfer && e.dataTransfer.files || [])].find(x => /\.(vrm|glb)$/i.test(x.name));
+  if (f) { const b = await f.arrayBuffer(); if (isGLB(b)) loadVRMBuffer(b, true); }
+});
+(async () => {
+  try { const r = await fetch('character.vrm'); if (r.ok) { const b = await r.arrayBuffer(); if (isGLB(b) && await loadVRMBuffer(b, false)) return; } } catch (_) {}
+  const b = await idbGet('vrm'); if (isGLB(b)) loadVRMBuffer(b, false);
+})();
+
+// ---- per-frame player update ----
+const vA = new THREE.Vector3(), vB = new THREE.Vector3(), vH = new THREE.Vector3(), grip = new THREE.Vector3(), dirO = new THREE.Vector3(), dirH = new THREE.Vector3();
+const qO = new THREE.Quaternion(), qH = new THREE.Quaternion();
+let lastHeading = PI;
+function updatePlayer(dt, t) {
+  const P = player, rig = P.rig;
+  // input → camera-relative direction
+  let ix = 0, iz = 0;
+  if (keys.KeyW || keys.ArrowUp) iz += 1; if (keys.KeyS || keys.ArrowDown) iz -= 1;
+  if (keys.KeyA || keys.ArrowLeft) ix -= 1; if (keys.KeyD || keys.ArrowRight) ix += 1;
+  let run = !!(keys.ShiftLeft || keys.ShiftRight);
+  if (joy) { ix += joy.x; iz -= joy.y; if (Math.hypot(joy.x, joy.y) > .93) run = true; }
+  const mag = Math.min(1, Math.hypot(ix, iz));
+  const fx = -Math.sin(cam.theta), fz = -Math.cos(cam.theta);
+  const mx = fx * iz - fz * ix, mz = fz * iz + fx * ix;
+  const tgt = mag > .08 ? (run ? 3.0 : 1.35 * Math.max(.45, mag)) : 0;
+  P.speed += (tgt - P.speed) * (1 - Math.exp(-dt * (tgt > P.speed ? 5 : 7)));
+  if (P.speed < .01) P.speed = 0;
+  if (mag > .08) P.heading += angDiff(Math.atan2(mx, mz), P.heading) * (1 - Math.exp(-dt * 11));
+  const turnRate = angDiff(P.heading, lastHeading) / Math.max(dt, 1e-3); lastHeading = P.heading;
+  P.pos.x += Math.sin(P.heading) * P.speed * dt; P.pos.z += Math.cos(P.heading) * P.speed * dt;
+  collide(P.pos, .22);
+  holder.position.set(P.pos.x, inStore(P.pos.x, P.pos.z) ? .015 : 0, P.pos.z);
+  holder.rotation.y = P.heading;
+  blob.position.set(P.pos.x, .03, P.pos.z);
+
+  // gait
+  const w = Math.min(1, P.speed / 1.35), rn = smooth(1.5, 2.9, P.speed);
+  P.phase += dt * P.speed / (.62 + .32 * rn) * PI;
+  const k = Math.floor((P.phase - PI / 2) / PI);
+  if (k !== P.stepK) {
+    P.stepK = k;
+    if (w > .3 && rig) {
+      const foot = rig.bones[(k & 1) ? 'rightFoot' : 'leftFoot'];
+      if (foot) { foot.getWorldPosition(vA); if (floorAt(vA.x, vA.z) === 0) ripple(vA.x, vA.z, inPuddle(vA.x, vA.z) ? .42 : .2, .014, .7); }
+    }
+  }
+  // umbrella: open in the rain, folded under the awning / inside
+  const exposed = floorAt(P.pos.x, P.pos.z) === 0;
+  P.umb = Math.max(0, Math.min(1, P.umb + (exposed ? 1 : -1) * dt / .8));
+  const hold = smooth(.32, .75, P.umb);
+
+  // look target: cat > camera (when it is in front) > straight ahead
+  const fwx = Math.sin(P.heading), fwz = Math.cos(P.heading);
+  const catD = Math.hypot(cat.g.position.x - P.pos.x, cat.g.position.z - P.pos.z);
+  const toCam = vA.copy(camera.position).sub(P.pos); toCam.y = 0; toCam.normalize();
+  if (catD < 2.4) cat.head.getWorldPosition(vB);
+  else if (toCam.x * fwx + toCam.z * fwz > .35 && P.speed < .3) vB.copy(camera.position);
+  else vB.set(P.pos.x + fwx * 3, 1.25, P.pos.z + fwz * 3);
+  P.look.lerp(vB, 1 - Math.exp(-dt * 4)); lookObj.position.copy(P.look);
+  const lx = P.look.x - P.pos.x, lz = P.look.z - P.pos.z;
+  const lyaw = Math.max(-.75, Math.min(.75, angDiff(Math.atan2(lx, lz), P.heading)));
+  const lpitch = Math.max(-.45, Math.min(.3, Math.atan2(P.look.y - 1.3, Math.hypot(lx, lz))));
+  if (!rig) return;
+  animateRig(rig, { phase: P.phase, walk: w, run: rn, t, hold, carry: true, lean: Math.max(-.12, Math.min(.12, -turnRate * P.speed * .02)), lookY: lyaw, lookP: lpitch });
+
+  if (rig.isVRM) {
+    const bs = rig.vrm.blendShapeProxy;
+    P.blinkT -= dt; if (P.blinkT < 0) { P.blink = .16; P.blinkT = 2 + Math.random() * 3.5; }
+    P.blink = Math.max(0, P.blink - dt);
+    P.joy += ((catD < 1.6 ? .7 : 0) - P.joy) * (1 - Math.exp(-dt * 3));
+    if (bs) { bs.setValue('joy', P.joy); bs.setValue('blink', P.joy > .3 ? 0 : (P.blink > 0 ? Math.sin((P.blink / .16) * PI) : 0)); }
+    rig.vrm.update(dt);
+  }
+  holder.updateMatrixWorld(true);
+
+  // place umbrella
+  const B = rig.bones;
+  B.rightHand.getWorldPosition(vA); (B.rightMiddleProximal || B.rightHand).getWorldPosition(vB); grip.lerpVectors(vA, vB, .75);
+  B.head.getWorldPosition(vH);
+  dirO.set(vH.x - fwx * .05, vH.y + .62, vH.z - fwz * .05).sub(grip).normalize();
+  if (dirO.y < .55) { dirO.y = .55; dirO.normalize(); }
+  qO.setFromUnitVectors(UP, dirO);
+  dirH.set(fwx * .62, -1, fwz * .62).normalize(); qH.setFromUnitVectors(UP, dirH);
+  const flip = P.umb < .32 ? smooth(0, 1, 1 - P.umb / .32) : 0;
+  umb.position.copy(grip); umb.quaternion.copy(qO).slerp(qH, flip);
+  const o = smooth(.32, 1, P.umb);
+  canopy.scale.set(mix(.085, 1, o), mix(1.75, 1, o), mix(.085, 1, o));
+  canopy.getWorldPosition(umbC); umbC.y -= .12; umbR = o > .5 ? .5 * o : 0;
+  // rim drips
+  if (o > .95 && exposed) {
+    rimAcc += dt * (6 + P.speed * 3);
+    while (rimAcc > 1) {
+      rimAcc--; const d = rimDrops[rimIdx++ % rimDrops.length], a = Math.floor(Math.random() * 8) * PI / 4;
+      d.m.position.set(Math.sin(a) * .52, -.35, Math.cos(a) * .52); canopy.localToWorld(d.m.position);
+      d.v = .4; d.on = true; d.m.visible = true;
+    }
+  }
+  for (const d of rimDrops) {
+    if (!d.on) continue;
+    d.v += 9.8 * dt; d.m.position.y -= d.v * dt;
+    if (d.m.position.y <= .02) { d.on = false; d.m.visible = false; if (floorAt(d.m.position.x, d.m.position.z) === 0) ripple(d.m.position.x, d.m.position.z, .16, .013, .55); }
+  }
+}
+
+window.__game = { player, cam, keys, umb, blob, holder, rimDrops, bloom: () => bloom, scene };
+// ---- third-person camera ----
+const CAM_BOXES = [
+  [X0, X1 + .25, CEIL - .02, TOP + .45, Z0, Z1 + .25],
+  [X0 - 2, X0 + .18, -1, CEIL, Z0 - 2, Z1], [X0 - 2, X1 + .1, -1, CEIL, Z0 - 2, Z0 + .18],
+  [X0, X1 + AW_PS, AW_OUT - .32, AW_IN + .08, Z1, Z1 + AW_P], [X1, X1 + AW_PS, AW_OUT - .32, AW_IN + .08, Z0, Z1]
+];
+function rayBoxes(o, d, maxT) {
+  let best = maxT;
+  for (const b of CAM_BOXES) {
+    let t0 = -Infinity, t1 = Infinity;
+    for (let a = 0; a < 3; a++) {
+      const oo = a === 0 ? o.x : a === 1 ? o.y : o.z, dd = a === 0 ? d.x : a === 1 ? d.y : d.z, lo = b[a * 2], hi = b[a * 2 + 1];
+      if (Math.abs(dd) < 1e-8) { if (oo < lo || oo > hi) { t0 = Infinity; break; } continue; }
+      let ta = (lo - oo) / dd, tb = (hi - oo) / dd; if (ta > tb) { const s = ta; ta = tb; tb = s; }
+      t0 = Math.max(t0, ta); t1 = Math.min(t1, tb);
+    }
+    if (t0 <= t1 && t0 > 0 && t0 < best) best = t0;
+  }
+  return best;
+}
+const camOff = new THREE.Vector3(), headT = new THREE.Vector3();
+function updateCamera(dt) {
+  const kA = 1 - Math.exp(-dt * (cam.intro ? 1.0 : 10)), kD = 1 - Math.exp(-dt * (cam.intro ? .85 : 7));
+  cam.theta += angDiff(cam.thetaT, cam.theta) * kA; cam.phi += (cam.phiT - cam.phi) * kA; cam.dist += (cam.distT - cam.dist) * kD;
+  if (cam.intro && Math.abs(cam.dist - cam.distT) < .05) cam.intro = false;
+  headT.set(player.pos.x, 1.2, player.pos.z).lerp(DIORAMA_C, smooth(9, 30, cam.dist));
+  cam.target.lerp(headT, cam.intro ? 1 : 1 - Math.exp(-dt * 10));
+  camOff.set(Math.sin(cam.phi) * Math.sin(cam.theta), Math.cos(cam.phi), Math.sin(cam.phi) * Math.cos(cam.theta));
+  let d = cam.dist;
+  const near = 1 - smooth(8, 13, cam.dist);
+  if (near > 0) {
+    const hit = rayBoxes(cam.target, camOff, d + .2);
+    if (hit < d + .2) d = mix(d, Math.max(.45, hit - .2), near);
+  }
+  camera.position.copy(cam.target).addScaledVector(camOff, d);
+  camera.lookAt(cam.target);
+}
+
 // ---------- resize ----------
 let composer, bloom;
 (function setupPost() {
@@ -1085,12 +1490,14 @@ let signBurst = 0, bladeBurst = 0, tvT = 0, sigT = 0, ripAcc = 0;
 const tmp = new THREE.Vector3();
 function frame() {
   const dt = Math.min(clock.getDelta(), .05), t = clock.elapsedTime;
+  updatePlayer(dt, t);
   // rain
   for (let i = 0; i < RN; i++) {
     const d = rain[i];
     d.y -= d.v * dt * RS; d.x += WIND * dt * RS;
     if (d.x > 10) d.x -= 20;
-    const fl = floorAt(d.x, d.z);
+    let fl = floorAt(d.x, d.z);
+    if (umbR > 0) { const ux = d.x - umbC.x, uz = d.z - umbC.z; if (ux * ux + uz * uz < umbR * umbR && fl < umbC.y) fl = umbC.y; }
     if (d.y < fl) {
       if (fl === 0 && Math.random() < .05) ripple(d.x, d.z, .14 + Math.random() * .1, .012, .5);
       d.y = 12 + Math.random() * 4; d.x = -10 + Math.random() * 20; d.z = -10 + Math.random() * 20;
@@ -1144,6 +1551,7 @@ function frame() {
   sigGlow.material.color.set(green ? 0x4dffb5 : 0xff5a4a); sigGlow.position.y = green ? 2.77 : 3.05;
   // automatic door
   doorT -= dt;
+  if (Math.hypot(player.pos.x - 0.7, player.pos.z - Z1) < 1.75) { if (doorPhase === 0 || doorPhase === 3) doorPhase = 1; else if (doorPhase === 2) doorHold = Math.max(doorHold, .7); }
   if (doorPhase === 0 && doorT <= 0) doorPhase = 1;
   if (doorPhase === 1) { doorOpen = Math.min(1, doorOpen + dt / .7); if (doorOpen >= 1) { doorPhase = 2; doorHold = 2.2 + Math.random() * 1.5; } }
   else if (doorPhase === 2) { doorHold -= dt; if (doorHold <= 0) doorPhase = 3; }
@@ -1154,17 +1562,21 @@ function frame() {
   sensorLed.material.color.set(doorPhase ? 0x44ff88 : 0xff4040);
   // clerk & customer & cat
   const bow = doorPhase === 1 || doorPhase === 2 ? Math.min(1, (doorPhase === 2 ? 1 : doorOpen)) : Math.max(0, doorOpen);
-  clerk.head.rotation.y = Math.sin(t * .45) * .22 * (1 - bow); clerk.head.rotation.x = bow * .25;
+  const pin = inStore(player.pos.x, player.pos.z), cyaw = pin ? Math.max(-.9, Math.min(.9, Math.atan2(player.pos.x - .6, player.pos.z + 8.25))) : Math.sin(t * .45) * .22;
+  clerk.head.rotation.y += (cyaw * (1 - bow) - clerk.head.rotation.y) * (1 - Math.exp(-dt * 4)); clerk.head.rotation.x = bow * .25;
   clerk.torso.rotation.x = bow * .08;
   customer.head.rotation.x = .08 + Math.sin(t * .6) * .03; customer.head.rotation.y = Math.sin(t * .23) * .12;
   customer.torso.scale.y = 1 + Math.sin(t * 1.6) * .012;
-  cat.tail.rotation.y = Math.sin(t * 1.3) * .5; cat.head.rotation.y = Math.sin(t * .37) * .35 + Math.sin(t * 2.1) * .04;
+  const cdx = player.pos.x - cat.g.position.x, cdz = player.pos.z - cat.g.position.z, cnear = Math.hypot(cdx, cdz) < 3.2;
+  const cyw = cnear ? Math.max(-1.1, Math.min(1.1, angDiff(Math.atan2(cdx, cdz), cat.g.rotation.y))) : Math.sin(t * .37) * .35 + Math.sin(t * 2.1) * .04;
+  cat.head.rotation.y += (cyw - cat.head.rotation.y) * (1 - Math.exp(-dt * 5)); cat.head.rotation.x = cnear ? -.25 : 0;
+  cat.tail.rotation.y = Math.sin(t * (cnear ? 4 : 1.3)) * .5;
   // reflector shimmer
   reflector.material.uniforms.time.value = t * RS;
-  // controls
-  controls.update();
-  controls.target.clamp(TMIN, TMAX);
-  if(!window.__skip) composer.render();
+  if (!window.__externalCamera) updateCamera(dt);
+  { const ci = smooth(.3, -.6, Math.max(camera.position.x - X1, camera.position.z - Z1, X0 - camera.position.x, Z0 - camera.position.z)) * (camera.position.y < CEIL ? 1 : 0);
+    bloom.strength = mix(.7, .32, ci); bloom.threshold = mix(.9, .96, ci); }
+  if (!window.__skip) composer.render();
   requestAnimationFrame(frame);
 }
 frame();

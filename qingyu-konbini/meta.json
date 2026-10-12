@@ -1,17 +1,17 @@
 {
   "title": "晴雨便利店",
-  "subtitle": "Qingyu Konbini · 雨夜街角",
-  "category": "WebGL / 三渲二微缩场景",
-  "summary": "雨夜街角的 24 小时晴雨便利店微缩三维场景，采用三渲二卡通风格。店内暖光透过玻璃映在潮湿积水的柏油路面上，伴随霓虹招牌、自动感应门与斜风细雨。",
-  "interaction": "左键拖动旋转 · 滚轮缩放 · 右键平移 · 触屏单指旋转 / 双指缩放",
-  "tags": ["Three.js", "三渲二卡通", "UnrealBloom 辉光", "鏡面积水反射", "粒子降雨", "单文件 HTML"],
+  "subtitle": "Qingyu Konbini v2 · 雨夜街角漫步",
+  "category": "WebGL / 第三人称三渲二交互场景",
+  "summary": "雨夜街角的 24 小时晴雨便利店三渲二卡通微缩场景（v2）。支持第三人称操控角色在雨夜街角与店内自由走动：入雨自动撑开透明伞、进店自动收伞并与店员及门口小猫互动，支持拖入自定义 VRM 角色模型。",
+  "interaction": "WASD / 方向键移动（Shift 跑步） · 鼠标拖动转镜头 · 拖入 .vrm 或按 L 换角色 · 触屏左摇杆移动 / 右侧转镜头",
+  "tags": ["Three.js", "three-vrm", "第三人称漫游", "三渲二卡通", "镜面积水反射", "UnrealBloom 辉光"],
   "highlights": [
-    "冷暖对比灯光：路灯雨雾冷光与便利店内暖黄照明",
-    "Reflector 积水路面实时倒影与 UnrealBloomPass 霓虹辉光",
-    "Canvas 2D 动态生成全套中文招牌、商品货架与关东煮细节纹理",
-    "随风倾斜的雨丝粒子系统与自动开合感应门动画"
+    "第三人称角色控制与碰撞检测：雨中自动撑开透明伞，屋檐下与进店自动收伞",
+    "丰富场景互动：走近自动感应门开启、店员点头致意、街角小猫抬头与角色微笑表情",
+    "支持拖拽或按 L 键实时加载自定义 VRM 0.x 角色模型并本地记忆",
+    "Reflector 潮湿柏油积水实时倒影 + 进店自动平滑减弱 UnrealBloom 辉光"
   ],
-  "scale": "Diorama",
+  "scale": "v2 · VRM",
   "order": 2,
   "featured": false,
   "offlineHref": "./qingyu-konbini/offline/",

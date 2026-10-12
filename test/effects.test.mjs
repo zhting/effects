@@ -62,7 +62,7 @@ describe('Effects Gallery 工程结构与子目录规范测试', () => {
     }
   })
 
-  test('qingyu-konbini 离线版资源齐全', () => {
+  test('qingyu-konbini v2 离线版资源齐全（含 three-vrm 与 GLTFLoader）', () => {
     assert.ok(
       existsSync(resolve(rootDir, 'qingyu-konbini/offline/index.html')),
       '缺少 qingyu-konbini/offline/index.html',
@@ -70,6 +70,14 @@ describe('Effects Gallery 工程结构与子目录规范测试', () => {
     assert.ok(
       existsSync(resolve(rootDir, 'qingyu-konbini/offline/lib/build/three.min.js')),
       '缺少 qingyu-konbini/offline/lib/build/three.min.js',
+    )
+    assert.ok(
+      existsSync(resolve(rootDir, 'qingyu-konbini/offline/lib/three-vrm/three-vrm.min.js')),
+      '缺少 qingyu-konbini/offline/lib/three-vrm/three-vrm.min.js',
+    )
+    assert.ok(
+      existsSync(resolve(rootDir, 'qingyu-konbini/offline/lib/examples/js/loaders/GLTFLoader.js')),
+      '缺少 qingyu-konbini/offline/lib/examples/js/loaders/GLTFLoader.js',
     )
   })
 
