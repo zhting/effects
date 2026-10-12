@@ -83,6 +83,12 @@ describe('Effects Gallery 工程结构与子目录规范测试', () => {
     const offlineHtml = readFileSync(resolve(rootDir, 'qingyu-konbini/offline/index.html'), 'utf-8')
     assert.match(onlineHtml, /id="vrm-upload-btn"/, '在线版缺少替换 VRM 模型按钮')
     assert.match(offlineHtml, /id="vrm-upload-btn"/, '离线版缺少替换 VRM 模型按钮')
+    assert.match(onlineHtml, /rigFromVRM1/, '在线版缺少 VRM 1.0 支持')
+    assert.match(offlineHtml, /rigFromVRM1/, '离线版缺少 VRM 1.0 支持')
+    assert.ok(
+      existsSync(resolve(rootDir, 'qingyu-konbini/character.vrm')),
+      '缺少默认模型 qingyu-konbini/character.vrm',
+    )
   })
 
   test('多页面构建 (npm run build) 生成主界面与所有子目录产物', () => {
@@ -99,6 +105,10 @@ describe('Effects Gallery 工程结构与子目录规范测试', () => {
     assert.ok(
       existsSync(resolve(rootDir, 'dist/qingyu-konbini/offline/index.html')),
       '构建产物缺少 dist/qingyu-konbini/offline/index.html',
+    )
+    assert.ok(
+      existsSync(resolve(rootDir, 'dist/qingyu-konbini/character.vrm')),
+      '构建产物缺少 dist/qingyu-konbini/character.vrm',
     )
   })
 })
