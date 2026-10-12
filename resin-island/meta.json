@@ -1,0 +1,24 @@
+{
+  "title": "树脂块微缩岛屿",
+  "subtitle": "Resin Island · 1:2000",
+  "category": "WebGL / 3D 交互场景",
+  "summary": "一块圆角透明树脂里装着悬崖、沙滩和青绿海水。整块像果冻一样跟着鼠标晃动，水面随鼠标划过泛起涟漪，点击溅起果冻水包。所有 3D 几何与焦散完全程序化生成。",
+  "interaction": "移动鼠标 → 果冻晃动 · 水面划过 → 涟漪尾迹 · 点击水面 → 溅起水花",
+  "tags": ["Three.js", "React Three Fiber", "GLSL 着色器", "高度场流体", "程序化地形", "透射材质"],
+  "highlights": [
+    "乒乓 HalfFloat RT 固定 60Hz 高度场水面模拟",
+    "MeshTransmissionMaterial 透射树脂外壳与水体深度混色",
+    "双层动态 Voronoi 焦散 + 高度场梯度折射与拉普拉斯调制",
+    "剪切矩阵果冻物理弹簧与水面晃荡双向耦合"
+  ],
+  "scale": "1:2000",
+  "order": 1,
+  "featured": false,
+  "palette": {
+    "bg": "#f3e9dc",
+    "primary": "#1d8a86",
+    "secondary": "#46b8b0",
+    "sand": "#dec4a1",
+    "cliff": "#7b6856"
+  }
+}

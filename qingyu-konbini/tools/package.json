@@ -1,0 +1,9 @@
+{
+  "name": "qingyu-konbini-recorder",
+  "private": true,
+  "scripts": {
+    "record": "node record.js frames 1280 720 30 12",
+    "encode": "ffmpeg -y -framerate 30 -i frames/f%04d.png -vf \"fade=t=in:st=0:d=0.8,fade=t=out:st=11.2:d=0.8\" -c:v libx264 -preset slow -crf 18 -pix_fmt yuv420p -movflags +faststart qingyu-konbini.mp4"
+  },
+  "dependencies": { "playwright": "1.43.0" }
+}
