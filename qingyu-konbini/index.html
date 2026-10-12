@@ -13,13 +13,24 @@
   #joy { position: fixed; width: 112px; height: 112px; margin: -56px 0 0 -56px; border-radius: 50%; border: 1.5px solid var(--joy-ring); pointer-events: none; }
   #joy-knob { position: absolute; left: 50%; top: 50%; width: 44px; height: 44px; border-radius: 50%; background: var(--joy-knob); transform: translate(-50%, -50%); }
   .vig { position: fixed; inset: 0; pointer-events: none; background: radial-gradient(ellipse 75% 70% at 50% 52%, transparent 55%, var(--vig) 100%); }
-  .back-portal { position: fixed; left: max(22px, env(safe-area-inset-left)); top: max(20px, env(safe-area-inset-top)); z-index: 20; padding: 5px 12px; border: 1px solid rgba(148, 197, 255, 0.28); border-radius: 999px; background: rgba(10, 18, 34, 0.65); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); font: 500 11px/1.4 ui-monospace, 'SF Mono', Menlo, monospace; letter-spacing: 0.14em; color: #dbeafe; text-decoration: none; transition: all 0.2s ease; }
-  .back-portal:hover { background: rgba(18, 32, 58, 0.9); border-color: rgba(148, 197, 255, 0.6); transform: translateX(-2px); }
+  .back-portal { position: fixed; left: max(22px, env(safe-area-inset-left)); top: max(20px, env(safe-area-inset-top)); z-index: 20; padding: 6px 13px; border: 1px solid rgba(148, 197, 255, 0.28); border-radius: 999px; background: rgba(10, 18, 34, 0.68); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); font: 500 11.5px/1.4 ui-monospace, 'SF Mono', Menlo, monospace; letter-spacing: 0.14em; color: #dbeafe; text-decoration: none; transition: all 0.2s ease; }
+  .back-portal:hover { background: rgba(18, 32, 58, 0.92); border-color: rgba(148, 197, 255, 0.6); transform: translateX(-2px); }
+  .vrm-Dock { position: fixed; right: max(22px, env(safe-area-inset-right)); top: max(20px, env(safe-area-inset-top)); z-index: 20; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+  .vrm-btn { cursor: pointer; padding: 6px 14px; border: 1px solid rgba(56, 189, 248, 0.45); border-radius: 999px; background: rgba(12, 26, 48, 0.76); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); font: 600 12px/1.4 "Noto Sans SC", ui-monospace, sans-serif; letter-spacing: 0.08em; color: #e0f2fe; transition: all 0.2s ease; box-shadow: 0 4px 16px rgba(2, 8, 20, 0.45); }
+  .vrm-btn:hover { background: rgba(14, 116, 144, 0.88); border-color: #7dd3fc; color: #fff; transform: translateY(-1px); }
+  .vrm-btn--sub { border-color: rgba(148, 163, 184, 0.32); font-weight: 500; color: #cbd5e1; }
+  .vrm-btn--sub:hover { background: rgba(30, 41, 59, 0.9); border-color: rgba(203, 213, 225, 0.6); }
+  .vrm-status { padding: 5px 11px; border-radius: 999px; background: rgba(10, 18, 34, 0.58); border: 1px solid rgba(148, 197, 255, 0.18); font: 500 11px/1.4 ui-monospace, 'SF Mono', Menlo, monospace; letter-spacing: 0.06em; color: #93c5fd; pointer-events: none; }
 </style>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@500;700;900&family=ZCOOL+QingKe+HuangYou&display=swap">
 </head>
 <body>
 <a class="back-portal" href="../">← 特效展厅</a>
+<div class="vrm-Dock">
+  <span id="vrm-status" class="vrm-status">当前: 默认角色</span>
+  <button type="button" id="vrm-upload-btn" class="vrm-btn" title="上传 .vrm 或 .glb 模型文件替换当前角色（快捷键 L）">替换 VRM 模型</button>
+  <button type="button" id="vrm-reset-btn" class="vrm-btn vrm-btn--sub" hidden title="恢复内置默认卡通角色">恢复默认</button>
+</div>
 <div id="stage"></div>
 <div class="vig"></div>
 <div id="joy" hidden><div id="joy-knob"></div></div>
@@ -1293,35 +1304,57 @@ cv.addEventListener('wheel', e => { e.preventDefault(); cam.intro = false; cam.d
 
 // ---- VRM loading: drag & drop / file picker / ./character.vrm, remembered in this browser ----
 const fileInput = document.getElementById('vrm-file');
+const vrmUploadBtn = document.getElementById('vrm-upload-btn');
+const vrmResetBtn = document.getElementById('vrm-reset-btn');
+const vrmStatus = document.getElementById('vrm-status');
 const gltfLoader = new THREE.GLTFLoader();
-function loadVRMBuffer(buf, remember) {
+function setVrmStatusText(label, isCustom) {
+  if (vrmStatus) vrmStatus.textContent = label;
+  if (vrmResetBtn) vrmResetBtn.hidden = !isCustom;
+}
+function loadVRMBuffer(buf, remember, name) {
+  setVrmStatusText('正在加载模型…', false);
   return new Promise(resolve => {
     try {
       gltfLoader.parse(buf, '', gltf => {
         if (THREE_VRM.VRMUtils && THREE_VRM.VRMUtils.removeUnnecessaryJoints) THREE_VRM.VRMUtils.removeUnnecessaryJoints(gltf.scene);
         THREE_VRM.VRM.from(gltf).then(vrm => {
           setRig(rigFromVRM(vrm));
-          if (remember) idbSet('vrm', buf);
+          if (remember) {
+            idbSet('vrm', buf);
+            if (name) idbSet('vrm-name', name);
+          }
+          setVrmStatusText('当前: ' + (name || '自定义 VRM'), true);
           resolve(true);
-        }).catch(err => { console.warn('VRM 解析失败', err); resolve(false); });
-      }, err => { console.warn('VRM 读取失败', err); resolve(false); });
-    } catch (err) { console.warn('VRM 读取失败', err); resolve(false); }
+        }).catch(err => { console.warn('VRM 解析失败', err); setVrmStatusText('VRM 解析失败', false); resolve(false); });
+      }, err => { console.warn('VRM 读取失败', err); setVrmStatusText('VRM 读取失败', false); resolve(false); });
+    } catch (err) { console.warn('VRM 读取失败', err); setVrmStatusText('VRM 读取失败', false); resolve(false); }
   });
 }
 function idbOpen() { return new Promise((res, rej) => { const r = indexedDB.open('qingyu-konbini', 1); r.onupgradeneeded = () => r.result.createObjectStore('files'); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); }); }
 async function idbSet(k, v) { try { const db = await idbOpen(); db.transaction('files', 'readwrite').objectStore('files').put(v, k); } catch (_) {} }
+async function idbDel(k) { try { const db = await idbOpen(); db.transaction('files', 'readwrite').objectStore('files').delete(k); } catch (_) {} }
 async function idbGet(k) { try { const db = await idbOpen(); return await new Promise(res => { const q = db.transaction('files').objectStore('files').get(k); q.onsuccess = () => res(q.result || null); q.onerror = () => res(null); }); } catch (_) { return null; } }
 const isGLB = buf => buf && buf.byteLength > 12 && new Uint8Array(buf, 0, 4).every((c, i) => c === [103, 108, 84, 70][i]);
-fileInput.addEventListener('change', async () => { const f = fileInput.files && fileInput.files[0]; if (f) { const b = await f.arrayBuffer(); if (isGLB(b)) loadVRMBuffer(b, true); } fileInput.value = ''; });
+if (vrmUploadBtn) vrmUploadBtn.addEventListener('click', () => fileInput.click());
+if (vrmResetBtn) vrmResetBtn.addEventListener('click', async () => {
+  setRig(buildPlaceholder());
+  await idbDel('vrm');
+  await idbDel('vrm-name');
+  setVrmStatusText('当前: 默认角色', false);
+});
+fileInput.addEventListener('change', async () => { const f = fileInput.files && fileInput.files[0]; if (f) { const b = await f.arrayBuffer(); if (isGLB(b)) loadVRMBuffer(b, true, f.name); else setVrmStatusText('文件格式需为 .vrm/.glb', !!(player.rig && player.rig.isVRM)); } fileInput.value = ''; });
 addEventListener('dragover', e => { e.preventDefault(); });
 addEventListener('drop', async e => {
   e.preventDefault();
   const f = [...(e.dataTransfer && e.dataTransfer.files || [])].find(x => /\.(vrm|glb)$/i.test(x.name));
-  if (f) { const b = await f.arrayBuffer(); if (isGLB(b)) loadVRMBuffer(b, true); }
+  if (f) { const b = await f.arrayBuffer(); if (isGLB(b)) loadVRMBuffer(b, true, f.name); }
 });
 (async () => {
-  try { const r = await fetch('character.vrm'); if (r.ok) { const b = await r.arrayBuffer(); if (isGLB(b) && await loadVRMBuffer(b, false)) return; } } catch (_) {}
-  const b = await idbGet('vrm'); if (isGLB(b)) loadVRMBuffer(b, false);
+  try { const r = await fetch('character.vrm'); if (r.ok) { const b = await r.arrayBuffer(); if (isGLB(b) && await loadVRMBuffer(b, false, 'character.vrm')) return; } } catch (_) {}
+  const b = await idbGet('vrm');
+  const savedName = await idbGet('vrm-name');
+  if (isGLB(b)) loadVRMBuffer(b, false, typeof savedName === 'string' ? savedName : '自定义 VRM');
 })();
 
 // ---- per-frame player update ----

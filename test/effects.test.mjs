@@ -79,6 +79,10 @@ describe('Effects Gallery 工程结构与子目录规范测试', () => {
       existsSync(resolve(rootDir, 'qingyu-konbini/offline/lib/examples/js/loaders/GLTFLoader.js')),
       '缺少 qingyu-konbini/offline/lib/examples/js/loaders/GLTFLoader.js',
     )
+    const onlineHtml = readFileSync(resolve(rootDir, 'qingyu-konbini/index.html'), 'utf-8')
+    const offlineHtml = readFileSync(resolve(rootDir, 'qingyu-konbini/offline/index.html'), 'utf-8')
+    assert.match(onlineHtml, /id="vrm-upload-btn"/, '在线版缺少替换 VRM 模型按钮')
+    assert.match(offlineHtml, /id="vrm-upload-btn"/, '离线版缺少替换 VRM 模型按钮')
   })
 
   test('多页面构建 (npm run build) 生成主界面与所有子目录产物', () => {
