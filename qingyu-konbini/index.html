@@ -27,9 +27,9 @@
 <body>
 <a class="back-portal" href="../">← 特效展厅</a>
 <div class="vrm-Dock">
-  <span id="vrm-status" class="vrm-status">当前: 默认角色</span>
+  <span id="vrm-status" class="vrm-status">当前: 默认 VRM</span>
   <button type="button" id="vrm-upload-btn" class="vrm-btn" title="上传 .vrm 或 .glb 模型文件替换当前角色（快捷键 L）">替换 VRM 模型</button>
-  <button type="button" id="vrm-reset-btn" class="vrm-btn vrm-btn--sub" hidden title="恢复内置默认卡通角色">恢复默认</button>
+  <button type="button" id="vrm-reset-btn" class="vrm-btn vrm-btn--sub" hidden title="恢复默认 VRM 角色模型">恢复默认</button>
 </div>
 <div id="stage"></div>
 <div class="vig"></div>
@@ -1148,6 +1148,146 @@ function rigFromVRM(vrm) {
   vrm.scene.traverse(o => { if (o.isMesh) o.frustumCulled = false; });
   return { root: vrm.scene, bones: B, hipsY: B.hips.position.y, isVRM: true, vrm };
 }
+const AXIS_VEC = {
+  PositiveX: new THREE.Vector3(1, 0, 0), NegativeX: new THREE.Vector3(-1, 0, 0),
+  PositiveY: new THREE.Vector3(0, 1, 0), NegativeY: new THREE.Vector3(0, -1, 0),
+  PositiveZ: new THREE.Vector3(0, 0, 1), NegativeZ: new THREE.Vector3(0, 0, -1),
+  X: new THREE.Vector3(1, 0, 0), Y: new THREE.Vector3(0, 1, 0), Z: new THREE.Vector3(0, 0, 1)
+};
+const vTmp1 = new THREE.Vector3(), vTmp2 = new THREE.Vector3(), vTmp3 = new THREE.Vector3();
+const qTmp1 = new THREE.Quaternion(), qTmp2 = new THREE.Quaternion(), qTmp3 = new THREE.Quaternion(), qTmp4 = new THREE.Quaternion(), qIdent = new THREE.Quaternion();
+async function rigFromVRM1(gltf) {
+  const json = gltf.parser.json, vrmc = json.extensions.VRMC_vrm;
+  const nodes = await Promise.all(json.nodes.map((_, i) => gltf.parser.getDependency('node', i)));
+  gltf.scene.rotation.set(0, 0, 0);
+  gltf.scene.position.set(0, 0, 0);
+  gltf.scene.updateMatrixWorld(true);
+  const B = {}, hb = (vrmc.humanoid && vrmc.humanoid.humanBones) || {};
+  for (const n of BONE_NAMES) {
+    const e = hb[n];
+    if (e && typeof e.node === 'number' && nodes[e.node]) {
+      const b = nodes[e.node], qW = b.getWorldQuaternion(new THREE.Quaternion());
+      b.userData.vrm1 = { qRest: b.quaternion.clone(), qWorld: qW, qWorldInv: qW.clone().invert() };
+      B[n] = b;
+    }
+  }
+  gltf.scene.traverse(o => {
+    if (o.isMesh) {
+      o.frustumCulled = false;
+      const conv = m => {
+        if (!m) return m;
+        const tm = new THREE.MeshToonMaterial({
+          color: m.color ? m.color.clone().multiplyScalar(0.88) : new THREE.Color(0xe0e0e0),
+          map: m.map || null,
+          gradientMap: grad,
+          transparent: !!m.transparent,
+          opacity: m.opacity !== undefined ? m.opacity : 1,
+          alphaTest: m.alphaTest || 0,
+          side: m.side !== undefined ? m.side : THREE.DoubleSide,
+          skinning: !!o.isSkinnedMesh,
+          morphTargets: !!(o.morphTargetInfluences && o.morphTargetInfluences.length),
+          morphNormals: !!(o.morphTargetInfluences && o.morphTargetInfluences.length)
+        });
+        if (m.map) { tm.emissive = new THREE.Color(0x242838); tm.emissiveMap = m.map; }
+        return tm;
+      };
+      o.material = Array.isArray(o.material) ? o.material.map(conv) : conv(o.material);
+    }
+  });
+  const aimC = [], rollC = [];
+  json.nodes.forEach((nDef, idx) => {
+    const ext = nDef.extensions && nDef.extensions.VRMC_node_constraint;
+    if (!ext || !ext.constraint || !nodes[idx]) return;
+    const dst = nodes[idx], c = ext.constraint, dstRest = dst.quaternion.clone(), dstWRest = dst.getWorldQuaternion(new THREE.Quaternion());
+    if (c.aim && nodes[c.aim.source]) {
+      const src = nodes[c.aim.source], ax = (AXIS_VEC[c.aim.aimAxis] || AXIS_VEC.PositiveZ).clone();
+      aimC.push({ dst, src, dstRest, fromVec: ax.applyQuaternion(dstRest).normalize(), w: c.aim.weight !== undefined ? c.aim.weight : 1 });
+    } else if (c.roll && nodes[c.roll.source]) {
+      const src = nodes[c.roll.source], srcWInv = src.getWorldQuaternion(new THREE.Quaternion()).invert();
+      rollC.push({ dst, src, dstRest, restRel: srcWInv.multiply(dstWRest), axis: (AXIS_VEC[c.roll.rollAxis] || AXIS_VEC.X).clone(), w: c.roll.weight !== undefined ? c.roll.weight : 1 });
+    } else if (c.rotation && nodes[c.rotation.source]) {
+      const src = nodes[c.rotation.source];
+      rollC.push({ dst, src, dstRest, srcRestInv: src.quaternion.clone().invert(), isRot: true, w: c.rotation.weight !== undefined ? c.rotation.weight : 1 });
+    }
+  });
+  const springs = [];
+  const sbExt = json.extensions && json.extensions.VRMC_springBone;
+  if (sbExt && Array.isArray(sbExt.springs)) {
+    for (const sp of sbExt.springs) {
+      const jl = sp.joints || [];
+      for (let i = 0; i < jl.length - 1; i++) {
+        const j0 = jl[i], j1 = jl[i + 1], head = nodes[j0.node], tail = nodes[j1.node];
+        if (!head || !tail) continue;
+        const lDir = tail.position.clone(), len = lDir.length() || 0.05; lDir.normalize();
+        const qRest = head.quaternion.clone(), lFrom = lDir.clone().applyQuaternion(qRest).normalize();
+        const wTail = tail.getWorldPosition(new THREE.Vector3());
+        springs.push({
+          head, qRest, lFrom, len,
+          stiff: j0.stiffness !== undefined ? j0.stiffness : 1.0,
+          drag: j0.dragForce !== undefined ? j0.dragForce : 0.4,
+          grav: j0.gravityPower !== undefined ? j0.gravityPower : 0,
+          gravDir: j0.gravityDir ? new THREE.Vector3(j0.gravityDir[0], j0.gravityDir[1], j0.gravityDir[2]) : new THREE.Vector3(0, -1, 0),
+          curr: wTail.clone(), prev: wTail.clone()
+        });
+      }
+    }
+  }
+  const preset = (vrmc.expressions && vrmc.expressions.preset) || {};
+  const blendShapeProxy = {
+    setValue(k, val) {
+      const exp = preset[k] || (k === 'joy' ? preset.happy : null);
+      if (!exp || !Array.isArray(exp.morphTargetBinds)) return;
+      for (const b of exp.morphTargetBinds) {
+        const tn = nodes[b.node]; if (!tn) continue;
+        const w = (b.weight !== undefined ? b.weight : 1) * val;
+        tn.traverse(m => { if (m.morphTargetInfluences && b.index < m.morphTargetInfluences.length) m.morphTargetInfluences[b.index] = w; });
+      }
+    }
+  };
+  const vrm = {
+    scene: gltf.scene,
+    blendShapeProxy,
+    update(dt) {
+      gltf.scene.updateMatrixWorld(true);
+      for (const ac of aimC) {
+        const sw = ac.src.getWorldPosition(vTmp1);
+        const toV = (ac.dst.parent ? ac.dst.parent.worldToLocal(sw) : sw).sub(ac.dst.position).normalize();
+        qTmp1.setFromUnitVectors(ac.fromVec, toV).multiply(ac.dstRest);
+        ac.dst.quaternion.copy(ac.dstRest).slerp(qTmp1, ac.w);
+        ac.dst.updateMatrixWorld(true);
+      }
+      for (const rc of rollC) {
+        if (rc.isRot) {
+          qTmp1.copy(rc.srcRestInv).multiply(rc.src.quaternion);
+          qTmp2.set(0, 0, 0, 1).slerp(qTmp1, rc.w);
+          rc.dst.quaternion.copy(rc.dstRest).multiply(qTmp2);
+        } else {
+          const pWQ = rc.dst.parent ? rc.dst.parent.getWorldQuaternion(qTmp1) : qIdent.set(0, 0, 0, 1);
+          const sWQ = rc.src.getWorldQuaternion(qTmp2);
+          const dQ = pWQ.multiply(rc.dstRest).invert().multiply(sWQ).multiply(rc.restRel);
+          vTmp1.copy(rc.axis).applyQuaternion(dQ).normalize();
+          const swInv = qTmp3.setFromUnitVectors(rc.axis, vTmp1).invert();
+          const tw = swInv.multiply(dQ).normalize();
+          rc.dst.quaternion.copy(rc.dstRest).multiply(qTmp4.set(0, 0, 0, 1).slerp(tw, rc.w));
+        }
+        rc.dst.updateMatrixWorld(true);
+      }
+      for (const sj of springs) {
+        const pWQ = sj.head.parent ? sj.head.parent.getWorldQuaternion(qTmp1) : qIdent.set(0, 0, 0, 1);
+        const hPos = sj.head.getWorldPosition(vTmp1);
+        const rDir = vTmp2.copy(sj.lFrom).applyQuaternion(pWQ).normalize();
+        const vel = vTmp3.copy(sj.curr).sub(sj.prev).multiplyScalar(Math.max(0, 1 - sj.drag));
+        const nxt = sj.curr.clone().add(vel).addScaledVector(rDir, sj.stiff * dt * 2.2).addScaledVector(sj.gravDir, sj.grav * dt);
+        const dW = nxt.sub(hPos).normalize();
+        sj.prev.copy(sj.curr); sj.curr.copy(hPos).addScaledVector(dW, sj.len);
+        const lTo = dW.applyQuaternion(pWQ.invert()).normalize();
+        sj.head.quaternion.setFromUnitVectors(sj.lFrom, lTo).multiply(sj.qRest);
+        sj.head.updateMatrixWorld(true);
+      }
+    }
+  };
+  return { root: gltf.scene, bones: B, hipsY: B.hips ? B.hips.position.y : 0.88, isVRM: true, vrm };
+}
 function setRig(rig) {
   if (player.rig) {
     holder.remove(player.rig.root);
@@ -1160,8 +1300,18 @@ const lookObj = new THREE.Object3D(); root.add(lookObj);
 setRig(buildPlaceholder());
 
 // ---- procedural animation ----
-const EU = new THREE.Euler();
-function setR(b, x, y, z) { if (b) b.quaternion.setFromEuler(EU.set(x, y, z, 'XYZ')); }
+const EU = new THREE.Euler(), qAnim = new THREE.Quaternion();
+function setR(b, x, y, z) {
+  if (!b) return;
+  qAnim.setFromEuler(EU.set(x, y, z, 'XYZ'));
+  const v1 = b.userData && b.userData.vrm1;
+  if (v1) {
+    qAnim.x = -qAnim.x; qAnim.z = -qAnim.z;
+    b.quaternion.copy(v1.qRest).multiply(v1.qWorldInv).multiply(qAnim).multiply(v1.qWorld);
+  } else {
+    b.quaternion.copy(qAnim);
+  }
+}
 function animateRig(rig, s) {
   const B = rig.bones, ph = s.phase, w = s.walk, rn = s.run, t = s.t, h = s.hold;
   const sL = Math.sin(ph), cL = Math.cos(ph);
@@ -1312,21 +1462,23 @@ function setVrmStatusText(label, isCustom) {
   if (vrmStatus) vrmStatus.textContent = label;
   if (vrmResetBtn) vrmResetBtn.hidden = !isCustom;
 }
-function loadVRMBuffer(buf, remember, name) {
+function loadVRMBuffer(buf, remember, name, isDefault) {
   setVrmStatusText('正在加载模型…', false);
   return new Promise(resolve => {
     try {
-      gltfLoader.parse(buf, '', gltf => {
-        if (THREE_VRM.VRMUtils && THREE_VRM.VRMUtils.removeUnnecessaryJoints) THREE_VRM.VRMUtils.removeUnnecessaryJoints(gltf.scene);
-        THREE_VRM.VRM.from(gltf).then(vrm => {
-          setRig(rigFromVRM(vrm));
+      gltfLoader.parse(buf, '', async gltf => {
+        try {
+          if (THREE_VRM.VRMUtils && THREE_VRM.VRMUtils.removeUnnecessaryJoints) THREE_VRM.VRMUtils.removeUnnecessaryJoints(gltf.scene);
+          const isVRM1 = !!(gltf.parser && gltf.parser.json && gltf.parser.json.extensions && gltf.parser.json.extensions.VRMC_vrm);
+          const rig = isVRM1 ? await rigFromVRM1(gltf) : rigFromVRM(await THREE_VRM.VRM.from(gltf));
+          setRig(rig);
           if (remember) {
             idbSet('vrm', buf);
             if (name) idbSet('vrm-name', name);
           }
-          setVrmStatusText('当前: ' + (name || '自定义 VRM'), true);
+          setVrmStatusText('当前: ' + (name || (isDefault ? '默认 VRM' : '自定义 VRM')), !isDefault);
           resolve(true);
-        }).catch(err => { console.warn('VRM 解析失败', err); setVrmStatusText('VRM 解析失败', false); resolve(false); });
+        } catch (err) { console.warn('VRM 解析失败', err); setVrmStatusText('VRM 解析失败', false); resolve(false); }
       }, err => { console.warn('VRM 读取失败', err); setVrmStatusText('VRM 读取失败', false); resolve(false); });
     } catch (err) { console.warn('VRM 读取失败', err); setVrmStatusText('VRM 读取失败', false); resolve(false); }
   });
@@ -1336,25 +1488,38 @@ async function idbSet(k, v) { try { const db = await idbOpen(); db.transaction('
 async function idbDel(k) { try { const db = await idbOpen(); db.transaction('files', 'readwrite').objectStore('files').delete(k); } catch (_) {} }
 async function idbGet(k) { try { const db = await idbOpen(); return await new Promise(res => { const q = db.transaction('files').objectStore('files').get(k); q.onsuccess = () => res(q.result || null); q.onerror = () => res(null); }); } catch (_) { return null; } }
 const isGLB = buf => buf && buf.byteLength > 12 && new Uint8Array(buf, 0, 4).every((c, i) => c === [103, 108, 84, 70][i]);
+async function loadDefaultVRM() {
+  for (const url of ['character.vrm', '../character.vrm']) {
+    try {
+      const r = await fetch(url);
+      if (r.ok) {
+        const b = await r.arrayBuffer();
+        if (isGLB(b) && await loadVRMBuffer(b, false, '默认 VRM', true)) return true;
+      }
+    } catch (_) {}
+  }
+  setRig(buildPlaceholder());
+  setVrmStatusText('当前: 默认角色', false);
+  return false;
+}
 if (vrmUploadBtn) vrmUploadBtn.addEventListener('click', () => fileInput.click());
 if (vrmResetBtn) vrmResetBtn.addEventListener('click', async () => {
-  setRig(buildPlaceholder());
   await idbDel('vrm');
   await idbDel('vrm-name');
-  setVrmStatusText('当前: 默认角色', false);
+  await loadDefaultVRM();
 });
-fileInput.addEventListener('change', async () => { const f = fileInput.files && fileInput.files[0]; if (f) { const b = await f.arrayBuffer(); if (isGLB(b)) loadVRMBuffer(b, true, f.name); else setVrmStatusText('文件格式需为 .vrm/.glb', !!(player.rig && player.rig.isVRM)); } fileInput.value = ''; });
+fileInput.addEventListener('change', async () => { const f = fileInput.files && fileInput.files[0]; if (f) { const b = await f.arrayBuffer(); if (isGLB(b)) loadVRMBuffer(b, true, f.name, false); else setVrmStatusText('文件格式需为 .vrm/.glb', !!(player.rig && player.rig.isVRM)); } fileInput.value = ''; });
 addEventListener('dragover', e => { e.preventDefault(); });
 addEventListener('drop', async e => {
   e.preventDefault();
   const f = [...(e.dataTransfer && e.dataTransfer.files || [])].find(x => /\.(vrm|glb)$/i.test(x.name));
-  if (f) { const b = await f.arrayBuffer(); if (isGLB(b)) loadVRMBuffer(b, true, f.name); }
+  if (f) { const b = await f.arrayBuffer(); if (isGLB(b)) loadVRMBuffer(b, true, f.name, false); }
 });
 (async () => {
-  try { const r = await fetch('character.vrm'); if (r.ok) { const b = await r.arrayBuffer(); if (isGLB(b) && await loadVRMBuffer(b, false, 'character.vrm')) return; } } catch (_) {}
   const b = await idbGet('vrm');
   const savedName = await idbGet('vrm-name');
-  if (isGLB(b)) loadVRMBuffer(b, false, typeof savedName === 'string' ? savedName : '自定义 VRM');
+  if (isGLB(b) && await loadVRMBuffer(b, false, typeof savedName === 'string' ? savedName : '自定义 VRM', false)) return;
+  await loadDefaultVRM();
 })();
 
 // ---- per-frame player update ----

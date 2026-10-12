@@ -79,6 +79,11 @@ function subdirEffectsPlugin(): Plugin {
           const offlineDest = resolve(rootDir, 'dist', dirent.name, 'offline')
           cpSync(offlineSrc, offlineDest, { recursive: true })
         }
+        const vrmSrc = resolve(rootDir, dirent.name, 'character.vrm')
+        if (existsSync(vrmSrc)) {
+          const vrmDest = resolve(rootDir, 'dist', dirent.name, 'character.vrm')
+          cpSync(vrmSrc, vrmDest)
+        }
       }
     },
   }
