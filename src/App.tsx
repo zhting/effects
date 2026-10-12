@@ -1,6 +1,50 @@
-import { useMemo, useState, type MouseEvent } from 'react'
+import { useEffect, useMemo, useRef, useState, type ChangeEvent, type MouseEvent } from 'react'
 import { loadEffects, type EffectItem } from './effects.ts'
 import { EffectCover } from './EffectCover.tsx'
+
+function openKonbiniIdb(): Promise<IDBDatabase> {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open('qingyu-konbini', 1)
+    req.onupgradeneeded = () => {
+      if (!req.result.objectStoreNames.contains('files')) {
+        req.result.createObjectStore('files')
+      }
+    }
+    req.onsuccess = () => resolve(req.result)
+    req.onerror = () => reject(req.error)
+  })
+}
+
+async function getSavedVrmName(): Promise<string | null> {
+  try {
+    const db = await openKonbiniIdb()
+    return await new Promise((resolve) => {
+      const tx = db.transaction('files', 'readonly')
+      const req = tx.objectStore('files').get('vrm-name')
+      req.onsuccess = () => resolve(typeof req.result === 'string' ? req.result : null)
+      req.onerror = () => resolve(null)
+    })
+  } catch {
+    return null
+  }
+}
+
+async function saveVrmToIdb(buf: ArrayBuffer, name: string): Promise<boolean> {
+  const isGlb =
+    buf.byteLength > 12 &&
+    new Uint8Array(buf, 0, 4).every((c, i) => c === [103, 108, 84, 70][i])
+  if (!isGlb) return false
+  const db = await openKonbiniIdb()
+  await new Promise<void>((resolve, reject) => {
+    const tx = db.transaction('files', 'readwrite')
+    const store = tx.objectStore('files')
+    store.put(buf, 'vrm')
+    store.put(name, 'vrm-name')
+    tx.oncomplete = () => resolve()
+    tx.onerror = () => reject(tx.error)
+  })
+  return true
+}
 
 export default function App() {
   const effects = useMemo(() => loadEffects(), [])
@@ -10,6 +54,27 @@ export default function App() {
   const [darkMode, setDarkMode] = useState(false)
   const [activeDoc, setActiveDoc] = useState<EffectItem | null>(null)
   const [showGuide, setShowGuide] = useState(false)
+  const [vrmName, setVrmName] = useState<string | null>(null)
+  const vrmInputRef = useRef<HTMLInputElement | null>(null)
+
+  useEffect(() => {
+    getSavedVrmName().then((name) => {
+      if (name) setVrmName(name)
+    })
+  }, [])
+
+  const handleVrmFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file) return
+    const buf = await file.arrayBuffer()
+    const ok = await saveVrmToIdb(buf, file.name)
+    if (ok) {
+      setVrmName(file.name)
+    } else {
+      alert('请选择有效的 .vrm 或 .glb 模型文件')
+    }
+  }
 
   const allTags = useMemo(() => {
     const tagSet = new Set<string>()
@@ -48,6 +113,14 @@ export default function App() {
 
   return (
     <div className={`portal ${darkMode ? 'portal--dark' : ''}`}>
+      <input
+        ref={vrmInputRef}
+        type="file"
+        accept=".vrm,.glb"
+        hidden
+        onChange={handleVrmFileChange}
+      />
+
       {/* 顶部展厅横幅 */}
       <header className="hero">
         <div className="hero__inner">
@@ -246,6 +319,20 @@ export default function App() {
                     </div>
 
                     <div className="effect-card__links">
+                      {effect.slug === 'qingyu-konbini' && (
+                        <button
+                          type="button"
+                          className="effect-card__doc-btn effect-card__vrm-btn"
+                          onClick={(e) => {
+                            e.preventDefault()
+                            e.stopPropagation()
+                            vrmInputRef.current?.click()
+                          }}
+                          title="上传新的 .vrm / .glb 角色模型并应用于晴雨便利店场景"
+                        >
+                          {vrmName ? `替换 VRM (${vrmName})` : '替换 VRM 模型'}
+                        </button>
+                      )}
                       {effect.offlineHref && (
                         <button
                           type="button"

@@ -777,6 +777,18 @@ body {
   background: var(--accent-soft);
 }
 
+.effect-card__vrm-btn {
+  border-color: var(--accent-border);
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.effect-card__vrm-btn:hover {
+  background: var(--accent);
+  color: #fff;
+}
+
 .effect-card__go {
   font-family: ui-monospace, 'SF Mono', Menlo, monospace;
   font-size: 12px;
