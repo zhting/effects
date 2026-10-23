@@ -55,6 +55,8 @@
   .time{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);white-space:nowrap}
   .time input{width:150px;accent-color:var(--vermilion)}
   .time output{font-variant-numeric:tabular-nums;color:var(--ink);min-width:38px}
+  .time .nightbtn{min-height:36px;padding:0 11px;font-size:13.5px;border-radius:8px}
+  .time .nightbtn[aria-pressed="true"]{background:#24324a;border-color:#24324a;color:#f3e3b5}
   .readout{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
   #labels{position:absolute;inset:0;pointer-events:none;overflow:hidden}
@@ -158,7 +160,7 @@
     <li><b>拖动</b>鼠标或单指，旋转视角</li>
     <li><b>滚轮 / 双指</b>缩放远近</li>
   </ul>
-  <p class="note">镜头始终围绕观察中心、保持在地面上方，最近距离也位于全部建筑的包围范围之外。键盘：方向键旋转，＋／－ 缩放，Home 复位。「光追静帧」在镜头静止时用显卡做路径追踪，逐步收敛出更真实的光影。院外的城市街区、道路与车辆为示意，不对应真实建筑。</p>
+  <p class="note">镜头始终围绕观察中心、保持在地面上方，最近距离也位于全部建筑的包围范围之外。键盘：方向键旋转，＋／－ 缩放，Home 复位。「光追静帧」在镜头静止时用显卡做路径追踪，逐步收敛出更真实的光影。院外的城市街区、道路与车辆为示意，不对应真实建筑。「夜景」切换到当晚：月相按 2026 年 10 月 22 日推算（盈凸月），月亮方位取当晚实际方位，高度与大小为便于观看的示意。</p>
 </header>
 
 <div class="compass card" aria-hidden="true">
@@ -195,7 +197,7 @@
     </div>
     <span class="sep env"></span>
     <div class="weather env" id="weather" role="radiogroup" aria-label="天气"></div>
-    <label class="time env">光照<input type="range" id="time" min="450" max="1060" step="5" value="900" aria-label="光照时间"><output id="timeOut">15:00</output></label>
+    <div class="time env"><label for="time">时间</label><input type="range" id="time" min="360" max="1410" step="5" value="900" aria-label="时间（光照与夜景）"><output id="timeOut" for="time">15:00</output><button id="btnNight" class="nightbtn" type="button" aria-pressed="false" title="切换到当晚 20:30，转到能看到月亮的视角">夜景</button></div>
   </div>
   <div class="readout" id="readout"></div>
 </div>
@@ -9835,7 +9837,13 @@ const WXU = {
   uWxWet: { value: 0 },
   uWxSnow: { value: 0 },
   uWxWind: { value: 0.03 },
+  // 夜景：uNight 天色（0 白天 → 1 夜晚）、uNightL 人工照明开启程度、uNightWin 亮灯窗户比例系数
+  uNight: { value: 0 }, uNightL: { value: 0 }, uNightWin: { value: 1 }, uPgWash: { value: 0.55 }, uPgIn: { value: 1.4 },
+  // 地面灯光照度图（院落高精度 + 城区），bounds = (x0, z0, 1/宽, 1/深)
+  uLampC: { value: null }, uLampF: { value: null },
+  uLampCB: { value: new T.Vector4(0, 0, 1, 1) }, uLampFB: { value: new T.Vector4(0, 0, 1, 1) },
 };
+{ const z = new T.DataTexture(new Uint16Array(2), 1, 1, T.RGFormat, T.HalfFloatType); z.needsUpdate = true; WXU.uLampC.value = z; WXU.uLampF.value = z; }
 const WX_HEAD = `
 float wxCoat; float wxCoatPud;
 varying vec3 vWxL; varying vec3 vWxW;
@@ -9847,6 +9855,25 @@ float wxNoise(vec3 x) {
              mix(mix(wxHash(i + vec3(0,0,1)), wxHash(i + vec3(1,0,1)), f.x), mix(wxHash(i + vec3(0,1,1)), wxHash(i + vec3(1,1,1)), f.x), f.y), f.z);
 }
 float wxFbm(vec2 p) { float s = 0.0, a = 0.5; for (int i = 0; i < 4; i++) { s += a * wxNoise(vec3(p, 0.37)); p = p * 2.03 + 1.7; a *= 0.5; } return s / 0.9375; }
+uniform float uNight; uniform float uNightL; uniform float uNightWin; uniform float uPgWash; uniform float uPgIn;
+uniform sampler2D uLampC; uniform sampler2D uLampF; uniform vec4 uLampCB; uniform vec4 uLampFB;
+const vec3 LAMP_WARM = vec3(1.0, 0.62, 0.30);
+const vec3 LAMP_COOL = vec3(0.80, 0.86, 1.0);
+// 路灯、庭院灯在地面上的照度：院落用高精度图、城区用低精度图，城区以外用程序生成的远郊路网灯带
+vec3 wxLampAt(vec2 p) {
+  vec2 uc = (p - uLampCB.xy) * uLampCB.zw, uf = (p - uLampFB.xy) * uLampFB.zw;
+  vec2 vc = texture2D(uLampC, clamp(uc, 0.0, 1.0)).rg, vf = texture2D(uLampF, clamp(uf, 0.0, 1.0)).rg;
+  vec2 ec = min(uc, 1.0 - uc), ef = min(uf, 1.0 - uf);
+  float wc = smoothstep(0.0, 0.03, min(ec.x, ec.y)), wf = smoothstep(0.0, 0.01, min(ef.x, ef.y));
+  // 远郊：约 165 m 一条街、660 m 一条主干道
+  vec2 c1 = abs(fract(p / 165.0 + 0.5) - 0.5) * 165.0, c2 = abs(fract((p + 80.0) / 660.0 + 0.5) - 0.5) * 660.0;
+  float d1 = min(c1.x, c1.y), d2 = min(c2.x, c2.y), fw1 = max(fwidth(d1), 1e-3), fw2 = max(fwidth(d2), 1e-3);
+  float l1 = mix(1.0 - smoothstep(5.0 - fw1, 5.0 + fw1, d1), 0.06, smoothstep(2.0, 9.0, fw1));
+  float l2 = mix(1.0 - smoothstep(11.0 - fw2, 11.0 + fw2, d2), 0.033, smoothstep(4.0, 20.0, fw2));
+  float far = (0.34 * l1 + 0.6 * l2) * (0.75 + 0.5 * wxNoise(vec3(p * 0.004, 2.0))) * (1.0 - smoothstep(4500.0, 6000.0, length(p)));
+  vec2 v = mix(vec2(far, far * 0.2), mix(vf, vc, wc), wf);
+  return v.x * LAMP_WARM + v.y * (LAMP_COOL - LAMP_WARM);
+}
 `;
 let WX_LIGHTS = T.ShaderChunk.lights_fragment_begin.replace(
   'getDirectionalLightInfo( directionalLight, directLight );',
@@ -9883,8 +9910,98 @@ const WX_LIGHTS_FOLIAGE = (() => {
 		  reflectedLight.directDiffuse += directLight.color * material.diffuseColor * vec3( 0.9, 1.08, 0.5 ) * lfT; }`);
 })();
 
+// 夜景自发光：路灯照度、塔身投光与塔内灯、殿宇投光、窗户灯光、树上的串灯、水池灯带
+const WIN_GLSL = {
+  // 住宅：4 开间 × 4 层；第 2、3 开间为阳台（窗在栏板以上）
+  res: { n: [4, 4], frac: 0.55, area: 0.3, code: `
+    float bx = mod(cg.x, 4.0); bool balc = bx > 0.5 && bx < 2.5;
+    vec2 lo = balc ? vec2(0.095, 0.37) : vec2(0.225, 0.33), hi = balc ? vec2(0.905, 0.81) : vec2(0.775, 0.81);
+    vec2 a = smoothstep(lo - fw, lo + fw, lc) - smoothstep(hi - fw, hi + fw, lc);
+    wm = a.x * a.y * (1.0 - 0.85 * (1.0 - smoothstep(0.012 - fw.x, 0.012 + fw.x, abs(lc.x - 0.5))));
+    hk = vec3(cg, fk);` },
+  // 办公：每层通长带形窗，按 3 个窗格成组开关灯
+  office: { n: [8, 4], frac: 0.36, area: 0.55, code: `
+    vec2 lo = vec2(0.05, 0.37), hi = vec2(0.95, 0.97);
+    vec2 a = smoothstep(lo - fw, lo + fw, lc) - smoothstep(hi - fw, hi + fw, lc);
+    wm = a.x * a.y; hk = vec3(floor(cg.x / 3.0), cg.y, fk); cool = 1.0;` },
+  glass: { n: [8, 4], frac: 0.3, area: 0.82, code: `
+    vec2 lo = vec2(0.04, 0.08), hi = vec2(0.96, 0.97);
+    vec2 a = smoothstep(lo - fw, lo + fw, lc) - smoothstep(hi - fw, hi + fw, lc);
+    wm = a.x * a.y; hk = vec3(floor(cg.x / 2.0), cg.y, fk); cool = 1.0;` },
+  // 仿唐建筑：直棂窗，灯光从窗棂间透出
+  tang: { n: [3, 2], frac: 0.82, area: 0.22, code: `
+    vec2 lo = vec2(0.19, 0.27), hi = vec2(0.81, 0.75);
+    vec2 a = smoothstep(lo - fw, lo + fw, lc) - smoothstep(hi - fw, hi + fw, lc);
+    float bars = fract((lc.x - 0.16) * 40.0); float fb = fw.x * 40.0;
+    float gap = mix(smoothstep(0.38 - fb, 0.38 + fb, bars) * (1.0 - smoothstep(1.0 - fb, 1.0, bars)), 0.62, smoothstep(0.3, 0.8, fb));
+    wm = a.x * a.y * mix(0.25, 1.0, gap); hk = vec3(cg, fk); cool = -0.4;` },
+};
+function nightBody(o) {
+  let s = `
+  if (uNightL > 0.001) {
+    vec3 nAlb = diffuseColor.rgb * (1.0 - 0.45 * metalnessFactor);
+    float nHf = 1.0 - smoothstep(2.0, 12.0, vWxW.y);
+    vec3 nE = nAlb * wxLampAt(vWxW.xz) * nHf * clamp(0.32 + 0.68 * wxN.y, 0.0, 1.0);
+    vec2 pgOff = vWxW.xz - vWxL.xz - vec2(${PG.x.toFixed(2)}, ${PG.z.toFixed(2)});
+    bool isPg = abs(pgOff.x) + abs(pgOff.y) < 0.05;
+    if (isPg) {${PAGODA_NIGHT}
+    }`;
+  // 院内殿宇、钟鼓楼、山门：地面投光，墙柱明亮、檐下最亮、屋面只得到少量余光
+  if (!o.sway) s += ` else if (abs(vWxW.x) < 66.0 && vWxW.z > -146.0 && vWxW.z < 116.0 && vWxW.y > 0.3 && (vWxW.z < 108.0 || abs(vWxW.x) < 12.0)) {
+      float hw = exp(-max(vWxW.y - 1.0, 0.0) / 8.0) * (wxN.y < -0.4 ? 1.45 : wxN.y > 0.5 ? 0.18 : 0.9);
+      nE += nAlb * hw * vec3(1.0, 0.70, 0.40) * 0.5;
+    }`;
+  if (o.win === 'lattice') s += `
+    #ifdef USE_MAP
+    { float lr = texture2D(map, vMapUv).r; nE += vec3(1.0, 0.66, 0.34) * mix(0.08, 0.95, smoothstep(0.15, 0.05, lr)) * (isPg ? 0.0 : 1.0); }
+    #endif`;
+  else if (o.win) {
+    const W = WIN_GLSL[o.win];
+    s += `
+    #ifdef USE_MAP
+    {
+      vec2 wuv = vMapUv * vec2(${W.n[0].toFixed(1)}, ${W.n[1].toFixed(1)});
+      vec2 fwr = fwidth(wuv), cg = floor(wuv), lc = fract(wuv), fw = min(fwr, vec2(0.5));
+      float fk = abs(wxN.x) > abs(wxN.z) ? vWxW.x * sign(wxN.x) : vWxW.z * sign(wxN.z); fk = floor(fk * 0.5 + 0.5);
+      float wm = 0.0, cool = 0.0; vec3 hk = vec3(0.0);
+      ${W.code}
+      wm = mix(wm, ${W.area.toFixed(2)}, smoothstep(0.3, 0.8, max(fwr.x, fwr.y)));
+      float h1 = wxHash(hk * vec3(1.31, 2.17, 0.73) + 3.7), h2 = wxHash(hk * vec3(2.9, 1.1, 1.7) + 9.1), h3 = wxHash(hk.yzx * 1.9 + 5.3);
+      float shop = 1.0 - smoothstep(3.6, 4.2, vWxW.y);
+      float wfr = mix(${W.frac.toFixed(2)} * uNightWin, 0.85, shop * ${o.win === 'tang' ? '0.0' : '1.0'});
+      float farK = smoothstep(0.3, 0.8, max(fwr.x, fwr.y));      // 窗户小于一个像素时取平均，避免远处闪烁的噪点
+      float won = mix(step(h1, wfr), wfr * 0.6, farK);
+      vec3 wc = h2 < 0.55 ? vec3(1.0, 0.66, 0.36) : h2 < 0.85 ? vec3(1.0, 0.82, 0.62) : vec3(0.78, 0.86, 1.0);
+      wc = mix(wc, vec3(0.86, 0.92, 1.0), clamp(cool, 0.0, 1.0) * 0.7);
+      if (cool < 0.0) wc = vec3(1.0, 0.6, 0.26);
+      float wi = ${o.win === 'tang' ? '0.6' : o.win === 'res' ? '0.3' : '0.4'} * mix(mix(0.45, 1.25, h3), 0.85, farK) * (1.0 + shop * 0.8);
+      nE += wc * wi * wm * won;
+      ${o.win === 'tang' ? `// 步行街、园林里的仿唐建筑整体投光
+      nE += nAlb * vec3(1.0, 0.68, 0.32) * (abs(vWxW.x) < 90.0 && vWxW.z > 200.0 && vWxW.z < 1510.0 ? 0.75 : (vWxW.x > 540.0 && vWxW.x < 1270.0 && vWxW.z > 190.0 && vWxW.z < 1070.0) ? 0.6 : 0.14);` : ''}
+    }
+    #endif`;
+  }
+  // 步行街行道树上的串灯
+  if (o.foliage) s += `
+    if (abs(vWxW.x) < 48.0 && vWxW.z > 210.0 && vWxW.z < 1505.0) {
+      float sp = step(0.955, wxHash(floor(vWxL * 4.0) + 0.37));
+      nE += vec3(1.0, 0.72, 0.36) * sp * 2.2;
+    }`;
+  // 北广场水池：池壁灯带与水下灯
+  if (o.water) s += `
+    if (abs(vWxW.x) < 9.7 && vWxW.z < -165.0 && vWxW.z > -326.0) {
+      float zz = mod(-170.0 - vWxW.z, 21.0), ez = min(zz, 19.0 - zz), ex = 9.0 - abs(vWxW.x);
+      float e = max(min(ex, ez), 0.0);      // 多重采样时像素中心可能落在池面之外，需截断
+      nE += vec3(1.0, 0.7, 0.38) * exp(-e * 3.0) * 0.22 + vec3(0.25, 0.55, 0.75) * 0.008;
+    }`;
+  s += `
+    totalEmissiveRadiance += nE * uNightL;
+  }`;
+  return s;
+}
+
 function enhance(mat, o) {
-  o = Object.assign({ amp: 0, streak: false, wet: false, puddles: false, snow: false, sway: false, bell: false, foliage: false, film: false, pagoda: false, water: false, lawn: false }, o);
+  o = Object.assign({ amp: 0, streak: false, wet: false, puddles: false, snow: false, sway: false, bell: false, foliage: false, film: false, pagoda: false, water: false, lawn: false, win: '' }, o);
   const key = 'wx' + JSON.stringify(o);
   mat.customProgramCacheKey = () => key;
   if (o.film) mat.userData.film = true;
@@ -9951,6 +10068,7 @@ ${o.bell ? `
     sh.fragmentShader = sh.fragmentShader
       .replace('#include <common>', '#include <common>\n' + WX_HEAD)
       .replace('#include <normal_fragment_maps>', '#include <normal_fragment_maps>\n' + body)
+      .replace('#include <emissivemap_fragment>', '#include <emissivemap_fragment>\n' + nightBody(o))
       .replace('#include <lights_fragment_begin>', o.foliage ? WX_LIGHTS_FOLIAGE : WX_LIGHTS);
     // 雨天水膜：用清漆层（clearcoat）表现地面、屋面上的一层薄水，积水处几乎镜面
     if (o.film) sh.fragmentShader = sh.fragmentShader
@@ -10018,7 +10136,7 @@ function buildMaterials() {
   M.plaster = std(Object.assign(PBR(TEX.plaster, 0.35), { roughness: 1.0 }), { amp: 0.18, streak: true, ...WET });
   // 红漆柱：桐油大漆，清漆高光
   M.column = phys({ color: 0x962a1c, roughness: 0.5, clearcoat: 0.55, clearcoatRoughness: 0.28 }, { amp: 0.06, wet: true });
-  M.lattice = std(Object.assign(PBR(TEX.lattice, 1.0), { roughness: 0.62 }), { amp: 0.05 });
+  M.lattice = std(Object.assign(PBR(TEX.lattice, 1.0), { roughness: 0.62 }), { amp: 0.05, win: 'lattice' });
   M.paint = phys({ color: 0xffffff, roughness: 0.62, clearcoat: 0.3, clearcoatRoughness: 0.4 }, { amp: 0.06 });
   M.eave = std({ color: 0x2d4443, roughness: 0.8 }, {});
   M.wood = std(Object.assign(PBR(TEX.wood, 0.5), { roughness: 1.0 }), { amp: 0.06 });
@@ -10459,6 +10577,48 @@ const PAGODA_GRIME = (() => {
       }
     }
   }`;
+})();
+
+// 夜景：塔身投光（每层墙脚的投光灯向上照亮本层墙面，叠涩檐下最亮）、塔基与塔顶投光、金色塔刹；
+// 塔内每层中央一盏灯、四面券洞内各一盏灯，灯光从券门透出。以塔的局部坐标计算（拆解时随构件移动）。
+const PAGODA_NIGHT = (() => {
+  const f = (v) => v.toFixed(3), cls = [], inn = [];
+  let y = PG.PH;
+  const floors = [];
+  for (let i = 0; i < 7; i++) { const pl = i === 0 ? PG.PLINTH : 0; floors.push(y + pl); y += PG.H[i]; }
+  y = PG.PH;
+  for (let i = 0; i < 7; i++) {
+    const nC = i === 6 ? 6 : 9, pl = i === 0 ? PG.PLINTH : 0, a = y + pl, b = y + PG.H[i] - nC * PG.LAY, c = y + PG.H[i];
+    cls.push(`if (pY >= ${f(i === 0 ? a - 0.6 : a)} && pY < ${f(c)}) { pA = ${f(a)}; pB = ${f(b)}; pHs = ${f(PG.S[i] / 2)}; pHi = ${f(PG.SI[i] / 2)}; }`);
+    const lo = floors[i] - 0.15, hi = i < 6 ? floors[i + 1] - 0.15 : c + 0.01;
+    inn.push(`if (pY >= ${f(lo)} && pY < ${f(hi)}) { pIn = ${i}.0; pYi = ${f(floors[i])}; pHsI = ${f(PG.S[i] / 2)}; }`);
+    y = c;
+  }
+  return `
+      vec3 pp = vWxL; float pY = pp.y, pCh = max(abs(pp.x), abs(pp.z));
+      float pA = -1.0, pB = 0.0, pHs = 0.0, pHi = 0.0, pIn = -1.0, pYi = 0.0, pHsI = 0.0;
+      ${cls.join('\n      ')}
+      ${inn.join('\n      ')}
+      bool pExt = pA < -0.5 || (pY < pB ? pCh >= pHs - 0.02 : pCh > pHi + 0.05);
+      if (pExt) {
+        float pW;
+        if (pY < ${f(PG.PH + 0.4)}) pW = mix(1.0, 0.72, clamp(pY / ${f(PG.PH)}, 0.0, 1.0)) * (wxN.y > 0.5 ? 0.3 : 1.0);
+        else if (pA > -0.5) {
+          if (pY < pB) { float ff = clamp((pY - pA) / (pB - pA), 0.0, 1.0); pW = mix(1.3, 0.7, sqrt(ff)) * (wxN.y > 0.5 ? 0.5 : wxN.y < -0.5 ? 1.2 : 1.0); }
+          else pW = wxN.y < -0.4 ? 1.6 : wxN.y > 0.5 ? 0.4 : 1.05;
+        }
+        else if (pY < ${f(PG.top - PG.finialH)}) pW = wxN.y > 0.5 ? 0.45 : 0.8;
+        else pW = 2.2;
+        nE += nAlb * pW * vec3(1.0, 0.70, 0.36) * uPgWash;
+      } else if (pIn > -0.5) {
+        vec3 L0 = vec3(0.0, pYi + 2.5, 0.0) - pp; float d0 = dot(L0, L0);
+        float lit = 9.0 * (0.15 + 0.85 * max(dot(wxN, L0 * inversesqrt(d0)), 0.0)) / (d0 + 1.5);
+        float tq = pHsI - 1.4;
+        vec3 Lt = (abs(pp.x) > abs(pp.z) ? vec3(sign(pp.x) * tq, pYi + 2.1, 0.0) : vec3(0.0, pYi + 2.1, sign(pp.z) * tq)) - pp;
+        float dtq = dot(Lt, Lt);
+        lit += 2.4 * (0.2 + 0.8 * max(dot(wxN, Lt * inversesqrt(dtq)), 0.0)) / (dtq + 0.6);
+        nE += nAlb * lit * vec3(1.0, 0.76, 0.5) * uPgIn;
+      }`;
 })();
 
 // 立面局部坐标：u 沿面宽（从外向里看左→右）、y 高度、w 向外法向偏移
@@ -11664,16 +11824,17 @@ function buildCityMaterials() {
   TEX.facadeRes = facadeResTexture(201); TEX.facadeOffice = facadeOfficeTexture(203); TEX.facadeGlass = facadeGlassTexture(205);
   TEX.tangWall = tangWallTexture(207); TEX.roofFlat = roofFlatTexture(209);
   const WET = { wet: true, snow: true };
-  MCITY.facadeRes = std(Object.assign(PBR(TEX.facadeRes, 0.8), { roughness: 1 }), { amp: 0.12, streak: true, ...WET });
-  MCITY.facadeOffice = std(Object.assign(PBR(TEX.facadeOffice, 0.7), { roughness: 1 }), { amp: 0.08, ...WET });
-  MCITY.facadeGlass = std(Object.assign(PBR(TEX.facadeGlass, 0.5), { roughness: 1, metalness: 0.35, envMapIntensity: 1.2 }), { amp: 0.05, ...WET });
-  MCITY.tangWall = std(Object.assign(PBR(TEX.tangWall, 0.8), { roughness: 1 }), { amp: 0.1, ...WET });
+  MCITY.facadeRes = std(Object.assign(PBR(TEX.facadeRes, 0.8), { roughness: 1 }), { amp: 0.12, streak: true, win: 'res', ...WET });
+  MCITY.facadeOffice = std(Object.assign(PBR(TEX.facadeOffice, 0.7), { roughness: 1 }), { amp: 0.08, win: 'office', ...WET });
+  MCITY.facadeGlass = std(Object.assign(PBR(TEX.facadeGlass, 0.5), { roughness: 1, metalness: 0.35, envMapIntensity: 1.2 }), { amp: 0.05, win: 'glass', ...WET });
+  MCITY.tangWall = std(Object.assign(PBR(TEX.tangWall, 0.8), { roughness: 1 }), { amp: 0.1, win: 'tang', ...WET });
+  MCITY.glow = NIGHT_MATS.glow;
   MCITY.roofFlat = std(Object.assign(PBR(TEX.roofFlat, 0.6), { roughness: 1 }), { amp: 0.18, puddles: true, ...WET });
   MCITY.mark = std({ color: 0xe8e6e0, roughness: 0.55 }, { amp: 0.15, ...WET });
   MCITY.markY = std({ color: 0xd8a83a, roughness: 0.55 }, { amp: 0.15, ...WET });
   MCITY.car = std({ roughness: 0.32, metalness: 0.45, envMapIntensity: 1.1 }, { wet: true, snow: true });
   for (const k of ['mark', 'markY']) { MCITY[k].polygonOffset = true; MCITY[k].polygonOffsetFactor = -3; MCITY[k].polygonOffsetUnits = -6; }
-  for (const k in MCITY) MCITY[k].shadowSide = T.DoubleSide;
+  for (const k in MCITY) if (k !== 'glow') MCITY[k].shadowSide = T.DoubleSide;
 }
 
 /* ---------- 路网 ---------- */
@@ -11729,7 +11890,19 @@ function modernBuilding(gb, x0, z0, x1, z1, h, key, tint, rnd, roofBoxes) {
   }
   CITY_BOXES.push([x0, 0, z0, x1, top, z1]);
   CITY_STATS.buildings++; CITY_STATS.maxH = Math.max(CITY_STATS.maxH, top);
+  if (h > 50) for (const [x, z] of [[x0 + 0.5, z0 + 0.5], [x1 - 0.5, z0 + 0.5], [x1 - 0.5, z1 - 0.5], [x0 + 0.5, z1 - 0.5]]) NIGHT_REDS.push([x, h + 0.35, z]);   // 高层屋顶航空障碍灯
   return h;
+}
+// 轮廓灯带（夜景）：沿折线生成一条水平 + 一条竖直的细带，保证俯视、平视都看得见
+let TANG_GLOW = true;
+function glowLine(gb, pts, w) {
+  if (!TANG_GLOW) return;
+  for (let i = 0; i + 1 < pts.length; i++) {
+    const a = pts[i], b = pts[i + 1];
+    gb.quad('glow', [a[0], a[1] - w, a[2]], [b[0], b[1] - w, b[2]], b, a, faceN([a[0], a[1] - w, a[2]], [b[0], b[1] - w, b[2]], b, [b[2] - a[2], 0, a[0] - b[0]]));
+    const dx = b[0] - a[0], dz = b[2] - a[2], l = Math.hypot(dx, dz) || 1, px = -dz / l * w * 0.5, pz = dx / l * w * 0.5;
+    gb.quad('glow', [a[0] - px, a[1] + 0.02, a[2] - pz], [b[0] - px, b[1] + 0.02, b[2] - pz], [b[0] + px, b[1] + 0.02, b[2] + pz], [a[0] + px, a[1] + 0.02, a[2] + pz], [0, 1, 0]);
+  }
 }
 // 简化仿唐建筑：台基 + 1–3 层墙身（层间腰檐）+ 四坡屋顶（翼角起翘、正脊）
 function hipRoof(gb, x0, z0, x1, z1, y0, ov) {
@@ -11760,10 +11933,30 @@ function hipRoof(gb, x0, z0, x1, z1, y0, ov) {
     }
     gb.box('ridge', cx - 0.35, y0 + rise - 0.25, cz - (az - ax) - 0.4, cx + 0.35, y0 + rise + 0.55, cz + (az - ax) + 0.4, { ao: 1 });
   }
+  // 夜景轮廓灯：沿檐口一圈、四条垂脊、正脊（取坡面网格顶点，紧贴屋面边缘）
+  const N = 2, eY = (u) => H(0) + lf(u, 0) + 0.04, loop = [];
+  for (let i = 0; i < N; i++) { const u = -1 + 2 * i / N; loop.push([cx + u * ax, eY(u), cz - az]); }
+  for (let i = 0; i < N; i++) { const u = -1 + 2 * i / N; loop.push([cx + ax, eY(u), cz + u * az]); }
+  for (let i = 0; i < N; i++) { const u = 1 - 2 * i / N; loop.push([cx + u * ax, eY(u), cz + az]); }
+  for (let i = 0; i <= N; i++) { const u = 1 - 2 * i / N; loop.push([cx - ax, eY(u), cz + u * az]); }
+  glowLine(gb, loop, 0.22);
+  for (const sx of [-1, 1]) for (const sz of [-1, 1]) {
+    const hip = [];
+    for (let k = 0; k <= 2; k++) {
+      const t = k / 2, y = H(t) + lift * (1 - t) * (1 - t) + 0.16;
+      hip.push(alongX ? [cx + sx * (ax - az * t), y, cz + sz * az * (1 - t)] : [cx + sx * ax * (1 - t), y, cz + sz * (az - ax * t)]);
+    }
+    glowLine(gb, hip, 0.18);
+  }
+  const rl = Math.abs(ax - az) + 0.4;
+  glowLine(gb, alongX ? [[cx - rl, y0 + rise + 0.57, cz], [cx + rl, y0 + rise + 0.57, cz]] : [[cx, y0 + rise + 0.57, cz - rl], [cx, y0 + rise + 0.57, cz + rl]], 0.18);
   return y0 + rise + 0.55;
 }
 function tangBuilding(gb, x0, z0, x1, z1, floors, rnd) {
   const cap = hCap(x0, z0, x1, z1);
+  // 轮廓灯：步行街、园林与寺旁园中亭榭全部装设，其余仿唐街区少量
+  { const cx = (x0 + x1) / 2, cz = (z0 + z1) / 2, P = CITY_ZONE.park, h = (Math.sin(cx * 12.9898 + cz * 78.233) * 43758.5453) % 1;
+    TANG_GLOW = (Math.abs(cx) < 90 && cz > 204 && cz < 1500) || (cx > P[0] && cx < P[2] && cz > P[1] && cz < P[3]) || (Math.abs(cx) < 180 && cz > -346 && cz < 204) || Math.abs(h) < 0.1; }
   const sh = Math.min(x1 - x0, z1 - z0) / 2;
   while (floors > 1 && 0.6 + floors * 4.6 + (sh + 1.8) * 0.6 + 1 > cap) floors--;
   gb.box('stone', x0 - 0.9, 0, z0 - 0.9, x1 + 0.9, 0.6, z1 + 0.9, { ao: 0.85 });
@@ -11776,6 +11969,8 @@ function tangBuilding(gb, x0, z0, x1, z1, floors, rnd) {
     if (f < floors - 1) {
       const ins = 1.4, cx = (a[0] + a[2]) / 2, cz = (a[1] + a[3]) / 2, hx = (a[2] - a[0]) / 2, hz = (a[3] - a[1]) / 2;
       gb.frustum('tile', cx, cz, y - 0.15, y + 0.9, hx + 1.6, hz + 1.6, hx - ins, hz - ins, { noTop: true });
+      const yy = y - 0.15, ox = hx + 1.6, oz = hz + 1.6;
+      glowLine(gb, [[cx - ox, yy, cz - oz], [cx + ox, yy, cz - oz], [cx + ox, yy, cz + oz], [cx - ox, yy, cz + oz], [cx - ox, yy, cz - oz]], 0.2);
       a = [a[0] + ins, a[1] + ins, a[2] - ins, a[3] - ins];
       y += 0.5;
     }
@@ -11783,7 +11978,8 @@ function tangBuilding(gb, x0, z0, x1, z1, floors, rnd) {
   gb.box('eave', a[0] - 0.2, y, a[1] - 0.2, a[2] + 0.2, y + 0.35, a[3] + 0.2, { ao: 1 });
   const top = hipRoof(gb, a[0], a[1], a[2], a[3], y + 0.35, 1.8);
   CITY_BOXES.push([x0 - 2, 0, z0 - 2, x1 + 2, top, z1 + 2]);
-  CITY_STATS.buildings++; CITY_STATS.tang++; CITY_STATS.maxH = Math.max(CITY_STATS.maxH, top);
+  CITY_STATS.buildings++; CITY_STATS.tang++; CITY_STATS.maxH = Math.max(CITY_STATS.maxH, top); if (TANG_GLOW) CITY_STATS.glowTang = (CITY_STATS.glowTang || 0) + 1;
+  TANG_GLOW = true;
   return top;
 }
 
@@ -11813,6 +12009,15 @@ function tangParcel(gb, x0, z0, x1, z1, rnd, plant, flat) {
 }
 
 /* ---------- 车辆 ---------- */
+function carLightGeometry() {
+  const parts = [];
+  for (const [x, c] of [[2.21, [1.0, 0.92, 0.78]], [-2.21, [1.0, 0.08, 0.05]]]) for (const z of [-0.62, 0.62]) {
+    const g = new T.BoxGeometry(0.06, 0.2, 0.36).toNonIndexed(); g.translate(x, 0.72, z);
+    g.setAttribute('color', new T.Float32BufferAttribute(new Array(g.attributes.position.count).fill(c).flat(), 3));
+    parts.push(g);
+  }
+  const g = A.mergeGeometries(parts, false); g.computeBoundingSphere(); return g;
+}
 function carGeometry() {
   const g1 = new T.BoxGeometry(4.4, 0.8, 1.8); g1.translate(0, 0.62, 0);
   const g2 = new T.BoxGeometry(2.3, 0.62, 1.6); g2.translate(-0.25, 1.32, 0);
@@ -11916,6 +12121,14 @@ function buildCity(treeProtos, treeProtosLite) {
     };
     street(eN, 'x', ox0, ox1, oz0 + SW / 2); street(eS, 'x', ox0, ox1, oz1 - SW / 2);
     street(eL, 'z', oz0, oz1, ox0 + SW / 2); street(eR, 'z', oz0, oz1, ox1 - SW / 2);
+    // 路灯：立在路缘，灯臂伸向路面（夜景用）
+    const lampOK = (w) => (w >= 30 && d < 2400) || (w >= 12 && d < 1500);
+    const lamps = (e, ax, a0, a1, fixed, armDir) => {
+      if (!e || !lampOK(e.w)) return;
+      for (let t = a0 + 14; t < a1 - 10; t += 34) NIGHT_LAMPS.push(ax === 'x' ? [t, fixed, 0, armDir, e.w] : [fixed, t, 0, armDir, e.w]);
+    };
+    lamps(eN, 'x', ox0, ox1, oz0 + 0.7, Math.PI); lamps(eS, 'x', ox0 + 17, ox1, oz1 - 0.7, 0);
+    lamps(eL, 'z', oz0 + 17, oz1, ox0 + 0.7, -Math.PI / 2); lamps(eR, 'z', oz0, oz1, ox1 - 0.7, Math.PI / 2);
 
     const inZ = (r) => mx > r[0] && mx < r[2] && mz > r[1] && mz < r[3];
     // —— 寺院东西两侧绿地 ——
@@ -11929,6 +12142,8 @@ function buildCity(treeProtos, treeProtosLite) {
         const r = rnd(); tree(gardenTrees, r < 0.45 ? 'sophora' : r < 0.65 ? 'broad' : r < 0.8 ? 'pine' : r < 0.92 ? 'cypress' : 'ginkgo', px, pz, 10 + rnd() * 5);
       }
       tangBuilding(gb, pc - 7, (z0 + z1) / 2 - 5, pc + 7, (z0 + z1) / 2 + 5, 1, rnd);   // 园中亭榭
+      for (let z = z0 + 10; z < z1 - 6; z += 18) if (Math.abs(z - (z0 + z1) / 2) > 10) for (const sx of [-1, 1]) NIGHT_LAMPS.push([pc + sx * 3.8, z, 1, 0]);
+      for (let x = x0 + 8; x < x1 - 6; x += 18) if (Math.abs(x - pc) > 10) NIGHT_LAMPS.push([x, (z0 + z1) / 2 + 3.8, 1, 0]);
       continue;
     }
     // —— 示意“大唐芙蓉园” ——
@@ -11950,6 +12165,7 @@ function buildCity(treeProtos, treeProtosLite) {
       flat('path', s > 0 ? 0 : x0, z0, s > 0 ? x1 : 0, z1, 0.035);
       flat('grass', s > 0 ? 0 : -4, z0, s > 0 ? 4 : 0, z1, 0.05);
       for (let z = z0 + 7; z < z1 - 5; z += 16) for (const ox of [10, 34]) tree(cityTrees, 'sophora', s * ox, z, 9 + rnd() * 2);
+      for (let z = z0 + 15; z < z1 - 5; z += 16) for (const ox of [5.5, 22, 41]) NIGHT_LAMPS.push([s * ox, z, 2, 0]);
       // 沿街建筑
       let z = z0 + 3;
       while (z < z1 - 16) {
@@ -12025,6 +12241,7 @@ function buildCity(treeProtos, treeProtosLite) {
       const w = (a) => 1 + 0.08 * Math.sin(a * 3) + 0.05 * Math.sin(a * 7);
       gb.tri('water', [lc[0], 0.12, lc[1]], [lc[0] + Math.cos(a0) * lr[0] * w(a0), 0.12, lc[1] + Math.sin(a0) * lr[1] * w(a0)], [lc[0] + Math.cos(a1) * lr[0] * w(a1), 0.12, lc[1] + Math.sin(a1) * lr[1] * w(a1)], [0, 1, 0]);
     }
+    for (let k = 0; k < 64; k++) { const a = k / 64 * Math.PI * 2, w = 1 + 0.08 * Math.sin(a * 3) + 0.05 * Math.sin(a * 7); NIGHT_LAMPS.push([lc[0] + Math.cos(a) * (lr[0] * w + 6), lc[1] + Math.sin(a) * (lr[1] * w + 6), 1, 0]); }
     for (let k = 0; k < 7; k++) {
       const a = k / 7 * Math.PI * 2 + 0.3, px = lc[0] + Math.cos(a) * (lr[0] + 30), pz = lc[1] + Math.sin(a) * (lr[1] + 30);
       tangBuilding(gb, px - 8, pz - 6, px + 8, pz + 6, 1 + (k % 2), rnd);
@@ -12032,7 +12249,8 @@ function buildCity(treeProtos, treeProtosLite) {
     tangBuilding(gb, lc[0] - 30, lc[1] - lr[1] - 70, lc[0] + 30, lc[1] - lr[1] - 34, 3, rnd);
   }
 
-  const grp = gb.toGroup(Object.assign({}, M, MCITY), { noCast: ['mark', 'markY', 'asphalt', 'paving', 'path', 'grass', 'water'] });
+  const grp = gb.toGroup(Object.assign({}, M, MCITY), { noCast: ['mark', 'markY', 'asphalt', 'paving', 'path', 'grass', 'water', 'glow'] });
+  grp.traverse((o) => { if (o.isMesh && o.userData.matKey === 'glow') { o.castShadow = o.receiveShadow = false; o.visible = false; NIGHT.glowMeshes.push(o); } });
   grp.traverse((o) => { if (o.isMesh && ['asphalt', 'paving', 'path', 'grass', 'water', 'mark', 'markY'].includes(o.userData.matKey)) o.castShadow = false; });
 
   // 车辆
@@ -12043,6 +12261,11 @@ function buildCity(treeProtos, treeProtosLite) {
     im.castShadow = true; im.receiveShadow = true; im.computeBoundingSphere();
     grp.add(im);
     CITY_STATS.cars = cars.length;
+    // 车灯（夜景）：前白后红
+    const lg = carLightGeometry(), lm = new T.InstancedMesh(lg, NIGHT_MATS.carLight, cars.length);
+    for (let i = 0; i < cars.length; i++) { im.getMatrixAt(i, m); lm.setMatrixAt(i, m); }
+    lm.computeBoundingSphere(); lm.userData.night = true; lm.visible = false;
+    grp.add(lm); NIGHT.carLights = lm;
   }
   // 树：城市里的用简化树形（叶簇更少更大），寺院两侧绿地用完整树形
   const tg = buildTreeGroup(cityTrees, treeProtosLite, false, false);
@@ -12136,6 +12359,7 @@ const WX_KEYS = Object.keys(WEATHER);
 const wx = Object.assign({}, WEATHER.clear);
 let wxFrom = Object.assign({}, wx), wxTo = WEATHER.clear, wxKey = 'clear', wxT = 1, wxDur = 2.2;
 let timeMin = 900;
+const NIGHT_EXPO = 2.4, NIGHT_ENV = 1.5;     // 夜间曝光与环境光强度（夜空与灯光的亮度按线性辐亮度设定）
 let envDirty = true, envAge = 0;
 let flash = 0, flashTimer = 3, cloudOff = new T.Vector2(0, 0);
 // 投影物范围：院落（+ 高档画质时院外行道树）
@@ -12182,7 +12406,7 @@ function makeSnow(count, size, flake, opacity) {
   g.setAttribute('aSeed', new T.BufferAttribute(seeds, 4));
   const mat = new T.ShaderMaterial({
     transparent: true, depthWrite: false, fog: false,
-    uniforms: { uCenter: { value: new T.Vector3() }, uSize: { value: new T.Vector3(...size) }, uTime: { value: 0 }, uFlake: { value: flake }, uScale: { value: 500 }, uWind: { value: new T.Vector2() }, uOpacity: { value: opacity } },
+    uniforms: { uCenter: { value: new T.Vector3() }, uSize: { value: new T.Vector3(...size) }, uTime: { value: 0 }, uFlake: { value: flake }, uScale: { value: 500 }, uWind: { value: new T.Vector2() }, uOpacity: { value: opacity }, uBright: { value: 1 } },
     vertexShader: `attribute vec4 aSeed; uniform vec3 uCenter; uniform vec3 uSize; uniform float uTime; uniform float uFlake; uniform float uScale; uniform vec2 uWind; varying float vD;
       void main(){
         float fall = 1.1 + aSeed.w * 0.7;
@@ -12195,9 +12419,9 @@ function makeSnow(count, size, flake, opacity) {
         vD = -mv.z;
         gl_PointSize = clamp(uFlake * (0.6 + aSeed.w * 0.8) * uScale / max(vD, 0.1), 1.2, 22.0);
         gl_Position = projectionMatrix * mv; }`,
-    fragmentShader: `uniform float uOpacity; varying float vD;
+    fragmentShader: `uniform float uOpacity; uniform float uBright; varying float vD;
       void main(){ float d = length(gl_PointCoord - 0.5); float a = smoothstep(0.5, 0.15, d) * uOpacity * smoothstep(1.0, 4.0, vD) * (1.0 - smoothstep(500.0, 900.0, vD));
-        gl_FragColor = vec4(0.97, 0.98, 1.0, a); }`,
+        gl_FragColor = vec4(vec3(0.97, 0.98, 1.0) * uBright, a); }`,
   });
   const pts = new T.Points(g, mat);
   pts.frustumCulled = false; pts.visible = false; pts.renderOrder = 5;
@@ -12221,7 +12445,7 @@ function setWeather(key, instant) {
 }
 let envPending = false;
 // 拖动时间滑块时天空环境贴图按间隔更新，松手时立即更新
-function setTime(min, immediate) { timeMin = clamp(min, 450, 1060); if (immediate) envDirty = true; else envPending = true; }
+function setTime(min, immediate) { timeMin = clamp(min, 360, 1410); if (immediate) envDirty = true; else envPending = true; }
 const tmpC = new T.Color();
 function sunColor(elevDeg) {
   const t = smooth01((elevDeg - 1) / 28);
@@ -12261,6 +12485,12 @@ function updateEnvironment(dt, time) {
   if (envPending) { envAge += dt; if (envAge > 0.25 || dt === 0) { envDirty = true; envPending = false; } }
   const s = sunAt(timeMin), eDeg = s.elev / DEG;
   const center = castBounds.getCenter(new T.Vector3());
+  // 夜景：天色（日落后约 1 小时完全入夜）、人工照明（日落前后开灯）、月亮
+  const nightSky = smooth01((-eDeg - 0.5) / 9.5), lightsK = smooth01((1.5 - eDeg) / 4.5);
+  const skyA = Math.max(nightSky, smooth01((2 - eDeg) / 2.5));    // 日落前后天空改由暮光 / 夜空模型绘制
+  const moon = moonAt(timeMin, s.dir), useMoon = eDeg < -0.5 && !!moon && moon.real.y > 0.05;
+  const ld = useMoon ? moon.real : s.dir;      // 主平行光：白天为日光，入夜后为月光
+  updateNight(nightSky, lightsK, moon, time, s.dir, skyA);
   const U = sky.material.uniforms;
   U.turbidity.value = wx.turb; U.rayleigh.value = wx.ray; U.mieCoefficient.value = wx.mie; U.mieDirectionalG.value = wx.mieG;
   U.sunPosition.value.copy(s.dir); U.cloudCoverage.value = wx.cover; U.cloudDensity.value = wx.dens; U.cloudElevation.value = wx.cElev;
@@ -12268,11 +12498,16 @@ function updateEnvironment(dt, time) {
   U.cloudSpeed.value = 0.00002 + wx.wind * 0.00008;
   // 日光
   const day = smooth01((eDeg + 1) / 14);
-  sun.position.copy(center).addScaledVector(s.dir, 900); sun.target.position.copy(center);
-  sun.intensity = 6.2 * (0.42 + 0.58 * smooth01(eDeg / 22)) * smooth01((eDeg + 0.5) / 2.5) * wx.sun * (1 - wx.haze * 0.25);
-  sun.color.copy(sunColor(eDeg));
+  sun.position.copy(center).addScaledVector(ld, 900); sun.target.position.copy(center);
+  if (useMoon) {
+    sun.intensity = 0.17 * nightSky * smooth01(moon.real.y / 0.3) * (1 - 0.9 * clamp(wx.sky, 0, 1)) * (1 - wx.haze * 0.4);
+    sun.color.setRGB(0.72, 0.82, 1.0);
+  } else {
+    sun.intensity = 6.2 * (0.42 + 0.58 * smooth01(eDeg / 22)) * smooth01((eDeg + 0.5) / 2.5) * wx.sun * (1 - wx.haze * 0.25);
+    sun.color.copy(sunColor(eDeg));
+  }
   sun.shadow.radius = wx.sRad; sun.shadow.intensity = wx.sInt;
-  scene.environmentIntensity = 0.3 * wx.env * lerp(0.55, 1.0, day) * lerp(1.35, 1.0, smooth01((eDeg - 3) / 15));
+  scene.environmentIntensity = lerp(0.3 * wx.env * lerp(0.55, 1.0, day) * lerp(1.35, 1.0, smooth01((eDeg - 3) / 15)), NIGHT_ENV * (1 - 0.55 * wx.snow), skyA);
   // 环境光照贴图（天空变化时重新生成）
   if (envDirty) {
     const E = envSky.material.uniforms;
@@ -12281,8 +12516,9 @@ function updateEnvironment(dt, time) {
     sampleHorizon();
     // 地面亮度 = 反照率 ×（直射日光 + 天空漫射），与主场景中地面的实际亮度一致
     const alb = [lerp(lerp(0.15, 0.09, wx.wet), 0.72, wx.snow), lerp(lerp(0.15, 0.09, wx.wet), 0.74, wx.snow), lerp(lerp(0.125, 0.08, wx.wet), 0.78, wx.snow)];
-    const sI = sun.intensity * Math.max(s.dir.y, 0) / Math.PI * (1 - 0.5 * wx.sky), amb = scene.environmentIntensity * 0.9;
-    envGround.material.uniforms.uG.value.setRGB(alb[0] * (sI * sun.color.r + amb * horizonColor.r), alb[1] * (sI * sun.color.g + amb * horizonColor.g), alb[2] * (sI * sun.color.b + amb * horizonColor.b));
+    const sI = sun.intensity * Math.max(ld.y, 0) / Math.PI * (1 - 0.5 * wx.sky), amb = scene.environmentIntensity * 0.9;
+    const lw = 0.06 * lightsK;      // 夜间地面被路灯照亮的平均亮度
+    envGround.material.uniforms.uG.value.setRGB(alb[0] * (sI * sun.color.r + amb * horizonColor.r + lw), alb[1] * (sI * sun.color.g + amb * horizonColor.g + lw * 0.62), alb[2] * (sI * sun.color.b + amb * horizonColor.b + lw * 0.3));
     envGround.material.uniforms.uH.value.copy(horizonColor);
     const rt = pmrem.fromScene(envScene, 0.02, 1, 3000);
     if (envRT) envRT.dispose();
@@ -12303,6 +12539,7 @@ function updateEnvironment(dt, time) {
   const mixK = clamp(wx.haze * 1.15 + 0.12, 0, 1);
   scene.fog.color.setRGB(horizonColor.r / hl, horizonColor.g / hl, horizonColor.b / hl)
     .lerp(tmpC.multiplyScalar(1 / Math.max(pl, 1e-4)), mixK).multiplyScalar(L);
+  scene.fog.color.multiplyScalar(lerp(1, 0.65, nightSky));      // 夜间远处建筑沉入较暗的雾霭，亮灯窗户仍可辨
   scene.fog.density = wx.fog;
   hazeDome.material.uniforms.uColor.value.copy(scene.fog.color);
   hazeDome.material.uniforms.uHaze.value = wx.haze;
@@ -12320,6 +12557,7 @@ function updateEnvironment(dt, time) {
     o.visible = rainOn; if (!rainOn) continue;
     u.uTime.value = time; u.uSpeed.value = 9 + wx.rain * 2.5; u.uWind.value.set(wx.wind * 6, wx.wind * 3);
     u.uOpacity.value = (k === 'rainFar' ? 0.3 : 0.42) * Math.min(1, wx.rain);
+    u.uColor.value.set(0xc8d2dc).multiplyScalar(lerp(1, 0.09, nightSky));
     o.geometry.setDrawRange(0, Math.floor(o.geometry.attributes.aEnd.count * Math.min(1, wx.rain / 1.8 + 0.45)));
     if (k === 'rainNear') u.uCenter.value.copy(camPos).add(new T.Vector3(0, -10, 0)); else u.uCenter.value.set(center.x, 110, center.z);
   }
@@ -12327,6 +12565,7 @@ function updateEnvironment(dt, time) {
     const o = PRECIP[k], u = o.material.uniforms;
     o.visible = snowOn; if (!snowOn) continue;
     u.uTime.value = time; u.uWind.value.set(wx.wind * 4, wx.wind * 2); u.uOpacity.value = (k === 'snowFar' ? 0.75 : 0.9) * Math.min(1, wx.flakes);
+    u.uBright.value = lerp(1, 0.12, nightSky);
     u.uScale.value = renderer.domElement.height / (2 * Math.tan(camera.fov * DEG / 2));
     if (k === 'snowNear') u.uCenter.value.copy(camPos); else u.uCenter.value.set(center.x, 100, center.z);
   }
@@ -12339,14 +12578,16 @@ function updateEnvironment(dt, time) {
   if (flash > 0) {
     flash = Math.max(0, flash - dt * 3.2);
     const f = flash > 0.7 ? 1 : flash > 0.45 ? 0.25 : flash > 0.3 ? 0.8 : flash * 0.5;
-    flashLight.intensity = f * 6; animating = true;
+    flashLight.intensity = f * 6 * lerp(1, 0.3, nightSky); animating = true;
   } else flashLight.intensity = 0;
-  renderer.toneMappingExposure = 0.62 * wx.expo * lerp(1.55, 1.0, smooth01((eDeg - 2) / 20)) * (1 + flashLight.intensity * 0.06);
+  renderer.toneMappingExposure = lerp(0.62 * wx.expo * lerp(1.55, 1.0, smooth01((eDeg - 2) / 20)), NIGHT_EXPO, nightSky) * (1 + flashLight.intensity * 0.06);
+  // 夜间辉光：路灯、灯带等光源溢出
+  bloomPass.threshold = lerp(10, 1.0, nightSky); bloomPass.strength = lerp(0.16, 0.6, nightSky); bloomPass.radius = lerp(0.45, 0.62, nightSky);
   if (rainOn || snowOn || wx.cShadow > 0.05 || wx.wind > 0.2) animating = true;
-  const sig = [s.dir.x, s.dir.y, s.dir.z, castBounds.min.x, castBounds.min.y, castBounds.min.z, castBounds.max.x, castBounds.max.y, castBounds.max.z].map((v) => v.toFixed(3)).join(',') + (compoundVisibleSig());
-  if (sig !== shadowSig) { shadowSig = sig; fitShadow(s.dir); renderer.shadowMap.needsUpdate = true; }
-  const fsig = s.dir.toArray().map((v) => v.toFixed(4)).join();
-  if (fsig !== farSig) { farSig = fsig; fitShadowFar(s.dir); sunFar.shadow.needsUpdate = true; renderer.shadowMap.needsUpdate = true; }
+  const sig = [ld.x, ld.y, ld.z, castBounds.min.x, castBounds.min.y, castBounds.min.z, castBounds.max.x, castBounds.max.y, castBounds.max.z].map((v) => v.toFixed(3)).join(',') + (compoundVisibleSig());
+  if (sig !== shadowSig) { shadowSig = sig; fitShadow(ld); renderer.shadowMap.needsUpdate = true; }
+  const fsig = ld.toArray().map((v) => v.toFixed(4)).join();
+  if (fsig !== farSig) { farSig = fsig; fitShadowFar(ld); sunFar.shadow.needsUpdate = true; renderer.shadowMap.needsUpdate = true; }
   sunFar.shadow.intensity = sun.shadow.intensity; sunFar.shadow.radius = Math.max(1.5, wx.sRad * 0.5);
   return animating;
 }
@@ -12523,6 +12764,265 @@ function resizeRenderer() {
 // 竖屏时加大垂直视场，保证水平视场不小于约 34°
 function fovFor(aspect) { return Math.max(40 * DEG, 2 * Math.atan(Math.tan(17 * DEG) / aspect)); }
 
+// ==== app_42_night.js ====
+/* =====================================================================
+ * 6b. 夜景：月亮、夜空、路灯与庭院灯、建筑投光、窗户与车灯
+ *     月相按 2026-10-22 西安推算（盈凸月，约 84%）；月亮方位按当晚实际方位，
+ *     但高度压低到地平线附近（真实高度约 30–50°，超出允许的俯视镜头范围），大小约为真实的 2 倍。
+ * ===================================================================== */
+const NIGHT = { sky: 0, lights: 0, glowMeshes: [], carLights: null, heads: [], posts: null, lampCount: 0, moon: null, built: false };
+const NIGHT_LAMPS = [];
+const NIGHT_REDS = [];            // 高层建筑屋顶四角的红色航空障碍灯           // [x, z, 种类, 灯臂朝向, 道路宽度]；0 路灯 1 庭院灯 2 步行街宫灯 3 寺内石灯 4 只有光照（投光灯）
+const NIGHT_MATS = {
+  glow: new T.MeshBasicMaterial({ color: 0x000000, side: T.DoubleSide }),
+  carLight: new T.MeshBasicMaterial({ vertexColors: true, color: 0x000000 }),
+  red: new T.MeshBasicMaterial({ color: 0x000000 }),
+};
+// 当晚月亮的真实方位（北京时间分钟, 方位角°自正北顺时针, 高度角°）
+const MOON_TABLE = [[930, 96.2, -2.5], [960, 100.2, 2.4], [990, 104.4, 8.2], [1020, 108.7, 14.0], [1050, 113.4, 19.7], [1080, 118.6, 25.2], [1110, 124.3, 30.5], [1140, 130.7, 35.4], [1170, 138.0, 39.8], [1200, 146.4, 43.7], [1230, 155.9, 46.7], [1260, 166.3, 48.8], [1290, 177.5, 49.8], [1320, 188.9, 49.6], [1350, 199.8, 48.2], [1380, 210.0, 45.8], [1410, 219.1, 42.4]];
+const MOON_SHOW_ALT = 6.5;        // 显示高度（°）
+const MOON_PHASE_E = Math.acos(1 - 2 * 0.84);    // 84% 被照亮对应的日月角距
+const dirAzAlt = (az, alt, v) => (v || new T.Vector3()).set(Math.cos(alt * DEG) * Math.sin(az * DEG), Math.sin(alt * DEG), -Math.cos(alt * DEG) * Math.cos(az * DEG));
+function moonAt(min, sunDir) {
+  const t = MOON_TABLE;
+  if (min < t[0][0] || min > t[t.length - 1][0]) return null;
+  let i = 0; while (i < t.length - 2 && t[i + 1][0] < min) i++;
+  const k = clamp((min - t[i][0]) / (t[i + 1][0] - t[i][0]), 0, 1);
+  const az = lerp(t[i][1], t[i + 1][1], k), alt = lerp(t[i][2], t[i + 1][2], k);
+  const real = dirAzAlt(az, alt), disp = dirAzAlt(az, Math.min(alt, MOON_SHOW_ALT));
+  // 月面受光方向：取在“月—日”平面内、与月亮方向成 MOON_PHASE_E 角的方向，使月相与当日一致；再随显示位置一起转动
+  const e1 = real.clone(), e2 = sunDir.clone().addScaledVector(real, -sunDir.dot(real)).normalize();
+  const L = e1.multiplyScalar(Math.cos(MOON_PHASE_E)).addScaledVector(e2, Math.sin(MOON_PHASE_E));
+  L.applyQuaternion(new T.Quaternion().setFromUnitVectors(real, disp));
+  return { az, alt, real, disp, L, up: smooth01((alt + 0.5) / 2) };
+}
+
+/* ---------- 夜空（主场景用随相机移动的穹顶；环境贴图用同一着色器、不画星星和月亮） ---------- */
+const NIGHT_SKY_U = {
+  uNight: { value: 0 }, uCover: { value: 0 }, uStars: { value: 0 }, uMoonI: { value: 0 }, uMoonR: { value: 0.5 * DEG }, uTwB: { value: 0 }, uSunDir: { value: new T.Vector3(0, -1, 0) },
+  uZen: { value: new T.Color() }, uHor: { value: new T.Color() }, uCloudCol: { value: new T.Color() }, uMoonCol: { value: new T.Color(1, 0.95, 0.86) },
+  uMoonDir: { value: new T.Vector3(0, 0.1, -1).normalize() }, uMoonL: { value: new T.Vector3(1, 0, 0) }, uCloudOff: { value: new T.Vector2() },
+};
+const NIGHT_SKY_FS = `
+  uniform float uNight; uniform float uCover; uniform float uStars; uniform float uMoonI; uniform float uMoonR; uniform float uEnv; uniform float uTwB; uniform vec3 uSunDir;
+  uniform vec3 uZen; uniform vec3 uHor; uniform vec3 uCloudCol; uniform vec3 uMoonCol; uniform vec3 uMoonDir; uniform vec3 uMoonL; uniform vec2 uCloudOff;
+  varying vec3 vDir;
+  float h21(vec2 p) { p = fract(p * vec2(123.34, 456.21)); p += dot(p, p + 45.32); return fract(p.x * p.y); }
+  float vn(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 * f);
+    return mix(mix(h21(i), h21(i + vec2(1.0, 0.0)), f.x), mix(h21(i + vec2(0.0, 1.0)), h21(i + vec2(1.0, 1.0)), f.x), f.y); }
+  float fbm(vec2 p) { float s = 0.0, a = 0.5; for (int i = 0; i < 5; i++) { s += a * vn(p); p = p * 2.03 + 1.7; a *= 0.5; } return s / 0.96875; }
+  void main() {
+    vec3 d = normalize(vDir);
+    float el = d.y, hb = smoothstep(-0.01, 0.4, el);
+    vec3 col = el < 0.0 ? uHor * 0.85 : mix(uHor, uZen, pow(hb, 0.42));
+    // 暮光（日落后的民用晨昏蒙影）：天顶蓝、背日方向地平线淡紫粉、日落方向橙色余晖；亮度随太阳下沉按指数衰减
+    vec2 sh = normalize(vec2(uSunDir.x, uSunDir.z) + 1e-5), dh = normalize(d.xz + 1e-5);
+    float ss = max(dot(sh, dh), 0.0), sl = exp(-max(el, 0.0) * 7.0);
+    vec3 twH = mix(vec3(0.42, 0.46, 0.85), vec3(1.0, 0.48, 0.18) * 2.6, ss * ss);
+    vec3 tw = mix(twH, vec3(0.2, 0.4, 1.0), 1.0 - sl) * uTwB;
+    tw += vec3(1.0, 0.42, 0.12) * 3.5 * uTwB * pow(ss, 6.0) * exp(-max(el, 0.0) * 22.0);
+    if (el < 0.0) tw = twH * uTwB * 0.5;
+    col += tw;
+    // 星星：城市光污染下只剩少数亮星
+    vec2 sc = vec2(atan(d.z, d.x), asin(clamp(el, -1.0, 1.0))) * 230.0;
+    float pxs = max(max(fwidth(sc.x), fwidth(sc.y)), 1e-4);
+    vec2 ce = floor(sc), fr = fract(sc);
+    float hs = h21(ce), sb = pow(h21(ce + 9.3), 3.0) * 0.5 + 0.04;
+    vec2 so = vec2(h21(ce + 17.1), h21(ce + 3.7)) * 0.6 + 0.2;
+    float sd = length(fr - so) / pxs;
+    col += vec3(0.9, 0.95, 1.0) * step(0.986, hs) * sb * 0.6 * exp(-sd * sd * 2.2) * smoothstep(0.06, 0.35, el) * uStars * (1.0 - uEnv) * step(pxs, 0.5);
+    // 月亮：盈凸月的月面明暗、月海、临边昏暗与光晕
+    float cm = dot(d, uMoonDir);
+    vec3 mt = normalize(cross(vec3(0.0, 1.0, 0.0), uMoonDir)), mb = cross(uMoonDir, mt);
+    vec2 q = vec2(dot(d, mt), dot(d, mb)) / uMoonR;
+    float rq = length(q), aa = max(fwidth(rq), 1e-3);
+    float disc = (1.0 - smoothstep(1.0 - aa, 1.0 + aa, rq)) * step(0.0, cm);
+    float zq = sqrt(max(1.0 - rq * rq, 0.0));
+    vec3 nm = q.x * mt + q.y * mb - zq * uMoonDir;
+    float ph = smoothstep(-0.05, 0.06, dot(nm, uMoonL));
+    float mar = 0.66 + 0.34 * smoothstep(0.62, 0.38, fbm(q * 1.7 + vec2(3.1, 7.7))) - 0.08 * smoothstep(0.5, 0.8, fbm(q * 6.0));
+    vec3 moon = uMoonCol * (ph * mar * (0.8 + 0.2 * zq) + 0.012) * disc;
+    float ang = acos(clamp(cm, -1.0, 1.0));
+    vec3 halo = uMoonCol * (exp(-ang / 0.012) * 0.06 + exp(-ang / 0.07) * 0.014 + exp(-ang / 0.3) * 0.004);
+    // 云：被城市灯光从下方照亮
+    vec2 cp = d.xz / max(el + 0.08, 0.03) * 0.8 + uCloudOff;
+    float n = fbm(cp * 1.25), cl = 0.0;
+    if (uCover > 0.01) {
+      cl = smoothstep(1.05 - uCover * 1.1, 1.35 - uCover * 1.1, n + uCover * 0.25);
+      cl = max(cl, smoothstep(0.85, 1.0, uCover) * 0.94) * smoothstep(-0.03, 0.05, el);
+    }
+    vec3 cc = uCloudCol * (0.72 + 0.4 * fbm(cp * 3.3 + 5.0)) * mix(1.25, 0.75, hb) + tw * 0.75 + uMoonCol * uMoonI * exp(-ang / 0.25) * 0.04 * (1.0 - smoothstep(0.85, 1.0, uCover));
+    col = mix(col, cc, cl);
+    moon *= 1.0 - cl * 0.96; halo *= 1.0 - cl * 0.5;
+    vec3 add = (moon + halo) * uMoonI * (1.0 - uEnv);
+    gl_FragColor = vec4(col * uNight + add, uNight);
+  }`;
+function nightSkyMaterial(env) {
+  return new T.ShaderMaterial({
+    side: T.BackSide, depthWrite: false, transparent: true, premultipliedAlpha: true, fog: false,
+    uniforms: Object.assign({ uEnv: { value: env ? 1 : 0 } }, NIGHT_SKY_U),
+    vertexShader: env ? 'varying vec3 vDir; void main(){ vDir = position; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }'
+      : 'varying vec3 vDir; void main(){ vDir = position; gl_Position = projectionMatrix * modelViewMatrix * vec4(position + cameraPosition, 1.0); }',
+    fragmentShader: NIGHT_SKY_FS,
+  });
+}
+const nightDome = new T.Mesh(new T.SphereGeometry(12000, 64, 32), nightSkyMaterial(false));
+nightDome.renderOrder = -1.5; nightDome.frustumCulled = false; nightDome.visible = false;
+const nightEnvSphere = new T.Mesh(new T.SphereGeometry(720, 48, 24), nightSkyMaterial(true));
+nightEnvSphere.renderOrder = 1; nightEnvSphere.visible = false;
+scene.add(nightDome); envScene.add(nightEnvSphere);
+AO_HIDE.push(nightDome);
+
+/* ---------- 灯具与地面照度图 ---------- */
+// 寺院、南北广场与寺院一侧人行道上的灯（城市街区里的灯在生成街区时记录）
+function templeLamps() {
+  const L = [], add = (x, z, k, a, w) => L.push([x, z, k, a || 0, w || 0]);
+  for (let z = -4; z <= 104; z += 12) for (const s of [-1, 1]) add(s * 4.4, z, 3);                 // 中轴甬道石灯
+  for (let x = -24; x <= 24; x += 12) for (const z of [-72.6, -11.4]) add(x, z, 3);                   // 塔院四周
+  for (let z = -62; z <= -20; z += 14) for (const s of [-1, 1]) add(s * 27.6, z, 3);
+  for (let z = -136; z <= -96; z += 10) for (const s of [-1, 1]) add(s * 42.2, z, 3);                // 玄奘三藏院
+  for (let z = 120; z <= 188; z += 14) for (const s of [-1, 1]) add(s * 5.2, z, 1);                  // 南广场
+  for (let z = 122; z <= 188; z += 17) for (const s of [-1, 1]) add(s * 62, z, 1);
+  for (let z = -165; z >= -334; z -= 28) for (const s of [-1, 1]) add(s * 70, z, 1);
+  for (const z of [-209, -251, -293]) for (const x of [-56, -39, -22, 22, 39, 56]) add(x, z, 1);
+  for (let z = -330; z <= 190; z += 34) for (const s of [-1, 1]) add(s * 80.7, z, 0, s * Math.PI / 2, 16);   // 环寺道路（寺院一侧）
+  for (let x = -68; x <= 68; x += 34) { add(x, -339.3, 0, Math.PI, 12); if (Math.abs(x) > 8) add(x, 195.3, 0, 0, 16); }
+  // 投光灯（只有光照）：塔基四周、殿前
+  for (let x = -22; x <= 22; x += 5.5) for (const z of [-67.5, -16.5]) add(x, z, 4);
+  for (let z = -62; z <= -22; z += 5.5) for (const s of [-1, 1]) add(s * 24.5, z, 4);
+  for (const [x, z] of [[0, 62], [-9, 62], [9, 62], [0, 22], [-7, 22], [7, 22], [0, 116], [-8, 116], [8, 116], [42, 70], [42, 34], [-42, 70], [-42, 34], [32, 96], [-32, 96], [0, -115]]) add(x, z, 4);
+  return L;
+}
+const LAMP_KIND = [
+  { h: 7.5, I: 1.0, rc: 26, c: 0.5 },     // 路灯（主干道偏暖，见下）
+  { h: 3.0, I: 0.42, rc: 9, c: 0.2 },     // 庭院灯
+  { h: 4.5, I: 0.85, rc: 12, c: -0.15 },  // 宫灯
+  { h: 1.3, I: 0.62, rc: 4.5, c: -0.1 },  // 石灯
+  { h: 3.2, I: 0.42, rc: 10, c: -0.05 },  // 投光灯溢光
+];
+function buildLampMaps(lamps) {
+  const mk = (x0, z0, w, n) => ({ x0, z0, w, n, a: new Float32Array(n * n * 2) });
+  const F = mk(-CITY_L, -CITY_L, CITY_L * 2, 2048), C = mk(-330, -430, 660, 1024);
+  const splat = (M, x, z, I, h, rc, c) => {
+    const px = M.w / M.n, cx = (x - M.x0) / px, cz = (z - M.z0) / px, R = rc / px;
+    const i0 = Math.max(0, Math.floor(cx - R)), i1 = Math.min(M.n - 1, Math.ceil(cx + R)), j0 = Math.max(0, Math.floor(cz - R)), j1 = Math.min(M.n - 1, Math.ceil(cz + R));
+    const h2 = h * h, rc2 = rc * rc;
+    for (let j = j0; j <= j1; j++) for (let i = i0; i <= i1; i++) {
+      const dx = (i + 0.5 - cx) * px, dz = (j + 0.5 - cz) * px, r2 = dx * dx + dz * dz;
+      if (r2 >= rc2) continue;
+      const e = I * Math.pow(1 + r2 / h2, -1.5) * (1 - smooth01((Math.sqrt(r2) / rc - 0.6) / 0.4)), k = (j * M.n + i) * 2;
+      M.a[k] += e; M.a[k + 1] += e * c;
+    }
+  };
+  for (const [x, z, kind, arm, w] of lamps) {
+    const K = LAMP_KIND[kind], off = kind === 0 ? 2.0 : 0, lx = x + Math.sin(arm) * off, lz = z + Math.cos(arm) * off;
+    const c = kind === 0 ? (w >= 30 ? 0.0 : 0.55) : K.c;
+    splat(F, lx, lz, K.I, K.h, K.rc, c);
+    if (lx > C.x0 - 30 && lx < C.x0 + C.w + 30 && lz > C.z0 - 30 && lz < C.z0 + C.w + 30) splat(C, lx, lz, K.I, K.h, K.rc, c);
+  }
+  const tex = (M) => {
+    const u = new Uint16Array(M.a.length);
+    for (let i = 0; i < M.a.length; i++) if (M.a[i] !== 0) u[i] = T.DataUtils.toHalfFloat(M.a[i]);
+    const t = new T.DataTexture(u, M.n, M.n, T.RGFormat, T.HalfFloatType);
+    t.minFilter = t.magFilter = T.LinearFilter; t.wrapS = t.wrapT = T.ClampToEdgeWrapping; t.generateMipmaps = false; t.needsUpdate = true;
+    return t;
+  };
+  WXU.uLampF.value = tex(F); WXU.uLampC.value = tex(C);
+  WXU.uLampFB.value.set(F.x0, F.z0, 1 / F.w, 1 / F.w); WXU.uLampCB.value.set(C.x0, C.z0, 1 / C.w, 1 / C.w);
+}
+// 灯具几何：灯杆（受光照的金属/石材）+ 发光灯头（单独材质，夜间提高自发光）
+function lampGeometries() {
+  const prep = (g, m) => { if (m) g.applyMatrix4(m); g = g.index ? g.toNonIndexed() : g; g.setAttribute('color', new T.Float32BufferAttribute(new Array(g.attributes.position.count * 3).fill(1), 3)); return g; };
+  const merge = (list) => { const g = A.mergeGeometries(list, false); g.computeBoundingSphere(); return g; };
+  const tr = (x, y, z) => new T.Matrix4().makeTranslation(x, y, z);
+  return [
+    { post: merge([prep(new T.CylinderGeometry(0.09, 0.15, 8.9, 8), tr(0, 4.45, 0)), prep(new T.BoxGeometry(0.08, 0.08, 2.2), tr(0, 8.82, 1.05)), prep(new T.BoxGeometry(0.36, 0.14, 0.86), tr(0, 8.8, 2.05))]),
+      head: merge([prep(new T.BoxGeometry(0.3, 0.06, 0.72), tr(0, 8.71, 2.05))]) },
+    { post: merge([prep(new T.CylinderGeometry(0.05, 0.07, 3.3, 6), tr(0, 1.65, 0)), prep(new T.CylinderGeometry(0.16, 0.12, 0.08, 8), tr(0, 3.32, 0))]),
+      head: merge([prep(new T.SphereGeometry(0.23, 10, 8), tr(0, 3.55, 0))]) },
+    { post: merge([prep(new T.CylinderGeometry(0.08, 0.12, 5.3, 8), tr(0, 2.65, 0)), prep(new T.BoxGeometry(2.1, 0.1, 0.1), tr(0, 5.05, 0)), prep(new T.ConeGeometry(0.28, 0.4, 8), tr(0, 5.5, 0))]),
+      head: merge([prep(new T.CylinderGeometry(0.3, 0.3, 0.72, 10), tr(-0.88, 4.5, 0)), prep(new T.CylinderGeometry(0.3, 0.3, 0.72, 10), tr(0.88, 4.5, 0))]) },
+    { post: merge([prep(new T.BoxGeometry(0.56, 0.26, 0.56), tr(0, 0.13, 0)), prep(new T.BoxGeometry(0.22, 0.74, 0.22), tr(0, 0.63, 0)), prep(new T.BoxGeometry(0.62, 0.06, 0.62), tr(0, 1.0, 0)),
+      prep(new T.ConeGeometry(0.5, 0.32, 4), new T.Matrix4().makeRotationY(Math.PI / 4).setPosition(0, 1.6, 0))]),
+      head: merge([prep(new T.BoxGeometry(0.42, 0.4, 0.42), tr(0, 1.23, 0))]) },
+  ];
+}
+function buildNightLights() {
+  const all = templeLamps().concat(NIGHT_LAMPS);
+  buildLampMaps(all);
+  const grp = new T.Group(), geos = lampGeometries();
+  const postMat = [std({ color: 0x34383c, roughness: 0.45, metalness: 0.6 }, { wet: true, snow: true }), null, null, std({ color: 0x9c978d, roughness: 0.85 }, { amp: 0.2, wet: true, snow: true })];
+  postMat[1] = postMat[0]; postMat[2] = std({ color: 0x5a1c14, roughness: 0.5, metalness: 0.3 }, { wet: true, snow: true });
+  const headDefs = [
+    { kind: 0, warm: true, col: [1.0, 0.6, 0.28], k: 14 }, { kind: 0, warm: false, col: [1.0, 0.84, 0.66], k: 14 },
+    { kind: 1, col: [1.0, 0.76, 0.5], k: 4.5 }, { kind: 2, col: [1.0, 0.46, 0.16], k: 4 }, { kind: 3, col: [1.0, 0.68, 0.38], k: 2.6 },
+  ];
+  const m = new T.Matrix4(), q = new T.Quaternion(), p = new T.Vector3(), s = new T.Vector3(1, 1, 1), up = new T.Vector3(0, 1, 0);
+  for (let kind = 0; kind < 4; kind++) {
+    const list = all.filter((l) => l[2] === kind);
+    if (!list.length) continue;
+    const post = new T.InstancedMesh(geos[kind].post, postMat[kind], list.length);
+    list.forEach((l, i) => { q.setFromAxisAngle(up, l[3]); p.set(l[0], 0, l[1]); m.compose(p, q, s); post.setMatrixAt(i, m); });
+    post.castShadow = true; post.receiveShadow = true; post.computeBoundingSphere(); grp.add(post);
+    for (const hd of headDefs.filter((h) => h.kind === kind)) {
+      const sub = list.filter((l) => kind !== 0 || (l[4] >= 30) === hd.warm);
+      if (!sub.length) continue;
+      const mat = new T.MeshStandardMaterial({ color: 0xd8d2c6, roughness: 0.35, emissive: new T.Color().setRGB(...hd.col), emissiveIntensity: 0 });
+      const head = new T.InstancedMesh(geos[kind].head, mat, sub.length);
+      sub.forEach((l, i) => { q.setFromAxisAngle(up, l[3]); p.set(l[0], 0, l[1]); m.compose(p, q, s); head.setMatrixAt(i, m); });
+      head.computeBoundingSphere(); grp.add(head);
+      NIGHT.heads.push({ mat, k: hd.k });
+    }
+  }
+  if (NIGHT_REDS.length) {
+    const red = new T.InstancedMesh(new T.BoxGeometry(0.7, 0.7, 0.7), NIGHT_MATS.red, NIGHT_REDS.length);
+    NIGHT_REDS.forEach((r, i) => { m.makeTranslation(r[0], r[1], r[2]); red.setMatrixAt(i, m); });
+    red.computeBoundingSphere(); red.visible = false; grp.add(red); NIGHT.reds = red;
+  }
+  NIGHT.lampCount = all.filter((l) => l[2] < 4).length;
+  NIGHT.built = true;
+  return grp;
+}
+
+/* ---------- 每帧更新 ---------- */
+// 亮灯窗户比例：傍晚逐渐亮起，深夜逐渐熄灭一部分
+function windowFactor(min) {
+  if (min < 720) return 0.5;
+  return (0.5 + 0.5 * smooth01((min - 1060) / 90)) * (1 - 0.35 * smooth01((min - 1320) / 90));
+}
+const _nc = new T.Color();
+function updateNight(nightSky, lights, moon, time, sunDir, skyA) {
+  NIGHT.sky = nightSky; NIGHT.lights = lights; NIGHT.moon = moon;
+  WXU.uNight.value = nightSky; WXU.uNightL.value = lights; WXU.uNightWin.value = windowFactor(timeMin);
+  for (const h of NIGHT.heads) h.mat.emissiveIntensity = h.k * lights;
+  NIGHT_MATS.glow.color.setRGB(1.0, 0.56, 0.2).multiplyScalar(1.3 * lights);
+  for (const g of NIGHT.glowMeshes) g.visible = lights > 0.01;
+  NIGHT_MATS.carLight.color.setScalar(5.5 * lights);
+  if (NIGHT.carLights) NIGHT.carLights.visible = lights > 0.01;
+  NIGHT_MATS.red.color.setRGB(1, 0.05, 0.02).multiplyScalar(9 * lights);
+  if (NIGHT.reds) NIGHT.reds.visible = lights > 0.01;
+  // 夜空颜色（线性）：晴夜天顶深蓝、地平线带城市灯光的暖色；有云时云底被灯光照亮
+  const U = NIGHT_SKY_U;
+  const cloudK = (1 + 0.3 * wx.snow + 0.35 * wx.haze) * wx.fogB;
+  U.uCloudCol.value.setRGB(0.026 * cloudK, 0.019 * cloudK, 0.0135 * cloudK);
+  U.uZen.value.setRGB(0.0012, 0.0024, 0.0068).lerp(U.uCloudCol.value, clamp(wx.sky, 0, 1));
+  U.uHor.value.setRGB(0.018, 0.0135, 0.0095).lerp(_nc.copy(U.uCloudCol.value).multiplyScalar(1.15), clamp(wx.sky, 0, 1));
+  U.uCover.value = wx.cover; U.uNight.value = skyA;
+  const eDeg = Math.asin(clamp(sunDir.y, -1, 1)) / DEG;
+  U.uTwB.value = 0.3 * Math.pow(10, Math.min(eDeg, 0) / 4.2) * (1 - 0.55 * clamp(wx.sky, 0, 1)); U.uSunDir.value.copy(sunDir);
+  U.uCloudOff.value.set(time * 0.004 * (0.3 + wx.wind * 3), time * 0.0017 * (0.3 + wx.wind * 3));
+  U.uStars.value = nightSky * nightSky * (1 - wx.cover) * (1 - wx.haze);
+  if (moon) {
+    U.uMoonDir.value.copy(moon.disp); U.uMoonL.value.copy(moon.L);
+    // 近地平线的月光偏暖（大气消光）
+    const lowK = smooth01((moon.disp.y / DEG - 1) / 10);
+    U.uMoonCol.value.setRGB(1.0, lerp(0.86, 0.95, lowK), lerp(0.68, 0.86, lowK));
+    U.uMoonI.value = moon.up * lerp(0.5, 0.95, nightSky) * (1 - 0.97 * clamp(wx.sky, 0, 1)) * (1 - 0.6 * wx.haze);
+  } else U.uMoonI.value = 0;
+  nightDome.visible = skyA > 0.002 || U.uMoonI.value > 0.002;
+  nightEnvSphere.visible = skyA > 0.002;
+}
+
 // ==== app_45_pathtrace.js ====
 /* =====================================================================
  * 6b. 光线追踪静帧（可选）：three-gpu-pathtracer 在 GPU 上做路径追踪
@@ -12677,11 +13177,12 @@ function ptBuild() {
   PT.buildMs = performance.now() - t0;
 }
 
-function ptAvailable() { return PT.supported && mode === 'court' && explodeK < 0.001 && PT_WEATHER.has(wxKey); }
+function ptAvailable() { return PT.supported && mode === 'court' && explodeK < 0.001 && PT_WEATHER.has(wxKey) && NIGHT.lights < 0.01; }
 function ptReason() {
   if (!PT.supported) return '当前浏览器不支持光追所需的浮点渲染目标';
   if (mode !== 'court') return '拆解模式下不可用';
   if (!PT_WEATHER.has(wxKey)) return '光追模式支持晴、多云、阴三种天气';
+  if (NIGHT.lights >= 0.01) return '光追模式仅支持白天（日落前）';
   return '';
 }
 function setPathTrace(on) {
@@ -12708,7 +13209,7 @@ let ptUIKey = '';
 function updatePtUI() {
   const b = $('btnPT');
   if (!b) return;
-  const key = [PT.on, PT.supported, mode, explodeK < 0.001, wxKey].join();
+  const key = [PT.on, PT.supported, mode, explodeK < 0.001, wxKey, NIGHT.lights < 0.01].join();
   if (key === ptUIKey) return;
   ptUIKey = key;
   b.setAttribute('aria-pressed', String(PT.on));
@@ -12747,7 +13248,7 @@ function ptTick(busy) {
 function cloneMat(m) { const c = m.clone(); c.onBeforeCompile = m.onBeforeCompile; c.customProgramCacheKey = m.customProgramCacheKey; return c; }
 function matSet(base) { const o = {}; for (const k in base) o[k] = base[k].isShaderMaterial ? base[k] : cloneMat(base[k]); return o; }
 
-let ground, compound, trees, streetTrees, city, pagodaGroup, parts = [], COURT_LABELS = [];
+let ground, compound, trees, streetTrees, city, lampGroup, pagodaGroup, parts = [], COURT_LABELS = [];
 const MC = {};   // 院落建筑与树木的材质（独立一套，便于拆解时淡出）
 function buildWorld() {
   buildTextures();
@@ -12782,7 +13283,8 @@ function buildWorld() {
   buildCityMaterials();
   const cr = QS.has('nocity') ? { grp: Object.assign(new T.Group(), { userData: { cityTrees: new T.Group() } }), labels: [] } : buildCity(TREE_PROTOS, TREE_PROTOS_LITE);   // nocity 仅供自动化测试提速
   city = cr.grp; COURT_LABELS.push(...cr.labels);
-  scene.add(ground, compound, trees, streetTrees, city, pagodaGroup);
+  lampGroup = buildNightLights();       // 路灯、庭院灯、宫灯、石灯与地面照度图
+  scene.add(ground, compound, trees, streetTrees, city, lampGroup, pagodaGroup);
   // 平面反射时隐藏：地面本身（即反射面）、城市路面与绿地、树下暗影贴花、降水粒子
   reflection.hide = [ground, ...Object.values(PRECIP)];
   for (const g of [trees, streetTrees, city]) g.traverse((o) => {
@@ -13128,6 +13630,27 @@ function resetView() {
   requestRender();
 }
 let onWeatherUI = null;
+const fmtTime = (m) => `${Math.floor(m / 60)}:${String(m % 60).padStart(2, '0')}`;
+const isNightTime = (m) => sunAt(m).elev / DEG < -4;
+function syncNightBtn() { $('btnNight').setAttribute('aria-pressed', String(isNightTime(timeMin))); }
+function applyTime(m) { setTime(m, true); $('time').value = String(m); $('timeOut').textContent = fmtTime(m); syncNightBtn(); requestRender(); }
+// 夜景：切到当晚 20:30，并转到朝向月亮的低角度视角（月亮在塔的上方一侧）；再按一次回到之前的白天时刻
+let dayTimeBefore = 900;
+const NIGHT_VIEW = { time: 1230, dAz: 9 * DEG, pitch: 8.5 * DEG, dist: 262 };
+function toggleNight() {
+  if (PT.on) setPathTrace(false);
+  if (isNightTime(timeMin)) { applyTime(isNightTime(dayTimeBefore) ? 900 : dayTimeBefore); return; }
+  dayTimeBefore = timeMin;
+  applyTime(NIGHT_VIEW.time);
+  const m = moonAt(NIGHT_VIEW.time, sunAt(NIGHT_VIEW.time).dir);
+  if (mode === 'court' && m) {
+    setOrbit(false);
+    // 相机方位角（自正南起算，向东为正）：位于月亮相反方向，看向月亮
+    const az = -m.az * DEG + NIGHT_VIEW.dAz, cur = currentSph();
+    const target = cur.az + Math.atan2(Math.sin(az - cur.az), Math.cos(az - cur.az));
+    tweenCamera('court', { az: target, pitch: NIGHT_VIEW.pitch, dist: NIGHT_VIEW.dist }, 2.2);
+  }
+}
 function bindUI() {
   $('btnReset').addEventListener('click', resetView);
   btnExplode.addEventListener('click', () => (mode === 'explode' ? exitExplode(false) : enterExplode()));
@@ -13147,10 +13670,11 @@ function bindUI() {
   onWeatherUI = (key) => { for (const b of wrap.children) b.setAttribute('aria-checked', String(b.dataset.k === key)); if (PT.on && !PT_WEATHER.has(key)) setPathTrace(false); updatePtUI(); };
   onWeatherUI(wxKey);
   const slider = $('time'), out = $('timeOut');
-  const fmt = (m) => `${Math.floor(m / 60)}:${String(m % 60).padStart(2, '0')}`;
-  slider.value = String(timeMin); out.textContent = fmt(timeMin);
-  slider.addEventListener('input', () => { setTime(+slider.value); out.textContent = fmt(+slider.value); requestRender(); });
-  slider.addEventListener('change', () => { setTime(+slider.value, true); requestRender(); });
+  slider.value = String(timeMin); out.textContent = fmtTime(timeMin);
+  slider.addEventListener('input', () => { setTime(+slider.value); out.textContent = fmtTime(+slider.value); syncNightBtn(); requestRender(); });
+  slider.addEventListener('change', () => { setTime(+slider.value, true); syncNightBtn(); requestRender(); });
+  $('btnNight').addEventListener('click', toggleNight);
+  syncNightBtn();
   controls.addEventListener('start', () => { canvas.classList.add('dragging'); if (controls.autoRotate) setOrbit(false); });
   controls.addEventListener('end', () => canvas.classList.remove('dragging'));
   controls.addEventListener('change', requestRender);
@@ -13312,7 +13836,9 @@ function start() {
     state: () => { const s = currentSph(); return { mode, az: s.az, pitch: s.pitch, dist: s.dist, target: controls.target.toArray(), eye: camera.position.toArray(), tweening: !!camTween, explode: explodeK }; },
     info: { vertices: countVerts(), shadowMap: QUALITY.shadow, ao: aoPass.enabled, dpr: renderer.getPixelRatio(), msaa: QUALITY.msaa, maxTex: GL_MAX_TEX, quality: QUALITY },
     setWeather: (k) => { setWeather(k, true); requestRender(); },
-    setTime: (m) => { setTime(m, true); $('time').value = String(m); $('timeOut').textContent = `${Math.floor(m / 60)}:${String(m % 60).padStart(2, '0')}`; requestRender(); },
+    setTime: (m) => applyTime(m),
+    night: () => ({ sky: NIGHT.sky, lights: NIGHT.lights, lamps: NIGHT.lampCount, exposure: renderer.toneMappingExposure, moon: NIGHT.moon ? { az: NIGHT.moon.az, alt: NIGHT.moon.alt, disp: NIGHT.moon.disp.toArray() } : null }),
+    toggleNight,
     _wx: WXU, _hz: horizonColor, _fog: () => scene.fog.color.toArray(),
     stats: STATS, treeStats: TREE_STATS, cityStats: CITY_STATS, cityBoxes: () => CITY_BOXES,
     pt: () => ({ on: PT.on, ready: PT.ready, building: PT.building, supported: PT.supported, samples: PT.tracer ? PT.tracer.samples : 0, target: PT.target, buildMs: PT.buildMs, error: PT.error || null }),
@@ -13342,7 +13868,7 @@ function start() {
     },
     ptOff() { PT.on = false; },
     _PT: PT,
-    _accum: accumPass, _renderFrame: renderFrame, _sun: sun, _renderer: renderer, _scene: scene, _composer: composer,
+    _accum: accumPass, _renderFrame: renderFrame, _refl: reflection, _WXU: WXU, _night: NIGHT, _nightU: NIGHT_SKY_U, _bloom: bloomPass, _sun: sun, _renderer: renderer, _scene: scene, _composer: composer,
     caption(title, sub, alpha) { $('capTitle').textContent = title || ''; $('capSub').textContent = sub || ''; $('caption').style.opacity = String(alpha); },
   });
 }
