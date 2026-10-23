@@ -1,5 +1,6 @@
 import { useState, type MouseEvent } from 'react'
 import type { EffectItem } from './effects.ts'
+import { DayanPagodaCover } from './DayanPagodaCover.tsx'
 
 interface Props {
   effect: EffectItem
@@ -281,6 +282,16 @@ export function EffectCover({ effect }: Props) {
               <line x1="226" y1="152" x2="218" y2="172" />
             </g>
           </svg>
+          <div className="diorama__cursor-ripple" />
+        </div>
+      ) : effect.slug === 'dayan-pagoda' ? (
+        <div
+          className="diorama"
+          style={{
+            transform: `perspective(800px) rotateX(${tiltY.toFixed(2)}deg) rotateY(${tiltX.toFixed(2)}deg)`,
+          }}
+        >
+          <DayanPagodaCover />
           <div className="diorama__cursor-ripple" />
         </div>
       ) : (

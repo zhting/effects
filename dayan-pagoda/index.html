@@ -37,6 +37,190 @@
 
   .compass{position:fixed;right:max(16px,env(safe-area-inset-right));top:max(16px,env(safe-area-inset-top));width:58px;height:58px;border-radius:50%;display:grid;place-items:center;pointer-events:none}
   .compass svg{width:48px;height:48px;display:block}
+  .intro-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .intro-toggle{pointer-events:auto;min-height:32px;width:32px;padding:0;display:grid;place-items:center;border-radius:8px;background:transparent;border-color:transparent;color:var(--muted);flex:0 0 auto;margin:-4px -6px -4px 0}
+  .intro-toggle:hover{background:rgba(73,55,35,.08);color:var(--ink)}
+  .intro-toggle svg{width:16px;height:16px;transition:transform .25s}
+  .vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+  .intro .actions{margin-top:10px;display:flex;flex-wrap:wrap;gap:8px}
+  .intro .actions button{pointer-events:auto}
+  .intro .actions button{min-height:40px;font-size:14px;padding:0 13px 0 11px;display:inline-flex;align-items:center;gap:7px;background:#2a231b;border-color:#2a231b;color:#f6efe2;font-weight:600}
+  .intro .actions button:hover{background:#3d3226}
+  .intro .actions button.tourbtn{background:#fff;border-color:rgba(42,35,27,.28);color:var(--ink)}
+  .intro .actions button.tourbtn:hover{background:#f6f1e8}
+  .intro .actions small{font-weight:400;opacity:.75;font-size:12px}
+  .intro .as{display:none}
+  /* 收起后只留标题与两个入口按钮，排成一行 */
+  .intro.min{display:flex;align-items:center;gap:10px;padding:7px 8px 7px 14px;max-width:none}
+  .intro.min .intro-head{display:contents}
+  .intro.min h1{order:0;font-size:20px;letter-spacing:.08em;white-space:nowrap}
+  .intro.min .actions{order:1;margin-top:0;flex-wrap:nowrap;gap:6px}
+  .intro.min .actions button{min-height:36px;font-size:13.5px;padding:0 11px 0 9px}
+  .intro.min .actions small{display:none}
+  .intro.min .intro-toggle{order:2;margin:0}
+  .intro.min .intro-toggle svg{transform:rotate(180deg)}
+  .intro.min .intro-body,.intro.min .note{display:none}
+  .tools{position:fixed;right:calc(max(16px,env(safe-area-inset-right)) + 70px);top:max(16px,env(safe-area-inset-top));display:flex;gap:8px}
+  .tools button{min-height:40px;padding:0 12px;font-size:13px;display:inline-flex;align-items:center;gap:6px;background:var(--paper);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);box-shadow:var(--shadow)}
+  .tools svg{width:17px;height:17px;flex:0 0 auto}
+  .tools .ts{display:none}
+  .toast{position:fixed;left:50%;top:max(16px,env(safe-area-inset-top));transform:translateX(-50%);display:flex;align-items:center;gap:10px;padding:8px 8px 8px 14px;font-size:13.5px;line-height:1.5;z-index:9;width:max-content;max-width:min(560px,calc(100vw - 24px))}
+  .toast span{flex:1 1 auto;min-width:0}
+  .toast button{flex:0 0 auto}
+  .toast[hidden]{display:none}
+  .toast button{min-height:36px;font-size:13px;padding:0 11px}
+  .zenexit{display:none;position:fixed;right:max(14px,env(safe-area-inset-right));bottom:max(14px,env(safe-area-inset-bottom));min-height:40px;padding:0 14px;font-size:13px;border-radius:999px;background:rgba(20,17,14,.55);color:#f3ece0;border:1px solid rgba(255,255,255,.18);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);opacity:.9;transition:opacity .6s;z-index:8}
+  .zenexit:hover{background:rgba(20,17,14,.72)}
+  body.zen .zenexit{display:inline-flex;align-items:center;gap:6px}
+  body.zen.zen-idle .zenexit{opacity:.18}
+  body.zen .intro, body.zen .compass, body.zen .tools, body.zen .dock, body.zen .xpanel, body.zen .dpanel, body.zen #labels, body.zen .toast{display:none}
+  body.demo .intro, body.demo .compass, body.demo .tools, body.demo .dock, body.demo .xpanel, body.demo .dpanel, body.demo #labels, body.demo .toast, body.demo .zenexit{display:none}
+  body.detail .intro, body.detail #labels{display:none}
+
+  /* 细节观察面板 */
+  .dpanel{position:fixed;right:max(16px,env(safe-area-inset-right));top:88px;width:330px;max-height:calc(100% - var(--dock-h, 120px) - 118px);display:flex;flex-direction:column;padding:14px 16px;overflow:hidden}
+  .dpanel[hidden]{display:none}
+  .dp-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
+  .dp-head h2{margin:0;font-family:var(--serif);font-size:19px;letter-spacing:.06em}
+  .dp-head button{min-height:36px;font-size:13px;padding:0 12px}
+  .dp-hint{margin:6px 0 8px;font-size:12px;color:var(--muted)}
+  .dp-points{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+  .dp-points button{min-height:32px;padding:0 10px;font-size:13px;border-radius:999px}
+  .dp-points button[aria-selected="true"]{background:var(--vermilion);border-color:var(--vermilion);color:#fff}
+  .dp-ctl{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:8px 10px;font-size:13px;color:var(--muted);margin-bottom:10px}
+  .dp-ctl input{width:100%;accent-color:var(--vermilion)}
+  .dp-ctl output{font-variant-numeric:tabular-nums;color:var(--ink);min-width:44px;text-align:right}
+  .dp-zoom{display:flex;gap:6px}
+  .dp-zoom button{min-height:34px;min-width:40px;padding:0 10px;font-size:15px}
+  .dp-detail{overflow:auto;padding-top:10px;border-top:1px solid var(--line);-webkit-user-select:text;user-select:text}
+  .dp-detail h3{margin:0 0 4px;font-size:16px;font-family:var(--serif)}
+  .dp-detail p{margin:0 0 8px;font-size:13.5px;line-height:1.7}
+  .dp-detail .src{font-size:11.5px;color:var(--muted)}
+
+  /* 讲解演示 */
+  .demo{position:fixed;inset:0;pointer-events:none;z-index:7;color:#f5eee2}
+  .demo[hidden]{display:none}
+  .demo::before{content:"";position:absolute;left:0;right:0;top:0;height:120px;background:linear-gradient(rgba(10,8,6,.38),rgba(10,8,6,0))}
+  .demo-top{position:absolute;left:max(18px,env(safe-area-inset-left));top:max(16px,env(safe-area-inset-top));right:18px;display:flex;align-items:baseline;gap:12px;text-shadow:0 1px 10px rgba(0,0,0,.55)}
+  .demo-chap{font-size:12.5px;letter-spacing:.12em;opacity:.85;white-space:nowrap}
+  .demo-title{font-family:var(--serif);font-size:24px;font-weight:700;letter-spacing:.1em}
+  .demo-bottom{position:absolute;left:50%;bottom:max(14px,env(safe-area-inset-bottom));transform:translateX(-50%);width:min(940px,calc(100vw - 24px));display:flex;flex-direction:column;gap:8px;pointer-events:auto}
+  .demo-subbox{background:rgba(14,12,10,.6);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:12px 16px 10px}
+  .demo-sub{margin:0;font-size:19px;line-height:1.65;letter-spacing:.03em;min-height:1.65em}
+  .demo-sub .prev{opacity:.5}
+  .demo-note{margin:4px 0 0;font-size:12px;opacity:.7;min-height:1em}
+  .demo-ctrl{display:flex;align-items:center;gap:8px;background:rgba(14,12,10,.6);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:6px 8px}
+  .demo-ctrl button{min-height:38px;min-width:42px;padding:0 10px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);color:#f5eee2;font-size:14px;border-radius:9px}
+  .demo-ctrl button:hover{background:rgba(255,255,255,.16)}
+  .demo-ctrl svg{width:16px;height:16px;display:block;margin:auto}
+  .demo-prog{flex:1;display:flex;gap:3px;align-items:center;min-width:60px}
+  .demo-prog span{flex:1;height:5px;border-radius:3px;background:rgba(255,255,255,.18);overflow:hidden;cursor:pointer;position:relative}
+  .demo-prog span i{position:absolute;inset:0;width:0;background:#e6b65c}
+  .demo-prog span.done i{width:100%}
+  .demo-status{font-size:12px;opacity:.8;white-space:nowrap;max-width:240px;overflow:hidden;text-overflow:ellipsis}
+  .demo-start{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:min(520px,calc(100vw - 24px));max-height:calc(100% - 24px);overflow:auto;padding:18px 20px 16px;z-index:16;background:var(--paper-solid);box-shadow:0 0 0 100vmax rgba(20,16,12,.32),var(--shadow)}
+  .demo-start[hidden]{display:none}
+  .demo-start h2{margin:0 0 4px;font-family:var(--serif);font-size:21px;letter-spacing:.08em}
+  .demo-start p{margin:6px 0;font-size:13.5px;line-height:1.65}
+  .demo-start fieldset{border:1px solid var(--line);border-radius:10px;margin:10px 0;padding:8px 12px 10px}
+  .demo-start legend{font-size:13px;color:var(--muted);padding:0 4px}
+  .demo-start label{display:flex;align-items:center;gap:8px;font-size:14px;line-height:1.5;margin:4px 0}
+  .demo-start .gem{display:grid;gap:6px;margin:6px 0 0 24px}
+  .demo-start .gem[hidden]{display:none}
+  .demo-start input[type=password],.demo-start input[type=text],.demo-start select{font:inherit;font-size:14px;min-height:38px;padding:0 10px;border-radius:8px;border:1px solid var(--line);background:#fff;flex:1;min-width:0;-webkit-user-select:text;user-select:text}
+  .demo-start .hint{font-size:12px;color:var(--muted);line-height:1.55;margin:2px 0}
+  .demo-start .row{display:flex;justify-content:flex-end;gap:8px;margin-top:12px;flex-wrap:wrap}
+  .demo-start .msg{font-size:12.5px;color:var(--vermilion);min-height:1em;margin:6px 0 0}
+  .demo-start .linkbtn{min-height:0;padding:0;border:0;background:none;color:var(--vermilion);font-size:12px;text-decoration:underline;margin-left:4px;cursor:pointer}
+
+  /* 讲解演示：场景内动画标注、资料卡片、立体展示窗 */
+  .demo, .tour{--holo:#8be6ff;--holo-a:rgba(139,230,255,.42);--amber:#ffcf7a;--glass:rgba(6,13,18,.68);--mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace}
+  .anno-svg{position:absolute;left:0;top:0;width:100%;height:100%;overflow:visible}
+  .anno-l{position:absolute;inset:0;overflow:hidden}
+  .cl{position:absolute;left:0;top:0;will-change:transform,opacity;white-space:nowrap;opacity:0}
+  .cl .bx{display:inline-flex;flex-direction:column;gap:2px;padding:5px 10px 6px;background:rgba(5,12,17,.7);border:1px solid rgba(139,230,255,.4);border-left:2px solid var(--holo);border-radius:3px;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);box-shadow:0 0 14px rgba(70,190,230,.18)}
+  .cl.l .bx{border-left-width:1px;border-left-color:rgba(139,230,255,.4);border-right:2px solid var(--holo);align-items:flex-end}
+  .cl b{font-size:13.5px;font-weight:600;color:#f1fbff;letter-spacing:.05em;line-height:1.25}
+  .cl span{font-size:11.5px;color:rgba(214,236,242,.8);letter-spacing:.02em;line-height:1.3}
+  .cl.amb .bx{border-color:rgba(255,207,122,.45);border-left-color:var(--amber);box-shadow:0 0 14px rgba(255,190,90,.16)}
+  .cl.amb.l .bx{border-left-color:rgba(255,207,122,.45);border-right-color:var(--amber)}
+  .cl.dim .bx{padding:3px 8px 4px;border-left-width:1px;border-left-color:rgba(255,207,122,.5);border-color:rgba(255,207,122,.5);background:rgba(16,11,4,.66)}
+  .cl.dim b{font-family:var(--mono);font-size:13px;color:#ffe7b8;letter-spacing:.02em}
+  .cl.tag .bx{padding:2px 7px 3px;border-left-width:1px;border-left-color:rgba(139,230,255,.4)}
+  .cl.tag b{font-size:12px;font-weight:600}
+  .hud-l{position:absolute;left:max(18px,env(safe-area-inset-left));top:94px;width:312px;display:flex;flex-direction:column;gap:10px}
+  .hc{position:relative;background:var(--glass);border:1px solid rgba(139,230,255,.26);border-radius:6px;padding:10px 13px 11px;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);color:#eaf6f9;opacity:0;transform:translateX(-10px);transition:opacity .55s ease,transform .55s ease}
+  .hc.on{opacity:1;transform:none}
+  .hc::before,.hc::after{content:"";position:absolute;width:10px;height:10px;border:solid var(--holo);opacity:.9}
+  .hc::before{left:-1px;top:-1px;border-width:2px 0 0 2px;border-top-left-radius:6px}
+  .hc::after{right:-1px;bottom:-1px;border-width:0 2px 2px 0;border-bottom-right-radius:6px}
+  .hc .hk{display:flex;justify-content:space-between;align-items:center;font:600 10.5px/1 var(--mono);letter-spacing:.16em;color:var(--holo);margin-bottom:7px}
+  .hc .hk i{font-style:normal;color:rgba(214,236,242,.55);letter-spacing:.08em}
+  .hc .ht{font-family:var(--serif);font-size:17px;font-weight:700;letter-spacing:.08em;margin:0 0 4px}
+  .hc p{margin:3px 0;font-size:12.5px;line-height:1.6;color:rgba(232,244,247,.88)}
+  .hc .mono{font-family:var(--mono);font-size:13px;letter-spacing:.04em;color:#f3fbff}
+  .hc .src{font-size:11px;color:rgba(214,236,242,.55);margin-top:6px}
+  .hc svg{display:block;width:100%;height:auto;overflow:visible}
+  .hc .tl{list-style:none;margin:2px 0 0;padding:0 0 0 14px;position:relative}
+  .hc .tl::before{content:"";position:absolute;left:4px;top:6px;bottom:6px;width:1px;background:rgba(139,230,255,.3)}
+  .hc .tl li{position:relative;font-size:12.5px;line-height:1.45;padding:3px 0;color:rgba(232,244,247,.5);transition:color .4s}
+  .hc .tl li::before{content:"";position:absolute;left:-13px;top:8px;width:7px;height:7px;border-radius:50%;background:#10232b;border:1px solid rgba(139,230,255,.5);transition:background .4s,box-shadow .4s}
+  .hc .tl li b{font-family:var(--mono);font-weight:600;margin-right:6px;color:inherit}
+  .hc .tl li.on{color:#f3fbff}
+  .hc .tl li.on::before{background:var(--holo);box-shadow:0 0 8px var(--holo)}
+  .hc .tl li.hot{color:var(--amber)}
+  .hc .tl li.hot::before{background:var(--amber);border-color:var(--amber);box-shadow:0 0 10px var(--amber)}
+  .hc.poem{padding:14px 16px 12px;display:flex;gap:14px;align-items:stretch}
+  .hc.poem .pv{writing-mode:vertical-rl;font-family:var(--serif);font-size:21px;letter-spacing:.3em;line-height:1.5;color:#fff7e6;text-shadow:0 0 14px rgba(255,210,140,.35);min-height:9.4em}
+  .hc.poem .pm{writing-mode:vertical-rl;font-size:12px;letter-spacing:.14em;color:rgba(232,244,247,.7);line-height:1.6}
+  .exf{position:absolute;left:0;top:0;width:10px;height:10px;border:1px solid rgba(139,230,255,.34);border-radius:10px;opacity:0;transition:opacity .45s ease;box-shadow:0 12px 40px rgba(0,0,0,.32)}
+  .exf.on{opacity:1}
+  .exf[hidden]{display:none}
+  .ex-head{position:absolute;left:0;right:0;top:0;display:flex;align-items:baseline;gap:8px;padding:9px 12px 16px;border-radius:10px 10px 0 0;background:linear-gradient(rgba(3,9,13,.78),rgba(3,9,13,0));white-space:nowrap;overflow:hidden}
+  .ex-tag{font:700 10px/1 var(--mono);letter-spacing:.12em;color:#06141a;background:var(--holo);border-radius:3px;padding:3px 5px 2px;align-self:center}
+  .ex-head b{font-family:var(--serif);font-size:16px;letter-spacing:.08em;color:#f3fbff}
+  .ex-sub{font-size:12px;color:rgba(214,236,242,.7);overflow:hidden;text-overflow:ellipsis}
+  .ex-svg{position:absolute;left:0;top:0;width:100%;height:100%;overflow:visible}
+  .ex-lbl{position:absolute;inset:0}
+  .ex-lbl .cl b{font-size:12.5px}
+  .ex-lbl .cl span{font-size:11px}
+  .ex-foot{position:absolute;left:12px;bottom:9px;font:500 10.5px/1.2 var(--mono);letter-spacing:.1em;color:rgba(214,236,242,.55)}
+  .ec{position:absolute;width:14px;height:14px;border:solid var(--holo)}
+  .ec.tl{left:-2px;top:-2px;border-width:2px 0 0 2px;border-top-left-radius:10px}
+  .ec.tr{right:-2px;top:-2px;border-width:2px 2px 0 0;border-top-right-radius:10px}
+  .ec.bl{left:-2px;bottom:-2px;border-width:0 0 2px 2px;border-bottom-left-radius:10px}
+  .ec.br{right:-2px;bottom:-2px;border-width:0 2px 2px 0;border-bottom-right-radius:10px}
+  .demo-chap{font-family:var(--mono);font-size:12px}
+  .demo.instant .hc, .demo.instant .exf{transition:none}
+
+  /* 登塔游览 */
+  .tour{position:fixed;inset:0;pointer-events:none;z-index:7;color:#f5eee2}
+  .tour[hidden]{display:none}
+  .tour::before{content:"";position:absolute;left:0;right:0;top:0;height:130px;background:linear-gradient(rgba(6,8,10,.45),rgba(6,8,10,0))}
+  .tour-top{position:absolute;left:max(18px,env(safe-area-inset-left));top:max(16px,env(safe-area-inset-top));right:130px;display:flex;flex-direction:column;gap:3px;text-shadow:0 1px 10px rgba(0,0,0,.6)}
+  .tour-k{font:600 11px/1.2 var(--mono);letter-spacing:.18em;color:var(--holo)}
+  .tour-title{font-family:var(--serif);font-size:24px;font-weight:700;letter-spacing:.1em;min-height:1.3em}
+  .tour-sub{font-size:14px;line-height:1.6;opacity:.9;max-width:600px;min-height:1.6em}
+  .tour-gauge{position:absolute;right:max(18px,env(safe-area-inset-right));top:50%;transform:translateY(-50%);width:86px;padding:10px 8px 9px;border-radius:10px;background:var(--glass);border:1px solid rgba(139,230,255,.26);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);text-align:center}
+  .tour-gauge svg{width:62px;height:194px;display:block;margin:0 auto;overflow:visible}
+  .tg-h{margin-top:6px;font-family:var(--mono);color:#f3fbff}
+  .tg-h b{font-size:17px;font-weight:600}
+  .tg-h span{font-size:11px;opacity:.7;margin-left:2px}
+  .tg-d{font-size:11.5px;color:rgba(214,236,242,.75);margin-top:2px}
+  .tour-hint{position:absolute;left:50%;bottom:calc(max(14px,env(safe-area-inset-bottom)) + 66px);transform:translateX(-50%);margin:0;font-size:12.5px;padding:5px 12px;border-radius:999px;background:rgba(10,10,10,.42);white-space:nowrap;transition:opacity 1.2s}
+  .tour-hint.off{opacity:0}
+  .tour-bottom{position:absolute;left:50%;bottom:max(14px,env(safe-area-inset-bottom));transform:translateX(-50%);width:min(760px,calc(100vw - 24px));pointer-events:auto}
+  .tour-end{position:absolute;left:50%;top:46%;transform:translate(-50%,-50%);width:min(380px,calc(100vw - 32px));padding:18px 20px 16px;pointer-events:auto;color:var(--ink);background:var(--paper-solid)}
+  .tour-end[hidden]{display:none}
+  .tour-end h2{margin:0 0 6px;font-family:var(--serif);font-size:21px;letter-spacing:.08em}
+  .tour-end p{margin:0 0 12px;font-size:14px;line-height:1.6}
+  .tour-end .row{display:flex;justify-content:flex-end;gap:8px}
+  body.tour .intro, body.tour .compass, body.tour .tools, body.tour .dock, body.tour .xpanel, body.tour .dpanel, body.tour #labels, body.tour .toast, body.tour .zenexit{display:none}
+  body.tour #gl{cursor:grab}
+  body.tour #gl.dragging{cursor:grabbing}
+  .fader{position:fixed;inset:0;background:#06080a;opacity:0;pointer-events:none;z-index:30;transition:opacity .42s ease}
+  .fader.on{opacity:1}
+  body.failed .tour, body.capture .tour{display:none}
 
   .dock{position:fixed;left:50%;bottom:max(14px,env(safe-area-inset-bottom));transform:translateX(-50%);padding:8px;display:flex;flex-direction:column;gap:6px;width:max-content;max-width:calc(100vw - 24px)}
   .dock .main{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:center}
@@ -97,7 +281,7 @@
   .error h2{margin:0 0 6px;font-size:20px;color:var(--vermilion)}
   .error p{font-size:14px;line-height:1.65;margin:8px 0}
   .error pre{margin:10px 0;white-space:pre-wrap;word-break:break-word;background:#fff;border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:12.5px;line-height:1.6;max-height:42vh;overflow:auto;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;-webkit-user-select:text;user-select:text}
-  body.failed #stage, body.failed .intro, body.failed .compass, body.failed .dock, body.failed .xpanel, body.failed .loading{display:none}
+  body.failed #stage, body.failed .intro, body.failed .compass, body.failed .dock, body.failed .xpanel, body.failed .loading, body.failed .tools, body.failed .dpanel, body.failed .demo, body.failed .toast{display:none}
   .ptbusy{position:fixed;left:50%;top:42%;transform:translate(-50%,-50%);padding:14px 20px;font-size:14px;z-index:14}
   .ptbusy[hidden]{display:none}
   button:disabled{opacity:.45;cursor:not-allowed}
@@ -108,7 +292,7 @@
   .caption{display:none;position:fixed;left:72px;bottom:64px;color:#fff;text-shadow:0 2px 14px rgba(0,0,0,.45);pointer-events:none}
   .caption b{display:block;font-family:var(--serif);font-size:56px;letter-spacing:.18em;font-weight:700}
   .caption span{display:block;margin-top:8px;font-size:22px;letter-spacing:.12em;opacity:.92}
-  body.capture .intro, body.capture .compass, body.capture .dock, body.capture #labels, body.capture .xpanel, body.capture .loading{display:none}
+  body.capture .intro, body.capture .compass, body.capture .dock, body.capture #labels, body.capture .xpanel, body.capture .loading, body.capture .tools, body.capture .dpanel, body.capture .toast, body.capture .zenexit{display:none}
   body.capture .caption{display:block}
 
   @media (max-width:1100px){
@@ -116,6 +300,25 @@
   }
   @media (max-width:640px){
     .intro{left:12px;right:80px;top:max(12px,env(safe-area-inset-top));max-width:none;padding:10px 12px}
+    .intro .actions{margin-top:7px}
+    .toast{top:auto;bottom:calc(var(--dock-h, 170px) + max(10px,env(safe-area-inset-bottom)) + 10px)}
+    .intro .actions button{min-height:38px;font-size:13.5px}
+    .tools{right:max(12px,env(safe-area-inset-right));top:calc(max(12px,env(safe-area-inset-top)) + 64px);flex-direction:column;gap:6px}
+    .tools button{min-height:40px;width:56px;padding:0;justify-content:center;flex-direction:column;gap:1px;font-size:11px}
+    .tools .tl{display:none}.tools .ts{display:inline}
+    .dpanel{left:10px;right:10px;width:auto;top:auto;bottom:calc(var(--dock-h, 170px) + max(10px,env(safe-area-inset-bottom)) + 8px);max-height:44%;padding:10px 12px}
+    .dp-hint{display:none}
+    .dp-points{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin-bottom:8px}
+    .dp-points::-webkit-scrollbar{display:none}
+    .dp-points button{flex:0 0 auto}
+    .dp-detail p{font-size:13px;line-height:1.6}
+    .demo-title{font-size:19px}
+    .demo-top{flex-direction:column;gap:2px}
+    .demo-sub{font-size:16px;line-height:1.6}
+    .demo-subbox{padding:9px 12px 8px}
+    .demo-status{display:none}
+    .demo-ctrl{gap:5px;padding:5px 6px}
+    .demo-ctrl button{min-width:38px;padding:0 6px}
     .intro h1{font-size:19px}
     .intro .sub{margin:2px 0 5px;font-size:12px}
     .intro .help{font-size:12px;line-height:1.6}
@@ -123,8 +326,9 @@
     .compass{right:12px;top:max(12px,env(safe-area-inset-top));width:56px;height:56px}
     .dock{left:10px;right:10px;bottom:max(10px,env(safe-area-inset-bottom));transform:none;width:auto;max-width:none;padding:7px;gap:6px}
     .dock .main{display:flex;flex-direction:column;align-items:stretch;gap:6px}
-    .btns{display:grid;grid-template-columns:1.7fr 1fr 1fr 1fr 1fr;gap:6px}
-    body.no-pt .btns{grid-template-columns:1.9fr 1fr 1fr 1fr}
+    .btns{display:grid;grid-template-columns:1.7fr 1fr 1fr 1fr 1fr 1fr;gap:5px}
+    body.no-pt .btns{grid-template-columns:1.8fr 1fr 1fr 1fr 1fr}
+    body:not(.no-pt) .btns #btnReset{font-size:12.5px}
     button{padding:0 6px}
     .lg{display:none}.sm{display:inline}
     .weather{overflow-x:auto;scrollbar-width:none;justify-content:space-between}
@@ -144,6 +348,31 @@
     body.exploded .dock .env, body.exploded .readout{display:none}
     .plbl span{font-size:11px;padding:4px 7px}
     .plbl b{width:12px}
+    .intro.min{right:auto;padding:6px 6px 6px 12px;gap:8px}
+    .intro.min h1{font-size:18px}
+    .intro.min .al{display:none}.intro.min .as{display:inline}
+    .intro.min .actions button{min-height:36px;padding:0 9px 0 8px;font-size:13px;gap:5px}
+    .intro .actions{gap:6px}
+    .intro .actions button{padding:0 10px 0 9px}
+    .hud-l{left:10px;right:10px;width:auto;top:76px}
+    body.ex-on .hud-l{display:none}
+    .hc{padding:8px 10px 9px}
+    .hc p{font-size:12px;line-height:1.5}
+    .hc .ht{font-size:15px}
+    .hc.poem .pv{font-size:18px;min-height:9.4em}
+    .cl b{font-size:12px}
+    .cl span{font-size:10.5px}
+    .cl .bx{padding:4px 7px 5px}
+    .ex-head b{font-size:14px}
+    .ex-sub{display:none}
+    .tour-top{right:84px;top:max(12px,env(safe-area-inset-top))}
+    .tour-title{font-size:19px}
+    .tour-sub{font-size:12.5px;line-height:1.5}
+    .tour-gauge{right:10px;width:64px;padding:8px 5px;top:46%}
+    .tour-gauge svg{width:48px;height:148px}
+    .tg-h b{font-size:14px}
+    .tour-hint{bottom:calc(max(10px,env(safe-area-inset-bottom)) + 62px);font-size:11.5px}
+    .tour-bottom{bottom:max(10px,env(safe-area-inset-bottom))}
   }
 </style>
 </head>
@@ -153,14 +382,23 @@
   <div id="labels" aria-hidden="true"></div>
 </div>
 
-<header class="intro card">
-  <h1>大雁塔</h1>
-  <p class="sub">西安 · 大慈恩寺院落（简化三维模型）</p>
-  <ul class="help">
-    <li><b>拖动</b>鼠标或单指，旋转视角</li>
-    <li><b>滚轮 / 双指</b>缩放远近</li>
-  </ul>
-  <p class="note">镜头始终围绕观察中心、保持在地面上方，最近距离也位于全部建筑的包围范围之外。键盘：方向键旋转，＋／－ 缩放，Home 复位。「光追静帧」在镜头静止时用显卡做路径追踪，逐步收敛出更真实的光影。院外的城市街区、道路与车辆为示意，不对应真实建筑。「夜景」切换到当晚：月相按 2026 年 10 月 22 日推算（盈凸月），月亮方位取当晚实际方位，高度与大小为便于观看的示意。</p>
+<header class="intro card" id="intro">
+  <div class="intro-head">
+    <h1>大雁塔</h1>
+    <button id="introToggle" class="intro-toggle" type="button" aria-expanded="true" aria-controls="introBody" title="收起说明"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 10 8 5.5 12.5 10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="vh">收起说明</span></button>
+  </div>
+  <div class="intro-body" id="introBody">
+    <p class="sub">西安 · 大慈恩寺院落（简化三维模型）</p>
+    <ul class="help">
+      <li><b>拖动</b>鼠标或单指，旋转视角</li>
+      <li><b>滚轮 / 双指</b>缩放远近</li>
+    </ul>
+  </div>
+  <div class="actions">
+    <button id="btnDemo" type="button" title="自动运镜 + 语音解说：大雁塔的由来、建造过程与建筑特点"><svg width="13" height="13" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 1 L11 6 L2 11 Z" fill="currentColor"/></svg><span class="al">讲解演示</span><span class="as">讲解</span> <small>约 4 分钟</small></button>
+    <button id="btnTour" type="button" class="tourbtn" title="第一人称自动游览：从南广场拾级而上，穿过券洞，沿木梯登上七层，凭门远眺"><svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 14h3v-3h3V8h3V5h3V2" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round"/></svg><span class="al">登塔游览</span><span class="as">登塔</span> <small>约 5 分钟</small></button>
+  </div>
+  <p class="note">镜头始终围绕观察中心、保持在地面上方，最近距离位于全部建筑的包围范围之外；「塔身细节」改为绕塔观察，可拉近到 36 m，再用长焦放大。「登塔游览」以第一人称沿预设路线自动行进，可拖动环顾。键盘：方向键旋转，＋／－ 缩放，Home 复位，H 隐藏界面。「讲解演示」使用固定录音，章节、镜头与字幕随录音推进；「性能版」适合低配电脑；「光追静帧」用显卡做路径追踪。院外的城市街区、道路与车辆为示意；夜景中月亮的方位按当晚实际，高度与大小为示意。</p>
 </header>
 
 <div class="compass card" aria-hidden="true">
@@ -174,6 +412,27 @@
     </g>
   </svg>
 </div>
+
+<div class="tools" role="toolbar" aria-label="显示与性能">
+  <button id="btnPerf" type="button" aria-pressed="false" title="性能版：降低画质以便在低配电脑上流畅浏览"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 14a7 7 0 1 1 14 0" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M10 14 L13.6 8.4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="10" cy="14" r="1.6" fill="currentColor"/></svg><span class="tl">性能版</span><span class="ts">性能</span></button>
+  <button id="btnZen" type="button" title="隐藏界面，纯欣赏（快捷键 H，Esc 返回）"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 7V3h4M13 3h4v4M17 13v4h-4M7 17H3v-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="tl">隐藏界面</span><span class="ts">隐藏</span></button>
+</div>
+<div class="toast card" id="toast" hidden role="status"><span></span><button id="toastPerf" type="button">开启性能版</button><button id="toastClose" type="button" aria-label="关闭提示">×</button></div>
+<button class="zenexit" id="zenExit" type="button" title="显示界面（Esc）"><svg width="15" height="15" viewBox="0 0 20 20" aria-hidden="true"><path d="M7 3H3v4M17 7V3h-4M13 17h4v-4M3 13v4h4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>显示界面</button>
+
+<aside class="dpanel card" id="dpanel" hidden aria-label="大雁塔细节观察">
+  <div class="dp-head">
+    <h2>大雁塔 · 细节观察</h2>
+    <button id="dpClose" type="button">返回院落</button>
+  </div>
+  <p class="dp-hint">拖动绕塔旋转 · 滚轮或双指拉近（到最近后继续滚动可放大镜头） · 选择下方部位快速定位</p>
+  <div class="dp-points" id="dpPoints" role="tablist" aria-label="细节部位"></div>
+  <div class="dp-ctl">
+    <label for="dpH">观察高度</label><input type="range" id="dpH" min="2" max="64" step="0.5" value="20"><output id="dpHOut" for="dpH">20 m</output>
+    <span>镜头焦距</span><div class="dp-zoom"><button id="dpZoomOut" type="button" aria-label="缩小镜头">−</button><button id="dpZoomIn" type="button" aria-label="放大镜头">＋</button></div><output id="dpZOut">1.0×</output>
+  </div>
+  <article class="dp-detail" id="dpDetail" aria-live="polite"></article>
+</aside>
 
 <aside class="xpanel card" id="xpanel" hidden aria-label="大雁塔结构拆解">
   <div class="xp-head">
@@ -191,6 +450,7 @@
     <div class="btns">
       <button id="btnReset" class="primary" type="button">回到初始视角</button>
       <button id="btnExplode" type="button" aria-pressed="false"><span class="lg">拆解大雁塔</span><span class="sm">拆解</span></button>
+      <button id="btnDetail" type="button" aria-pressed="false" title="绕塔近距离观察塔身细节"><span class="lg">塔身细节</span><span class="sm">细节</span></button>
       <button id="btnLabels" type="button" aria-pressed="true">标注</button>
       <button id="btnOrbit" type="button" aria-pressed="false">环绕</button>
       <button id="btnPT" type="button" aria-pressed="false"><span class="lg">光追静帧</span><span class="sm">光追</span></button>
@@ -201,6 +461,74 @@
   </div>
   <div class="readout" id="readout"></div>
 </div>
+
+<div class="demo" id="demo" hidden>
+  <svg class="anno-svg" id="annoSvg" aria-hidden="true"></svg>
+  <div class="anno-l" id="annoLbl" aria-hidden="true"></div>
+  <div class="hud-l" id="hudL"></div>
+  <div class="exf" id="exFrame" hidden>
+    <div class="ex-head"><span class="ex-tag">3D</span><b id="exTitle"></b><span class="ex-sub" id="exSub"></span></div>
+    <svg class="ex-svg" id="exSvg" aria-hidden="true"></svg>
+    <div class="ex-lbl" id="exLbl" aria-hidden="true"></div>
+    <div class="ex-foot" id="exFoot"></div>
+    <i class="ec tl"></i><i class="ec tr"></i><i class="ec bl"></i><i class="ec br"></i>
+  </div>
+  <div class="demo-top"><span class="demo-chap" id="demoChap"></span><span class="demo-title" id="demoTitle"></span></div>
+  <div class="demo-bottom">
+    <div class="demo-subbox"><p class="demo-sub" id="demoSub" aria-live="polite"></p><p class="demo-note" id="demoNote"></p></div>
+    <div class="demo-ctrl" role="toolbar" aria-label="演示控制">
+      <button id="demoPrev" type="button" aria-label="上一节" title="上一节（←）"><svg viewBox="0 0 16 16"><path d="M3 2v12M13 2 5 8l8 6z" fill="currentColor" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg></button>
+      <button id="demoPlay" type="button" aria-label="暂停" title="暂停 / 继续（空格）"><svg viewBox="0 0 16 16"><path id="demoPlayIcon" d="M4 2h3v12H4zM9 2h3v12H9z" fill="currentColor"/></svg></button>
+      <button id="demoNext" type="button" aria-label="下一节" title="下一节（→）"><svg viewBox="0 0 16 16"><path d="M13 2v12M3 2l8 6-8 6z" fill="currentColor" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg></button>
+      <div class="demo-prog" id="demoProg" aria-hidden="true"></div>
+      <span class="demo-status" id="demoStatus" role="status"></span>
+      <button id="demoVoice" type="button" title="查看固定解说录音">解说录音</button>
+      <button id="demoExit" type="button" title="退出演示（Esc）">退出</button>
+    </div>
+  </div>
+</div>
+<div class="demo-start card" id="demoStart" hidden role="dialog" aria-modal="true" aria-labelledby="dsTitle">
+  <h2 id="dsTitle">讲解演示</h2>
+  <p>约 4 分钟，共 11 节：从玄奘建塔、改建与明代包砌，到塔的形制、仿木构造、叠涩出檐、塔内结构、碑刻线刻、倾斜与保护，最后以夜景收尾。画面配合全息复原的历史场景、场景内的动画标注，并把关键构件单独拿出来立体放大展示。镜头自动运行，可随时暂停、跳节或按 Esc 退出。</p>
+  <fieldset>
+    <legend>解说声音</legend>
+    <p>使用固定解说录音，暂停、继续和跳转章节时，语音与画面同步。</p>
+    <p class="hint" id="dsFileInfo"></p>
+  </fieldset>
+  <p class="hint">录音时长约 4 分 19 秒。<button id="dsScript" type="button" class="linkbtn">下载讲解词</button></p>
+  <p class="msg" id="dsMsg" role="status"></p>
+  <div class="row"><button id="dsTest" type="button">试听</button><button id="dsCancel" type="button">取消</button><button id="dsGo" class="primary" type="button">开始演示</button></div>
+</div>
+
+<div class="tour" id="tour" hidden>
+  <div class="tour-top">
+    <span class="tour-k">登塔游览 · 第一人称</span>
+    <span class="tour-title" id="tourTitle"></span>
+    <span class="tour-sub" id="tourSub"></span>
+  </div>
+  <div class="tour-gauge" id="tourGauge" aria-hidden="true">
+    <svg viewBox="0 0 64 200" id="tourGaugeSvg"></svg>
+    <div class="tg-h"><b id="tourH">0.0</b><span>m</span></div>
+    <div class="tg-d" id="tourDir">面向 北</div>
+  </div>
+  <p class="tour-hint" id="tourHint">拖动可环顾四周 · 滚轮调节视野 · 空格暂停</p>
+  <div class="tour-end card" id="tourEnd" hidden>
+    <h2>游览结束</h2>
+    <p>您已登上大雁塔第七层，从四面券门远眺了西安城。</p>
+    <div class="row"><button id="tourAgain" type="button">重新游览</button><button id="tourDone" type="button" class="primary">回到院落</button></div>
+  </div>
+  <div class="tour-bottom">
+    <div class="demo-ctrl" role="toolbar" aria-label="游览控制">
+      <button id="tourPrev" type="button" aria-label="上一处" title="上一处（←）"><svg viewBox="0 0 16 16"><path d="M3 2v12M13 2 5 8l8 6z" fill="currentColor" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg></button>
+      <button id="tourPlay" type="button" aria-label="暂停" title="暂停 / 继续（空格）"><svg viewBox="0 0 16 16"><path id="tourPlayIcon" d="M4 2h3v12H4zM9 2h3v12H9z" fill="currentColor"/></svg></button>
+      <button id="tourNext" type="button" aria-label="下一处" title="下一处（→）"><svg viewBox="0 0 16 16"><path d="M13 2v12M3 2l8 6-8 6z" fill="currentColor" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg></button>
+      <div class="demo-prog" id="tourProg" aria-hidden="true"></div>
+      <button id="tourSpeed" type="button" title="行进速度" aria-label="行进速度 1 倍">1×</button>
+      <button id="tourExit" type="button" title="退出游览（Esc）">退出</button>
+    </div>
+  </div>
+</div>
+<div class="fader" id="fader" aria-hidden="true"></div>
 
 <div class="lost card" id="lost" hidden role="status"></div>
 <div class="ptbusy card" id="ptBusy" hidden role="status">正在构建光线追踪场景（约十几秒）…</div>
@@ -9839,6 +10167,7 @@ const WXU = {
   uWxWind: { value: 0.03 },
   // 夜景：uNight 天色（0 白天 → 1 夜晚）、uNightL 人工照明开启程度、uNightWin 亮灯窗户比例系数
   uNight: { value: 0 }, uNightL: { value: 0 }, uNightWin: { value: 1 }, uPgWash: { value: 0.55 }, uPgIn: { value: 1.4 },
+  uTourL: { value: 0 },      // 登塔游览：白天也点亮塔内灯
   // 地面灯光照度图（院落高精度 + 城区），bounds = (x0, z0, 1/宽, 1/深)
   uLampC: { value: null }, uLampF: { value: null },
   uLampCB: { value: new T.Vector4(0, 0, 1, 1) }, uLampFB: { value: new T.Vector4(0, 0, 1, 1) },
@@ -9855,7 +10184,7 @@ float wxNoise(vec3 x) {
              mix(mix(wxHash(i + vec3(0,0,1)), wxHash(i + vec3(1,0,1)), f.x), mix(wxHash(i + vec3(0,1,1)), wxHash(i + vec3(1,1,1)), f.x), f.y), f.z);
 }
 float wxFbm(vec2 p) { float s = 0.0, a = 0.5; for (int i = 0; i < 4; i++) { s += a * wxNoise(vec3(p, 0.37)); p = p * 2.03 + 1.7; a *= 0.5; } return s / 0.9375; }
-uniform float uNight; uniform float uNightL; uniform float uNightWin; uniform float uPgWash; uniform float uPgIn;
+uniform float uNight; uniform float uNightL; uniform float uNightWin; uniform float uPgWash; uniform float uPgIn; uniform float uTourL;
 uniform sampler2D uLampC; uniform sampler2D uLampF; uniform vec4 uLampCB; uniform vec4 uLampFB;
 const vec3 LAMP_WARM = vec3(1.0, 0.62, 0.30);
 const vec3 LAMP_COOL = vec3(0.80, 0.86, 1.0);
@@ -9938,8 +10267,9 @@ const WIN_GLSL = {
 };
 function nightBody(o) {
   let s = `
-  if (uNightL > 0.001) {
+  if (uNightL > 0.001 || uTourL > 0.001) {
     vec3 nAlb = diffuseColor.rgb * (1.0 - 0.45 * metalnessFactor);
+    vec3 nI = vec3(0.0);
     float nHf = 1.0 - smoothstep(2.0, 12.0, vWxW.y);
     vec3 nE = nAlb * wxLampAt(vWxW.xz) * nHf * clamp(0.32 + 0.68 * wxN.y, 0.0, 1.0);
     vec2 pgOff = vWxW.xz - vWxL.xz - vec2(${PG.x.toFixed(2)}, ${PG.z.toFixed(2)});
@@ -9995,7 +10325,7 @@ function nightBody(o) {
       nE += vec3(1.0, 0.7, 0.38) * exp(-e * 3.0) * 0.22 + vec3(0.25, 0.55, 0.75) * 0.008;
     }`;
   s += `
-    totalEmissiveRadiance += nE * uNightL;
+    totalEmissiveRadiance += nE * uNightL + nI * max(uNightL, uTourL);
   }`;
   return s;
 }
@@ -10617,7 +10947,7 @@ const PAGODA_NIGHT = (() => {
         vec3 Lt = (abs(pp.x) > abs(pp.z) ? vec3(sign(pp.x) * tq, pYi + 2.1, 0.0) : vec3(0.0, pYi + 2.1, sign(pp.z) * tq)) - pp;
         float dtq = dot(Lt, Lt);
         lit += 2.4 * (0.2 + 0.8 * max(dot(wxN, Lt * inversesqrt(dtq)), 0.0)) / (dtq + 0.6);
-        nE += nAlb * lit * vec3(1.0, 0.76, 0.5) * uPgIn;
+        nI += nAlb * lit * vec3(1.0, 0.76, 0.5) * uPgIn;
       }`;
 })();
 
@@ -11712,10 +12042,12 @@ function buildTrees() {
   for (const kind in TREE_SPECS) TREE_PROTOS_LITE[kind] = [0, 1].map(() => makeTree(seed += 101, lite(TREE_SPECS[kind])));
   const L = treeLayout();
   const court = buildTreeGroup(L.court, protos, true, false), street = buildTreeGroup(L.street, protos, true, !QUALITY.streetShadow);
+  const streetLite = buildTreeGroup(L.street, TREE_PROTOS_LITE, false, false);     // 性能版用
+  streetLite.visible = false;
   TREE_STATS.protoCards = Object.fromEntries(Object.entries(protos).map(([k, v]) => [k, v.map((p) => p.cards)]));
   TREE_STATS.liteCards = Object.fromEntries(Object.entries(TREE_PROTOS_LITE).map(([k, v]) => [k, v.map((p) => p.cards + '/' + (p.leaves.attributes.position.count + p.bark.attributes.position.count))]));
   TREE_STATS.court = L.court.length; TREE_STATS.street = L.street.length;
-  return { court, street };
+  return { court, street, streetLite };
 }
 
 // ==== app_36_city.js ====
@@ -12268,10 +12600,19 @@ function buildCity(treeProtos, treeProtosLite) {
     grp.add(lm); NIGHT.carLights = lm;
   }
   // 树：城市里的用简化树形（叶簇更少更大），寺院两侧绿地用完整树形
-  const tg = buildTreeGroup(cityTrees, treeProtosLite, false, false);
+  // 城市行道树按“象限 × 远近”分块实例化：视锥外的块整块剔除；性能版只保留近处几块
+  const tg = new T.Group(), chunks = new Map();
+  for (const t of cityTrees) {
+    const dx = t.x - CITY_T[0], dz = t.z - CITY_T[1], far = Math.hypot(dx, dz) > 650 ? 1 : 0, key = (dx < 0 ? 'w' : 'e') + (dz < 0 ? 'n' : 's') + far;
+    if (!chunks.has(key)) chunks.set(key, { far, list: [] });
+    chunks.get(key).list.push(t);
+  }
+  for (const { far, list } of chunks.values()) { const g = buildTreeGroup(list, treeProtosLite, false, false); g.userData.far = far; tg.add(g); }
   const gg = buildTreeGroup(gardenTrees, treeProtos, true, false);
-  grp.add(tg, gg);
-  grp.userData.cityTrees = tg;
+  const ggLite = buildTreeGroup(gardenTrees, treeProtosLite, false, false);   // 性能版换用简化树形
+  ggLite.visible = false;
+  grp.add(tg, gg, ggLite);
+  grp.userData.cityTrees = tg; grp.userData.gardenFull = gg; grp.userData.gardenLite = ggLite;
   CITY_STATS.trees = cityTrees.length; CITY_STATS.gardenTrees = gardenTrees.length;
   const labels = [{ t: '示意：大唐不夜城', p: [0, 24, 760] }, { t: '示意：大唐芙蓉园', p: [905, 30, 640] }];
   return { grp, labels };
@@ -12358,6 +12699,7 @@ const WEATHER = {
 const WX_KEYS = Object.keys(WEATHER);
 const wx = Object.assign({}, WEATHER.clear);
 let wxFrom = Object.assign({}, wx), wxTo = WEATHER.clear, wxKey = 'clear', wxT = 1, wxDur = 2.2;
+let ENV_EXPO_MUL = 1, PRECIP_OFF = false;     // 登塔游览：塔内略提高曝光、不显示雨雪
 let timeMin = 900;
 const NIGHT_EXPO = 2.4, NIGHT_ENV = 1.5;     // 夜间曝光与环境光强度（夜空与灯光的亮度按线性辐亮度设定）
 let envDirty = true, envAge = 0;
@@ -12554,18 +12896,19 @@ function updateEnvironment(dt, time) {
   const rainOn = wx.rain > 0.02, snowOn = wx.flakes > 0.02;
   for (const k of ['rainFar', 'rainNear']) {
     const o = PRECIP[k], u = o.material.uniforms;
-    o.visible = rainOn; if (!rainOn) continue;
+    o.visible = rainOn && !PRECIP_OFF; if (!o.visible) continue;
     u.uTime.value = time; u.uSpeed.value = 9 + wx.rain * 2.5; u.uWind.value.set(wx.wind * 6, wx.wind * 3);
     u.uOpacity.value = (k === 'rainFar' ? 0.3 : 0.42) * Math.min(1, wx.rain);
     u.uColor.value.set(0xc8d2dc).multiplyScalar(lerp(1, 0.09, nightSky));
-    o.geometry.setDrawRange(0, Math.floor(o.geometry.attributes.aEnd.count * Math.min(1, wx.rain / 1.8 + 0.45)));
+    o.geometry.setDrawRange(0, Math.floor(o.geometry.attributes.aEnd.count * Math.min(1, wx.rain / 1.8 + 0.45) * (PERF.on ? 0.4 : 1) / 2) * 2);
     if (k === 'rainNear') u.uCenter.value.copy(camPos).add(new T.Vector3(0, -10, 0)); else u.uCenter.value.set(center.x, 110, center.z);
   }
   for (const k of ['snowFar', 'snowNear']) {
     const o = PRECIP[k], u = o.material.uniforms;
-    o.visible = snowOn; if (!snowOn) continue;
+    o.visible = snowOn && !PRECIP_OFF; if (!o.visible) continue;
     u.uTime.value = time; u.uWind.value.set(wx.wind * 4, wx.wind * 2); u.uOpacity.value = (k === 'snowFar' ? 0.75 : 0.9) * Math.min(1, wx.flakes);
     u.uBright.value = lerp(1, 0.12, nightSky);
+    o.geometry.setDrawRange(0, Math.floor(o.geometry.attributes.aSeed.count * (PERF.on ? 0.4 : 1)));
     u.uScale.value = renderer.domElement.height / (2 * Math.tan(camera.fov * DEG / 2));
     if (k === 'snowNear') u.uCenter.value.copy(camPos); else u.uCenter.value.set(center.x, 100, center.z);
   }
@@ -12580,7 +12923,7 @@ function updateEnvironment(dt, time) {
     const f = flash > 0.7 ? 1 : flash > 0.45 ? 0.25 : flash > 0.3 ? 0.8 : flash * 0.5;
     flashLight.intensity = f * 6 * lerp(1, 0.3, nightSky); animating = true;
   } else flashLight.intensity = 0;
-  renderer.toneMappingExposure = lerp(0.62 * wx.expo * lerp(1.55, 1.0, smooth01((eDeg - 2) / 20)), NIGHT_EXPO, nightSky) * (1 + flashLight.intensity * 0.06);
+  renderer.toneMappingExposure = lerp(0.62 * wx.expo * lerp(1.55, 1.0, smooth01((eDeg - 2) / 20)), NIGHT_EXPO, nightSky) * (1 + flashLight.intensity * 0.06) * ENV_EXPO_MUL;
   // 夜间辉光：路灯、灯带等光源溢出
   bloomPass.threshold = lerp(10, 1.0, nightSky); bloomPass.strength = lerp(0.16, 0.6, nightSky); bloomPass.radius = lerp(0.45, 0.62, nightSky);
   if (rainOn || snowOn || wx.cShadow > 0.05 || wx.wind > 0.2) animating = true;
@@ -12705,6 +13048,7 @@ function renderFrame(k) {
   }
   if (reflection.enabled) renderReflection();
   composer.render();
+  exhRender();            // 讲解演示的立体展示窗（叠加在后期处理之后）
   if (k > 0) {
     camera.updateProjectionMatrix();
     if (QUALITY.sunJitter) { sun.position.copy(_sunBase); renderer.shadowMap.needsUpdate = true; }
@@ -12717,7 +13061,7 @@ const reflection = {
   enabled: false, h: 0.04,
   rt: new T.WebGLRenderTarget(1, 1, { type: halfFloatOK ? T.HalfFloatType : T.UnsignedByteType, generateMipmaps: true, minFilter: T.LinearMipmapLinearFilter, samples: 0 }),
   cam: new T.PerspectiveCamera(),
-  hide: [],
+  hide: [], dryHide: [],
 };
 WXU.uRefl = { value: reflection.rt.texture };
 WXU.uReflMat = { value: new T.Matrix4() };
@@ -12739,13 +13083,15 @@ function renderReflection() {
   cam.fov = Math.min(150, 2 * Math.atan(Math.tan(camera.fov * DEG / 2) * 1.35) / DEG); cam.aspect = camera.aspect; cam.near = camera.near; cam.far = camera.far;
   cam.updateProjectionMatrix(); cam.updateMatrixWorld();
   WXU.uReflMat.value.set(0.5, 0, 0, 0.5, 0, 0.5, 0, 0.5, 0, 0, 0.5, 0.5, 0, 0, 0, 1).multiply(cam.projectionMatrix).multiply(cam.matrixWorldInverse);
-  const vis = R.hide.map((o) => o.visible); R.hide.forEach((o) => { o.visible = false; });
+  // 晴天只有水池需要倒影：城区、院外树木与灯具不进反射（省掉大半开销）；雨天地面普遍积水，保留全部
+  const hide = wx.wet > 0.02 ? R.hide : R.hide.concat(R.dryHide);
+  const vis = hide.map((o) => o.visible); hide.forEach((o) => { o.visible = false; });
   const on = WXU.uReflOn.value; WXU.uReflOn.value = 0; WXU.uRefl.value = REFL_DUMMY;   // 避免读写同一纹理（反馈回路）
   const prev = renderer.getRenderTarget();
   renderer.setRenderTarget(R.rt); renderer.clear(); renderer.render(scene, cam);
   renderer.setRenderTarget(prev);
   WXU.uReflOn.value = on; WXU.uRefl.value = R.rt.texture;
-  R.hide.forEach((o, i) => { o.visible = vis[i]; });
+  hide.forEach((o, i) => { o.visible = vis[i]; });
 }
 
 function resizeRenderer() {
@@ -12878,7 +13224,7 @@ AO_HIDE.push(nightDome);
 function templeLamps() {
   const L = [], add = (x, z, k, a, w) => L.push([x, z, k, a || 0, w || 0]);
   for (let z = -4; z <= 104; z += 12) for (const s of [-1, 1]) add(s * 4.4, z, 3);                 // 中轴甬道石灯
-  for (let x = -24; x <= 24; x += 12) for (const z of [-72.6, -11.4]) add(x, z, 3);                   // 塔院四周
+  for (let x = -24; x <= 24; x += 12) for (const z of [-72.6, -11.4]) if (!(x === 0 && z > -20)) add(x, z, 3);   // 塔院四周（南面正中是踏道，不放）
   for (let z = -62; z <= -20; z += 14) for (const s of [-1, 1]) add(s * 27.6, z, 3);
   for (let z = -136; z <= -96; z += 10) for (const s of [-1, 1]) add(s * 42.2, z, 3);                // 玄奘三藏院
   for (let z = 120; z <= 188; z += 14) for (const s of [-1, 1]) add(s * 5.2, z, 1);                  // 南广场
@@ -12936,12 +13282,12 @@ function lampGeometries() {
   const merge = (list) => { const g = A.mergeGeometries(list, false); g.computeBoundingSphere(); return g; };
   const tr = (x, y, z) => new T.Matrix4().makeTranslation(x, y, z);
   return [
-    { post: merge([prep(new T.CylinderGeometry(0.09, 0.15, 8.9, 8), tr(0, 4.45, 0)), prep(new T.BoxGeometry(0.08, 0.08, 2.2), tr(0, 8.82, 1.05)), prep(new T.BoxGeometry(0.36, 0.14, 0.86), tr(0, 8.8, 2.05))]),
+    { post: merge([prep(new T.CylinderGeometry(0.09, 0.15, 8.9, 6, 1, true), tr(0, 4.45, 0)), prep(new T.BoxGeometry(0.08, 0.08, 2.2), tr(0, 8.82, 1.05)), prep(new T.BoxGeometry(0.36, 0.14, 0.86), tr(0, 8.8, 2.05))]),
       head: merge([prep(new T.BoxGeometry(0.3, 0.06, 0.72), tr(0, 8.71, 2.05))]) },
-    { post: merge([prep(new T.CylinderGeometry(0.05, 0.07, 3.3, 6), tr(0, 1.65, 0)), prep(new T.CylinderGeometry(0.16, 0.12, 0.08, 8), tr(0, 3.32, 0))]),
-      head: merge([prep(new T.SphereGeometry(0.23, 10, 8), tr(0, 3.55, 0))]) },
-    { post: merge([prep(new T.CylinderGeometry(0.08, 0.12, 5.3, 8), tr(0, 2.65, 0)), prep(new T.BoxGeometry(2.1, 0.1, 0.1), tr(0, 5.05, 0)), prep(new T.ConeGeometry(0.28, 0.4, 8), tr(0, 5.5, 0))]),
-      head: merge([prep(new T.CylinderGeometry(0.3, 0.3, 0.72, 10), tr(-0.88, 4.5, 0)), prep(new T.CylinderGeometry(0.3, 0.3, 0.72, 10), tr(0.88, 4.5, 0))]) },
+    { post: merge([prep(new T.CylinderGeometry(0.05, 0.07, 3.3, 5, 1, true), tr(0, 1.65, 0)), prep(new T.CylinderGeometry(0.16, 0.12, 0.08, 6), tr(0, 3.32, 0))]),
+      head: merge([prep(new T.IcosahedronGeometry(0.23, 1), tr(0, 3.55, 0))]) },
+    { post: merge([prep(new T.CylinderGeometry(0.08, 0.12, 5.3, 6, 1, true), tr(0, 2.65, 0)), prep(new T.BoxGeometry(2.1, 0.1, 0.1), tr(0, 5.05, 0)), prep(new T.ConeGeometry(0.28, 0.4, 6, 1, true), tr(0, 5.5, 0))]),
+      head: merge([prep(new T.CylinderGeometry(0.3, 0.3, 0.72, 8), tr(-0.88, 4.5, 0)), prep(new T.CylinderGeometry(0.3, 0.3, 0.72, 8), tr(0.88, 4.5, 0))]) },
     { post: merge([prep(new T.BoxGeometry(0.56, 0.26, 0.56), tr(0, 0.13, 0)), prep(new T.BoxGeometry(0.22, 0.74, 0.22), tr(0, 0.63, 0)), prep(new T.BoxGeometry(0.62, 0.06, 0.62), tr(0, 1.0, 0)),
       prep(new T.ConeGeometry(0.5, 0.32, 4), new T.Matrix4().makeRotationY(Math.PI / 4).setPosition(0, 1.6, 0))]),
       head: merge([prep(new T.BoxGeometry(0.42, 0.4, 0.42), tr(0, 1.23, 0))]) },
@@ -13021,6 +13367,78 @@ function updateNight(nightSky, lights, moon, time, sunDir, skyA) {
   } else U.uMoonI.value = 0;
   nightDome.visible = skyA > 0.002 || U.uMoonI.value > 0.002;
   nightEnvSphere.visible = skyA > 0.002;
+}
+
+// ==== app_44_perf.js ====
+/* =====================================================================
+ * 6c. 性能版：为低配电脑降低渲染开销（可随时切换，选择记在本机浏览器）
+ *     像素比 ≤ 1、关闭环境光遮蔽 / 辉光 / 多重采样 / 平面反射、缩小阴影贴图、
+ *     远处行道树不绘制、近处树木换用简化树形、降水粒子减量；静止时仍做少量累积抗锯齿。
+ * ===================================================================== */
+const PERF = { on: false, base: null, suggested: false };
+const PERF_KEY = 'dayanta.perf';
+function perfStored() { try { return localStorage.getItem(PERF_KEY) === '1'; } catch (e) { return false; } }
+// 近处树木：完整树形 / 简化树形按性能版切换（同时服从拆解时的院落淡出）
+function applyTreeSwap() {
+  const vis = !!(compound && compound.visible), lite = PERF.on;
+  if (streetTrees) streetTrees.visible = vis && !lite;
+  if (streetTreesLite) streetTreesLite.visible = vis && lite;
+  if (city && city.userData.gardenFull) { city.userData.gardenFull.visible = !lite; city.userData.gardenLite.visible = lite; }
+  if (city && city.userData.cityTrees) for (const g of city.userData.cityTrees.children) g.visible = !(lite && g.userData.far);
+}
+function setShadowSize(light, n) {
+  if (light.shadow.mapSize.x === n) return;
+  light.shadow.mapSize.set(n, n);
+  if (light.shadow.map) { light.shadow.map.dispose(); light.shadow.map = null; }
+  light.shadow.needsUpdate = true;
+}
+function applyPerf(on, persist) {
+  if (!PERF.base) PERF.base = { dpr: QUALITY.dpr, ao: aoPass.enabled, bloom: bloomPass.enabled, msaa: QUALITY.msaa, reflect: QUALITY.reflect, accum: QUALITY.accum, sunJitter: QUALITY.sunJitter, shadow: QUALITY.shadow, far: sunFar.shadow.mapSize.x };
+  const B = PERF.base;
+  PERF.on = on;
+  renderer.setPixelRatio(on ? Math.min(1, B.dpr) : B.dpr);
+  aoPass.enabled = on ? false : B.ao;
+  bloomPass.enabled = on ? false : B.bloom;
+  QUALITY.reflect = on ? false : B.reflect;
+  QUALITY.accum = on ? Math.min(B.accum || 6, 6) : B.accum;
+  QUALITY.sunJitter = on ? false : B.sunJitter;
+  const samples = on ? 0 : B.msaa;
+  for (const rt of [composer.renderTarget1, composer.renderTarget2]) if (rt.samples !== samples) { rt.samples = samples; rt.dispose(); }
+  setShadowSize(sun, on ? Math.min(2048, B.shadow) : B.shadow);
+  setShadowSize(sunFar, on ? Math.min(1024, B.far) : B.far);
+  farSig = ''; shadowSig = '';
+  renderer.shadowMap.needsUpdate = true;
+  applyTreeSwap();
+  composer._w = -1;           // 下一帧按新像素比重设渲染目标尺寸
+  const b = $('btnPerf');
+  if (b) { b.setAttribute('aria-pressed', String(on)); b.title = on ? '已开启性能版：画质较低、更流畅。再点一次恢复高画质' : '性能版：降低画质以便在低配电脑上流畅浏览'; }
+  document.body.classList.toggle('perf', on);
+  if (persist) { try { localStorage.setItem(PERF_KEY, on ? '1' : '0'); } catch (e) { /* 存储不可用时只在本次生效 */ } }
+  hideToast();
+  if (typeof resetAccum === 'function') resetAccum();
+  if (typeof requestRender === 'function') requestRender();
+}
+// 画面持续卡顿时提示开启性能版（每次打开页面最多提示一次）
+function suggestPerf() {
+  if (PERF.on || PERF.suggested || CAPTURE) return;
+  PERF.suggested = true;
+  const t = $('toast');
+  t.querySelector('span').textContent = '画面不够流畅？可以切换到「性能版」。';
+  t.hidden = false;
+  clearTimeout(PERF.tt); PERF.tt = setTimeout(hideToast, 12000);
+}
+function hideToast() { const t = $('toast'); if (t) t.hidden = true; }
+// 首次打开时，若显卡像是集成显卡或软件渲染，提示可以改用性能版
+function perfHintForGPU() {
+  if (PERF.on || CAPTURE) return;
+  let stored = null; try { stored = localStorage.getItem(PERF_KEY); } catch (e) { /* 忽略 */ }
+  if (stored !== null) return;
+  let name = '';
+  try { const ext = gl.getExtension('WEBGL_debug_renderer_info'); name = ext ? gl.getParameter(ext.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER); } catch (e) { /* 忽略 */ }
+  if (/SwiftShader|llvmpipe|Software|Intel.*(HD|UHD) Graphics|Mali|Adreno \(TM\) [3-6]|PowerVR/i.test(String(name))) {
+    PERF.gpu = name; suggestPerf();
+    $('toast').querySelector('span').textContent = '检测到集成显卡或软件渲染，可切换到「性能版」以获得更流畅的画面。';
+  }
 }
 
 // ==== app_45_pathtrace.js ====
@@ -13180,7 +13598,7 @@ function ptBuild() {
 function ptAvailable() { return PT.supported && mode === 'court' && explodeK < 0.001 && PT_WEATHER.has(wxKey) && NIGHT.lights < 0.01; }
 function ptReason() {
   if (!PT.supported) return '当前浏览器不支持光追所需的浮点渲染目标';
-  if (mode !== 'court') return '拆解模式下不可用';
+  if (mode !== 'court') return mode === 'detail' ? '细节观察时不可用' : '拆解模式下不可用';
   if (!PT_WEATHER.has(wxKey)) return '光追模式支持晴、多云、阴三种天气';
   if (NIGHT.lights >= 0.01) return '光追模式仅支持白天（日落前）';
   return '';
@@ -13248,7 +13666,7 @@ function ptTick(busy) {
 function cloneMat(m) { const c = m.clone(); c.onBeforeCompile = m.onBeforeCompile; c.customProgramCacheKey = m.customProgramCacheKey; return c; }
 function matSet(base) { const o = {}; for (const k in base) o[k] = base[k].isShaderMaterial ? base[k] : cloneMat(base[k]); return o; }
 
-let ground, compound, trees, streetTrees, city, lampGroup, pagodaGroup, parts = [], COURT_LABELS = [];
+let ground, compound, trees, streetTrees, streetTreesLite, city, lampGroup, pagodaGroup, parts = [], COURT_LABELS = [];
 const MC = {};   // 院落建筑与树木的材质（独立一套，便于拆解时淡出）
 function buildWorld() {
   buildTextures();
@@ -13261,8 +13679,8 @@ function buildWorld() {
   c.grp.traverse((o) => { if (o.isMesh) o.material = MC[o.userData.matKey]; });
   compound = c.grp; COURT_LABELS = c.labels;
   const tg = buildTrees();
-  trees = tg.court; streetTrees = tg.street;
-  for (const g of [trees, streetTrees]) g.traverse((o) => { if (o.isMesh && o.userData.matKey) o.material = MC[o.userData.matKey]; });
+  trees = tg.court; streetTrees = tg.street; streetTreesLite = tg.streetLite;
+  for (const g of [trees, streetTrees, streetTreesLite]) g.traverse((o) => { if (o.isMesh && o.userData.matKey) o.material = MC[o.userData.matKey]; });
   // 大雁塔分件，每件独立材质（用于高亮）
   pagodaGroup = new T.Group();
   pagodaGroup.position.set(PG.x, 0, PG.z);
@@ -13284,13 +13702,14 @@ function buildWorld() {
   const cr = QS.has('nocity') ? { grp: Object.assign(new T.Group(), { userData: { cityTrees: new T.Group() } }), labels: [] } : buildCity(TREE_PROTOS, TREE_PROTOS_LITE);   // nocity 仅供自动化测试提速
   city = cr.grp; COURT_LABELS.push(...cr.labels);
   lampGroup = buildNightLights();       // 路灯、庭院灯、宫灯、石灯与地面照度图
-  scene.add(ground, compound, trees, streetTrees, city, lampGroup, pagodaGroup);
+  scene.add(ground, compound, trees, streetTrees, streetTreesLite, city, lampGroup, pagodaGroup);
   // 平面反射时隐藏：地面本身（即反射面）、城市路面与绿地、树下暗影贴花、降水粒子
   reflection.hide = [ground, ...Object.values(PRECIP)];
-  for (const g of [trees, streetTrees, city]) g.traverse((o) => {
+  for (const g of [trees, streetTrees, streetTreesLite, city]) g.traverse((o) => {
     if (o.isMesh && (!o.userData.matKey || ['asphalt', 'paving', 'path', 'grass', 'water', 'mark', 'markY'].includes(o.userData.matKey))) reflection.hide.push(o);
   });
   city.userData.cityTrees.traverse((o) => { if (o.isInstancedMesh) o.userData.ptMaxDist = 900; });
+  reflection.dryHide = [city, streetTrees, streetTreesLite, lampGroup];
 }
 
 /* ---------- 包围范围与相机约束 ---------- */
@@ -13398,19 +13817,22 @@ function stepCamTween(dt) {
 const viewOff = { x: 0, y: 0, tx: 0, ty: 0, occB: 0, occR: 0 };
 function updateViewOffset(snap) {
   const W = canvas.clientWidth, H = canvas.clientHeight;
-  let bottom = 0, right = 0;
+  let bottom = 0, right = 0, top = 0;
   if (!CAPTURE) {
     const dock = document.querySelector('.dock').getBoundingClientRect();
-    bottom = Math.max(0, H - dock.top);
-    const xp = $('xpanel');
-    if (!xp.hidden) {
+    if (dock.height > 0) bottom = Math.max(0, H - dock.top);          // 纯欣赏 / 演示时底栏隐藏
+    for (const xp of [$('xpanel'), $('dpanel')]) {
+      if (xp.hidden) continue;
       const r = xp.getBoundingClientRect();
-      if (r.width < W * 0.6) right = Math.max(0, W - r.left); else bottom = Math.max(bottom, H - r.top);
+      if (!r.height) continue;
+      if (r.width < W * 0.6) right = Math.max(right, W - r.left); else bottom = Math.max(bottom, H - r.top);
     }
   }
+  // 讲解中的立体展示窗：桌面在右侧、手机在上方
+  if (EXH.vis && !EXH.hiding && EXH.rect) { if (EXH.rect.side === 'right') right = Math.max(right, W - EXH.rect.left + 8); else top = Math.max(top, EXH.rect.top + EXH.rect.h); }
   viewOff.occB = bottom; viewOff.occR = right;
-  if (!CAPTURE) document.documentElement.style.setProperty('--dock-h', Math.round(document.querySelector('.dock').getBoundingClientRect().height) + 'px');
-  viewOff.tx = right / 2; viewOff.ty = bottom / 2 * 0.9;
+  if (!CAPTURE) { const dh = Math.round(document.querySelector('.dock').getBoundingClientRect().height); if (dh) document.documentElement.style.setProperty('--dock-h', dh + 'px'); }
+  viewOff.tx = right / 2; viewOff.ty = bottom / 2 * 0.9 - top / 2 * 0.9;
   if (snap) { viewOff.x = viewOff.tx; viewOff.y = viewOff.ty; }
 }
 function stepViewOffset(dt) {
@@ -13443,7 +13865,8 @@ function setCompoundOpacity(a) {
     if (m.transparent !== tr) { m.transparent = tr; m.needsUpdate = true; }
     m.opacity = a; m.depthWrite = a > 0.5;
   }
-  compound.visible = trees.visible = streetTrees.visible = a > 0.002;
+  compound.visible = trees.visible = a > 0.002;
+  applyTreeSwap();
   TREE_BLOB_MAT.opacity = 0.18 * a;
   const lbl = document.body;
   lbl.classList.toggle('court-hidden', a < 0.5);
@@ -13463,6 +13886,7 @@ function stepExplode(dt) {
     const k = easeInOut(clamp((explodeK - delay) / (1 - 0.45), 0, 1));
     p.position.y = k * i * PG.GAP;
   });
+  if (applyPartFx()) moving = true;        // 讲解演示：建造动画、倾斜示意、外层高亮
   const inside = lerp(0.12, 1.0, explodeK);
   for (const p of parts) for (const key of ['brickIn', 'wood', 'stone']) if (p.userData.mats[key]) p.userData.mats[key].envMapIntensity = key === 'stone' ? lerp(0.6, 1, explodeK) : inside;
   if (moving) updateCastBounds();
@@ -13478,6 +13902,7 @@ function updateCastBounds() {
 function enterExplode() {
   if (mode === 'explode') return;
   if (PT.on) setPathTrace(false);
+  leaveDetailState();
   mode = 'explode'; explodeGoal = 1;
   updatePtUI();
   document.body.classList.add('exploded');
@@ -13614,7 +14039,7 @@ function updateHud() {
   $('needle').setAttribute('transform', `rotate(${azDeg.toFixed(2)})`);
   const dir = DIRS[Math.round((((azDeg % 360) + 360) % 360) / 45) % 8];
   const L = MODES[camTween ? camTween.mode : mode];
-  let txt = `${mode === 'explode' ? '环绕大雁塔' : '环绕院落中心'} · 自${dir}方观察 · 俯仰 ${Math.round(s.pitch / DEG)}° · 距离 ${Math.round(s.dist)} m（可缩放 ${L.minDist}–${L.maxDist} m）`;
+  let txt = `${mode === 'explode' ? '环绕大雁塔' : mode === 'detail' ? `细节观察 · 塔轴高 ${Math.round(controls.target.y)} m` : '环绕院落中心'} · 自${dir}方观察 · 俯仰 ${Math.round(s.pitch / DEG)}° · 距离 ${Math.round(s.dist)} m（可缩放 ${L.minDist}–${L.maxDist} m${mode === 'detail' && DETAIL.zoom < 0.99 ? ` · 镜头 ${(1 / DETAIL.zoom).toFixed(1)}×` : ''}）`;
   if (PT.on) txt = PT.tracer && PT.camSig ? `光线追踪 · 已累积 ${Math.floor(PT.tracer.samples)} / ${PT.target} 次采样${PT.tracer.samples >= PT.target ? '（完成）' : ''} · 移动镜头会重新开始` : '光线追踪 · 镜头静止后开始累积采样';
   if (txt !== lastReadout) { lastReadout = txt; $('readout').textContent = txt; }
   updatePtUI();
@@ -13626,6 +14051,7 @@ function setOrbit(on) { controls.autoRotate = on; btnOrbit.setAttribute('aria-pr
 function resetView() {
   setOrbit(false);
   if (mode === 'explode') exitExplode(true);
+  else if (mode === 'detail') exitDetail(true);
   else tweenCamera('court', MODES.court.init, 1.2);
   requestRender();
 }
@@ -13694,6 +14120,7 @@ function bindUI() {
     canvas.classList.toggle('hovering', !!pickPart(e.clientX, e.clientY));
   });
   canvas.addEventListener('keydown', (e) => {
+    if (DEMO.on || TOUR.on) return;
     const step = 6 * DEG;
     const s = currentSph();
     let used = true;
@@ -13710,7 +14137,7 @@ function bindUI() {
     if (!used || camTween) return;
     e.preventDefault();
     const L = MODES[mode];
-    s.pitch = clamp(s.pitch, 8 * DEG, 86 * DEG); s.dist = clamp(s.dist, L.minDist, L.maxDist);
+    s.pitch = clamp(s.pitch, 8 * DEG, (mode === 'detail' ? DETAIL_LIM.maxPitch : 86) * DEG); s.dist = clamp(s.dist, L.minDist, L.maxDist);
     killInertia(); camera.position.copy(sph(s.az, s.pitch, s.dist, controls.target)); camera.lookAt(controls.target);
     controls.update(); requestRender();
   });
@@ -13745,9 +14172,13 @@ function tick(dt, force) {
   let busy = false;
   if (resizeRenderer()) { needRender = true; updateViewOffset(false); }
   busy = stepViewOffset(dt) || busy;
+  busy = stepDemo(dt) || busy;
+  busy = stepTour(dt) || busy;
   busy = stepCamTween(dt) || busy;
   busy = stepExplode(dt) || busy;
-  if (controls.enabled && controls.update(dt)) busy = true;
+  if (controls.enabled && !DEMO.on && !TOUR.on && controls.update(dt)) busy = true;
+  if (mode === 'detail' && !DEMO.on && guardDetailCamera()) { busy = true; if (controls.enabled) controls.update(); }
+  busy = stepZoom(dt) || busy;
   if (controls.autoRotate) busy = true;
   busy = updateEnvironment(dt, simTime) || busy;
   STATS.idle = !(busy || needRender);
@@ -13778,7 +14209,7 @@ function tick(dt, force) {
 }
 const _frus = new T.Frustum(), _pm = new T.Matrix4(), POOL_BOX = new T.Box3(new T.Vector3(-10, 0, -323), new T.Vector3(10, 0.5, -169));
 function updateReflectionState() {
-  let on = wx.wet > 0.02;
+  let on = wx.wet > 0.02 && !PERF.on;
   if (!on && QUALITY.reflect) {
     camera.updateMatrixWorld();
     _pm.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse); _frus.setFromProjectionMatrix(_pm);
@@ -13795,6 +14226,7 @@ function adaptQuality(dt) {
   if (avg > 0.05) {
     if (aoPass.enabled) aoPass.enabled = false;
     else if (renderer.getPixelRatio() > 1) { renderer.setPixelRatio(1); composer._w = -1; }
+    else suggestPerf();
   }
 }
 
@@ -13812,9 +14244,16 @@ function start() {
   try {
     buildWorld();
     setupLimits();
+    setupDetail();
     buildLabels();
     buildPanel();
     bindUI();
+    bindModesUI();
+    bindDemoUI();
+    bindTourUI();
+    bindIntroUI();
+    if (!CAPTURE && (QS.has('perf') || perfStored())) applyPerf(true, false);
+    else setTimeout(perfHintForGPU, 1500);
     setCompoundOpacity(1);
     resizeRenderer(); updateViewOffset(true); applyViewOffset();
     placeCamera('court', MODES.court.init);
@@ -13832,13 +14271,18 @@ function start() {
   }
   window.__dayanta = {
     get mode() { return mode; },
-    limits: () => ({ court: summarize(MODES.court), explode: summarize(MODES.explode), minPitch: 8, maxPitch: 86 }),
-    state: () => { const s = currentSph(); return { mode, az: s.az, pitch: s.pitch, dist: s.dist, target: controls.target.toArray(), eye: camera.position.toArray(), tweening: !!camTween, explode: explodeK }; },
+    limits: () => ({ court: summarize(MODES.court), explode: summarize(MODES.explode), detail: summarize(MODES.detail), minPitch: 8, maxPitch: 86, detailMaxPitch: DETAIL_LIM.maxPitch }),
+    state: () => { const s = currentSph(); return { mode, az: s.az, pitch: s.pitch, dist: s.dist, target: controls.target.toArray(), eye: camera.position.toArray(), tweening: !!camTween, explode: explodeK, fov: camera.fov, zoom: DETAIL.zoom }; },
     info: { vertices: countVerts(), shadowMap: QUALITY.shadow, ao: aoPass.enabled, dpr: renderer.getPixelRatio(), msaa: QUALITY.msaa, maxTex: GL_MAX_TEX, quality: QUALITY },
     setWeather: (k) => { setWeather(k, true); requestRender(); },
     setTime: (m) => applyTime(m),
     night: () => ({ sky: NIGHT.sky, lights: NIGHT.lights, lamps: NIGHT.lampCount, exposure: renderer.toneMappingExposure, moon: NIGHT.moon ? { az: NIGHT.moon.az, alt: NIGHT.moon.alt, disp: NIGHT.moon.disp.toArray() } : null }),
     toggleNight,
+    detail: (id) => enterDetail(id), exitDetail: () => exitDetail(false), detailState: () => ({ zoom: DETAIL.zoom, zoomGoal: DETAIL.zoomGoal, sel: DETAIL.sel, fieldAt: (x, z) => fieldH(x, z), hidden: DETAIL.hidden ? DETAIL.hidden.reduce((a, b) => a + b[1].length, 0) : 0 }),
+    fieldAt: (x, z) => fieldH(x, z),
+    zen: (on) => setZen(on), perf: (on) => (on === undefined ? PERF.on : applyPerf(!!on, false)),
+    demo: () => demoApi(),
+    tour: () => tourApi(),
     _wx: WXU, _hz: horizonColor, _fog: () => scene.fog.color.toArray(),
     stats: STATS, treeStats: TREE_STATS, cityStats: CITY_STATS, cityBoxes: () => CITY_BOXES,
     pt: () => ({ on: PT.on, ready: PT.ready, building: PT.building, supported: PT.supported, samples: PT.tracer ? PT.tracer.samples : 0, target: PT.target, buildMs: PT.buildMs, error: PT.error || null }),
@@ -13876,6 +14320,2209 @@ function summarize(m) { return { target: m.target.toArray(), radius: m.radius, m
 function countVerts() { let n = 0; scene.traverse((o) => { if (o.isMesh && o.geometry.attributes.position) n += o.geometry.attributes.position.count * (o.isInstancedMesh ? o.count : 1); }); return n; }
 // 让“正在构建”提示先绘制出来再开始耗时的建模
 requestAnimationFrame(() => setTimeout(start, 30));
+
+// ==== app_52_modes.js ====
+/* =====================================================================
+ * 9. 塔身细节观察、纯欣赏（隐藏界面）与性能版的界面逻辑
+ * ===================================================================== */
+
+/* ---------- 塔身细节观察 ----------
+ * 观察中心始终在塔的中轴线上（高度可调），镜头绕塔旋转：
+ * 距离 36–150 m、俯仰 8–45°——此时镜头离塔轴的水平距离 ≥ 25 m，在塔身（含檐口、铜铃）之外；
+ * 另用院内建筑与树木的高度场兜底，镜头始终高出所在位置的建筑、树冠 2.5 m 以上。
+ * 拉到最近后继续滚动，改为缩小视场角（相当于长焦镜头）继续放大。观察时暂时隐藏塔周围 55 m 内的树木。 */
+const DETAIL_LIM = { minDist: 36, maxDist: 150, minPitch: 8, maxPitch: 45, minZoom: 0.3 };
+const DETAIL = { zoom: 1, zoomGoal: 1, sel: null, field: null, hidden: null, treeR: 55 };
+const DETAIL_POINTS = [
+  { id: 'finial', name: '塔刹', y: 61.4, face: 0, az: 28, pitch: 14, dist: 44, zoom: 0.55,
+    body: ['塔顶以平砖逐皮收进，砌成四面坡的攒尖顶，上立宝葫芦形塔刹，下承方形刹座。', '明代嘉靖年间的大地震曾将塔刹震落，后来重修。资料记载塔刹为釉陶宝葫芦，本模型按金色金属表现。'] },
+  { id: 'cornice', name: '叠涩檐口', y: 27.6, face: 17, az: 45, pitch: 10, dist: 38, zoom: 0.5,
+    body: ['塔檐不用木椽，而是把砖一层层向外挑出，称为“叠涩出檐”；其间夹砌斜放的砖，露出一排三角形的菱角牙子。', '檐上再用砖逐皮向内收回（反叠涩），形成上一层的平台。图中为第三层檐口东南角。'] },
+  { id: 'bracket', name: '倚柱与栌斗', y: 18, face: 11.9, az: 0, pitch: 8, dist: 38, zoom: 0.62,
+    body: ['塔身全用砖砌，外观却模仿木构：墙面用砖隐出倚柱和阑额，柱头上砌出斗形的栌斗，把每一面分成若干开间。', '一、二层每面九间，三、四层七间，五至七层五间。图中为第二层南面。'] },
+  { id: 'door', name: '券门', y: 23, face: 11.2, az: 0, pitch: 9, dist: 40, zoom: 0.45,
+    body: ['每层四面的当心间各辟一道券门，券洞穿过厚墙通向塔心室，既供采光，也可凭门远眺。', '夜间（时间拖到日落后）可以看到塔内的灯光从券门透出。图中为第三层南面。'] },
+  { id: 'bell', name: '檐角铜铃', y: 19.6, face: 17.9, az: 45, pitch: 8, dist: 37, zoom: 0.32,
+    body: ['每层四角檐下悬挂铜铃（风铎），在“多云”“雨”“雷雨”等有风天气中会随风摆动。', '铜铃的形制与尺寸为示意建模。图中为第二层东南角。'] },
+  { id: 'stele', name: '圣教序碑', y: 6.6, face: 12.8, az: 0, pitch: 10, dist: 40, zoom: 0.5,
+    body: ['底层南面券门两侧各有一座碑龛：西龛为唐太宗撰《大唐三藏圣教序》碑，东龛为唐高宗撰《圣教序记》碑，均为褚遂良书，立于永徽四年（653年）。', '碑面文字为示意纹理，不代表真实碑文。'] },
+  { id: 'lintel', name: '门楣线刻', y: 8.9, face: 12.8, az: -90, pitch: 9, dist: 38, zoom: 0.4,
+    body: ['底层四面券门的石门楣、门框上保存着唐代线刻。西门楣上刻有一座五开间佛殿，梁思成曾据此研究唐代木构建筑。', '门楣图案为按构图示意绘制。图中为底层西门。'] },
+  { id: 'base', name: '塔基', y: 4, face: 0, az: 18, pitch: 12, dist: 64, zoom: 1,
+    body: ['塔身坐落在方形砖砌台基上，台基高约 4.2 米，南北约 48.7 米、东西约 45.7 米，台面以石材铺砌，南面设踏道登临。'] },
+];
+function setupDetail() {
+  MODES.detail = { target: new T.Vector3(PG.x, 20, PG.z), radius: Math.SQRT2 * (PG.S[0] / 2 + PG.OUT[5]), minDist: DETAIL_LIM.minDist, maxDist: DETAIL_LIM.maxDist,
+    init: { az: 0, pitch: 10 * DEG, dist: 60 } };
+}
+function detailPolar(on) {
+  controls.minPolarAngle = (90 - (on ? DETAIL_LIM.maxPitch : 86)) * DEG;
+  controls.maxPolarAngle = (90 - DETAIL_LIM.minPitch) * DEG;
+}
+// 塔周围的树暂时隐藏（实例矩阵置零，退出时恢复）
+function hideTreesNearPagoda(on) {
+  if (on && !DETAIL.hidden) {
+    DETAIL.hidden = [];
+    const m = new T.Matrix4(), Z = new T.Matrix4().makeScale(0, 0, 0);
+    trees.traverse((o) => {
+      if (!o.isInstancedMesh) return;
+      const saved = [];
+      for (let i = 0; i < o.count; i++) {
+        o.getMatrixAt(i, m);
+        if (Math.hypot(m.elements[12] - PG.x, m.elements[14] - PG.z) < DETAIL.treeR) { saved.push([i, m.clone()]); o.setMatrixAt(i, Z); }
+      }
+      if (saved.length) { o.instanceMatrix.needsUpdate = true; DETAIL.hidden.push([o, saved]); }
+    });
+  } else if (!on && DETAIL.hidden) {
+    for (const [o, saved] of DETAIL.hidden) { for (const [i, mm] of saved) o.setMatrixAt(i, mm); o.instanceMatrix.needsUpdate = true; }
+    DETAIL.hidden = null;
+  }
+  renderer.shadowMap.needsUpdate = true;
+}
+// 高度场：1 m 网格，记录院内建筑、塔、树冠、灯杆的最高点（只在第一次进入细节观察时计算）
+const FIELD = { x0: -170, z0: -212, n: 340 };
+function buildObstacleField() {
+  const { x0, z0, n } = FIELD, H = new Float32Array(n * n);
+  const fill = (ax, az, bx, bz, y) => {
+    const i0 = Math.max(0, Math.floor(ax - x0)), i1 = Math.min(n - 1, Math.floor(bx - x0)), j0 = Math.max(0, Math.floor(az - z0)), j1 = Math.min(n - 1, Math.floor(bz - z0));
+    for (let j = j0; j <= j1; j++) for (let i = i0; i <= i1; i++) { const k = j * n + i; if (H[k] < y) H[k] = y; }
+  };
+  const inGrid = (ax, az, bx, bz) => bx >= x0 && ax <= x0 + n && bz >= z0 && az <= z0 + n;
+  const v = new T.Vector3(), m = new T.Matrix4(), box = new T.Box3();
+  for (const root of [compound, trees, streetTrees, city, lampGroup, pagodaGroup]) {
+    if (!root) continue;
+    root.updateMatrixWorld(true);
+    root.traverse((o) => {
+      if (!o.isMesh || !o.geometry || !o.geometry.attributes.position) return;
+      let vis = true; for (let q = o; q; q = q.parent) if (!q.visible) vis = false;
+      if (!vis || o.userData.blob || o.material.isShaderMaterial) return;
+      const g = o.geometry;
+      if (o.isInstancedMesh) {
+        if (!g.boundingBox) g.computeBoundingBox();
+        for (let i = 0; i < o.count; i++) {
+          o.getMatrixAt(i, m); if (m.determinant() === 0) continue;
+          m.premultiply(o.matrixWorld); box.copy(g.boundingBox).applyMatrix4(m);
+          if (box.max.y > 0.6 && inGrid(box.min.x, box.min.z, box.max.x, box.max.z)) fill(box.min.x, box.min.z, box.max.x, box.max.z, box.max.y);
+        }
+        return;
+      }
+      const P = g.attributes.position, idx = g.index, cnt = idx ? idx.count : P.count, ident = o.matrixWorld.equals(new T.Matrix4());
+      const get = (k) => { v.fromBufferAttribute(P, idx ? idx.getX(k) : k); if (!ident) v.applyMatrix4(o.matrixWorld); return v; };
+      for (let t = 0; t + 2 < cnt; t += 3) {
+        let ax = Infinity, az = Infinity, bx = -Infinity, bz = -Infinity, y = -Infinity;
+        for (let c = 0; c < 3; c++) { const p = get(t + c); ax = Math.min(ax, p.x); bx = Math.max(bx, p.x); az = Math.min(az, p.z); bz = Math.max(bz, p.z); y = Math.max(y, p.y); }
+        if (y > 0.6 && inGrid(ax, az, bx, bz)) fill(ax, az, bx, bz, y);
+      }
+    });
+  }
+  DETAIL.field = H;
+}
+function fieldH(x, z) {
+  const { x0, z0, n } = FIELD, H = DETAIL.field;
+  if (!H) return 0;
+  let h = 0;
+  for (let dj = -2; dj <= 2; dj++) for (let di = -2; di <= 2; di++) {
+    const i = Math.floor(x - x0) + di, j = Math.floor(z - z0) + dj;
+    if (i >= 0 && j >= 0 && i < n && j < n) h = Math.max(h, H[j * n + i]);
+  }
+  return h;
+}
+// 镜头低于所在位置的建筑或树冠时，抬高俯仰角（必要时缩短距离）
+function guardDetailCamera() {
+  if (!DETAIL.field) return false;
+  const t = controls.target, s = currentSph(), need = (p) => fieldH(p.x, p.z) + 2.5;
+  if (camera.position.y >= need(camera.position)) return false;
+  for (let p = s.pitch; p <= DETAIL_LIM.maxPitch * DEG + 1e-6; p += 0.5 * DEG) {
+    const q = sph(s.az, p, s.dist, t);
+    if (q.y >= need(q)) { camera.position.copy(q); camera.lookAt(t); return true; }
+  }
+  for (let d = s.dist; d >= DETAIL_LIM.minDist; d -= 1.5) {
+    const q = sph(s.az, DETAIL_LIM.maxPitch * DEG, d, t);
+    if (q.y >= need(q)) { camera.position.copy(q); camera.lookAt(t); return true; }
+  }
+  return false;
+}
+function setDetailHeight(h, moveCamera) {
+  h = clamp(h, 2, 64);
+  const dy = h - controls.target.y;
+  MODES.detail.target.set(PG.x, h, PG.z);
+  if (moveCamera && mode === 'detail' && !camTween) { controls.target.y += dy; camera.position.y += dy; camera.lookAt(controls.target); controls.update(); }
+  $('dpH').value = String(h); $('dpHOut').textContent = `${h.toFixed(h < 10 ? 1 : 0)} m`;
+}
+function setDetailZoom(z) { DETAIL.zoomGoal = clamp(z, DETAIL_LIM.minZoom, 1); $('dpZOut').textContent = `${(1 / DETAIL.zoomGoal).toFixed(1)}×`; requestRender(); }
+function selectDetail(id, dur) {
+  const P = DETAIL_POINTS.find((p) => p.id === id) || DETAIL_POINTS[2];
+  DETAIL.sel = P.id;
+  for (const b of $('dpPoints').children) b.setAttribute('aria-selected', String(b.dataset.id === P.id));
+  // 观察中心在塔轴上；按俯仰角把它放低，使视线正好落在塔面上的该部位
+  setDetailHeight(P.y - P.face * Math.tan(P.pitch * DEG), false);
+  setDetailZoom(P.zoom);
+  tweenCamera('detail', { az: P.az * DEG, pitch: P.pitch * DEG, dist: P.dist }, dur || 1.6);
+  const box = $('dpDetail'); box.innerHTML = '';
+  const h = document.createElement('h3'); h.textContent = P.name; box.appendChild(h);
+  for (const t of P.body) { const p = document.createElement('p'); p.textContent = t; box.appendChild(p); }
+  const note = document.createElement('p'); note.className = 'src'; note.textContent = '细节观察时，塔周围 55 m 内的树木暂时隐藏。'; box.appendChild(note);
+  requestRender();
+}
+function enterDetail(id) {
+  if (mode === 'detail') { if (id) selectDetail(id); return; }
+  if (PT.on) setPathTrace(false);
+  if (mode === 'explode') { exitExplode(false); }
+  setOrbit(false);
+  mode = 'detail';
+  document.body.classList.add('detail');
+  $('btnDetail').setAttribute('aria-pressed', 'true');
+  $('dpanel').hidden = false;
+  detailPolar(true);
+  hideTreesNearPagoda(true);
+  if (!DETAIL.field) buildObstacleField();
+  updatePtUI();
+  updateViewOffset(false);
+  selectDetail(id || DETAIL.sel || 'bracket', 2.2);
+}
+// 只撤销细节观察的状态（不移动镜头）
+function leaveDetailState() {
+  if (mode !== 'detail') return;
+  mode = 'court';
+  document.body.classList.remove('detail');
+  $('btnDetail').setAttribute('aria-pressed', 'false');
+  $('dpanel').hidden = true;
+  detailPolar(false);
+  hideTreesNearPagoda(false);
+  DETAIL.zoomGoal = 1;
+  updateViewOffset(false);
+}
+function exitDetail(toInitial) {
+  if (mode !== 'detail') return;
+  leaveDetailState();
+  const cur = currentSph(), I = MODES.court.init;
+  tweenCamera('court', toInitial ? I : { az: cur.az, pitch: Math.max(cur.pitch, 20 * DEG), dist: I.dist }, 1.8);
+  updatePtUI();
+  requestRender();
+}
+// 视场角缩放（细节观察的长焦）：平滑过渡；转动灵敏度随视场缩小
+function stepZoom(dt) {
+  if (DEMO.on || TOUR.on) return false;
+  const goal = mode === 'detail' ? DETAIL.zoomGoal : 1;
+  const z = DETAIL.zoom, nz = Math.abs(goal - z) < 1e-3 ? goal : lerp(z, goal, 1 - Math.exp(-dt * 7));
+  DETAIL.zoom = nz;
+  const fov = fovFor(camera.aspect) / DEG * nz;
+  controls.rotateSpeed = 0.55 * Math.pow(nz, 0.75);
+  if (Math.abs(camera.fov - fov) > 1e-4) { camera.fov = fov; camera.updateProjectionMatrix(); return true; }
+  return false;
+}
+function buildDetailPanel() {
+  const wrap = $('dpPoints');
+  for (const P of DETAIL_POINTS) {
+    const b = document.createElement('button');
+    b.type = 'button'; b.setAttribute('role', 'tab'); b.dataset.id = P.id; b.setAttribute('aria-selected', 'false'); b.textContent = P.name;
+    b.addEventListener('click', () => selectDetail(P.id));
+    wrap.appendChild(b);
+  }
+  $('dpClose').addEventListener('click', () => exitDetail(false));
+  $('dpH').addEventListener('input', (e) => { setDetailHeight(+e.target.value, true); requestRender(); });
+  $('dpZoomIn').addEventListener('click', () => setDetailZoom(DETAIL.zoomGoal * 0.8));
+  $('dpZoomOut').addEventListener('click', () => setDetailZoom(DETAIL.zoomGoal / 0.8));
+  $('btnDetail').addEventListener('click', () => (mode === 'detail' ? exitDetail(false) : enterDetail()));
+  // 滚轮：拉到最近后继续向前滚动则放大镜头；向后滚动先恢复视场角
+  window.addEventListener('wheel', (e) => {
+    if (mode !== 'detail' || e.target !== canvas || camTween) return;
+    const d = currentSph().dist;
+    if (e.deltaY < 0 && d <= DETAIL_LIM.minDist + 0.6 && DETAIL.zoomGoal > DETAIL_LIM.minZoom + 1e-3) { setDetailZoom(DETAIL.zoomGoal * 0.88); e.preventDefault(); e.stopImmediatePropagation(); }
+    else if (e.deltaY > 0 && DETAIL.zoomGoal < 0.999) { setDetailZoom(DETAIL.zoomGoal / 0.88); e.preventDefault(); e.stopImmediatePropagation(); }
+  }, { capture: true, passive: false });
+}
+
+/* ---------- 纯欣赏：隐藏全部界面 ---------- */
+let zenTimer = 0;
+function setZen(on) {
+  if (DEMO.on || TOUR.on) return;
+  document.body.classList.toggle('zen', on);
+  document.body.classList.remove('zen-idle');
+  $('btnZen').setAttribute('aria-pressed', String(on));
+  clearTimeout(zenTimer);
+  if (on) { zenTimer = setTimeout(() => document.body.classList.add('zen-idle'), 2500); canvas.focus({ preventScroll: true }); }
+  updateViewOffset(false);
+  requestRender();
+}
+function bindModesUI() {
+  buildDetailPanel();
+  $('btnZen').addEventListener('click', () => setZen(true));
+  $('zenExit').addEventListener('click', () => setZen(false));
+  const wake = () => {
+    if (!document.body.classList.contains('zen')) return;
+    document.body.classList.remove('zen-idle'); clearTimeout(zenTimer);
+    zenTimer = setTimeout(() => document.body.classList.add('zen-idle'), 2500);
+  };
+  window.addEventListener('pointermove', wake, { passive: true });
+  window.addEventListener('pointerdown', wake, { passive: true });
+  $('btnPerf').addEventListener('click', () => applyPerf(!PERF.on, true));
+  $('toastPerf').addEventListener('click', () => applyPerf(true, true));
+  $('toastClose').addEventListener('click', hideToast);
+  document.addEventListener('keydown', (e) => {
+    const tag = (e.target && e.target.tagName) || '';
+    if (/INPUT|SELECT|TEXTAREA/.test(tag) && e.key !== 'Escape') return;
+    if (DEMO.on || DEMO.dialog) { demoKey(e); return; }
+    if (TOUR.on) { tourKey(e); return; }
+    if (e.key === 'Escape' && document.body.classList.contains('zen')) { setZen(false); e.preventDefault(); return; }
+    if ((e.key === 'h' || e.key === 'H') && !e.ctrlKey && !e.metaKey && !e.altKey) { setZen(!document.body.classList.contains('zen')); e.preventDefault(); }
+  });
+}
+
+// ==== app_53_holo.js ====
+/* =====================================================================
+ * 10a. 讲解演示的场景内特效：全息投影（唐初五级塔示意）、扫描框、地面网格
+ *      加法混合 + 深色半透明衬底，白天对着亮天空也看得清；不投影、不参与环境光遮蔽。
+ * ===================================================================== */
+const HOLO = { ready: false, group: null, stupa: null, scan: null, grid: null, U: null, scanU: null, gridU: null, anchors: null };
+const HOLO_VS = `
+varying vec3 vW; varying vec3 vN; varying vec3 vL;
+void main() {
+  vec4 w = modelMatrix * vec4(position, 1.0);
+  vW = w.xyz; vL = position; vN = normalize(mat3(modelMatrix) * normal);
+  gl_Position = projectionMatrix * viewMatrix * w;
+}`;
+// uReveal：自下而上显现（0–1）；uDis：自上而下消散（0–1）；uLine：线框模式
+const HOLO_FS = `
+uniform vec3 uColor; uniform vec3 uCore; uniform float uTime; uniform float uReveal; uniform float uH0; uniform float uH1;
+uniform float uAlpha; uniform float uGain; uniform float uDis; uniform float uLine; uniform float uIsCore; uniform float uFill;
+varying vec3 vW; varying vec3 vN; varying vec3 vL;
+float hh(vec3 p) { return fract(sin(dot(p, vec3(12.9898, 78.233, 37.719))) * 43758.5453); }
+void main() {
+  float yr = (vL.y - uH0) / (uH1 - uH0);
+  float front = uReveal * 1.08 - 0.04;
+  if (yr > front) discard;
+  float nz = hh(floor(vW * 0.7 + 0.37));
+  float dv = uDis * 1.25 - yr * 0.25;
+  if (nz < dv) discard;
+  vec3 base = mix(uColor, uCore, uIsCore);
+  if (uFill > 0.5) { gl_FragColor = vec4(vec3(0.004, 0.02, 0.03), 0.34 * uAlpha * (1.0 - uIsCore)); return; }
+  vec3 n = normalize(vN), v = normalize(cameraPosition - vW);
+  float fr = pow(1.0 - abs(dot(n, v)), 2.0);
+  float band = smoothstep(0.86, 1.0, fract(vW.y * 0.42 - uTime * 0.32));
+  float fine = 0.5 + 0.5 * sin(vW.y * 9.0 - uTime * 2.2);
+  float edge = 1.0 - smoothstep(0.0, 0.03, front - yr);
+  float dEdge = uDis > 0.001 ? 1.0 - smoothstep(0.0, 0.1, nz - dv) : 0.0;
+  float a = uLine > 0.5 ? 1.0 : (0.05 + 0.42 * fr + 0.22 * band + 0.05 * fine);
+  vec3 col = base * a + vec3(0.85, 1.0, 1.0) * edge * 1.8 + vec3(1.0, 0.5, 0.18) * dEdge * 2.4;
+  gl_FragColor = vec4(col * uAlpha * uGain, 1.0);
+}`;
+// 加法混合但不改目标的 alpha（立体展示窗合成时据此判断背景）
+function holoBlend(m) {
+  m.blending = T.CustomBlending; m.blendEquation = T.AddEquation; m.blendSrc = T.OneFactor; m.blendDst = T.OneFactor;
+  m.blendSrcAlpha = T.ZeroFactor; m.blendDstAlpha = T.OneFactor; return m;
+}
+function holoUniforms(color, core, h0, h1) {
+  return {
+    uColor: { value: new T.Color(color) }, uCore: { value: new T.Color(core === undefined ? color : core) }, uTime: { value: 0 }, uReveal: { value: 1 },
+    uH0: { value: h0 || 0 }, uH1: { value: h1 || 1 }, uAlpha: { value: 1 }, uGain: { value: 1 }, uDis: { value: 0 },
+  };
+}
+// kind：glow（发光面）、line（线框）、fill（深色衬底）、core（内部“土心”）
+function holoMaterial(U, kind) {
+  const u = Object.assign({}, U, { uLine: { value: kind === 'line' ? 1 : 0 }, uIsCore: { value: kind === 'core' ? 1 : 0 }, uFill: { value: kind === 'fill' ? 1 : 0 } });
+  const m = new T.ShaderMaterial({ uniforms: u, vertexShader: HOLO_VS, fragmentShader: HOLO_FS, transparent: true, depthWrite: false, side: kind === 'fill' ? T.FrontSide : T.DoubleSide, fog: false });
+  if (kind === 'fill') { m.blending = T.NormalBlending; } else holoBlend(m);
+  return m;
+}
+const nonIdx = (g) => (g.index ? g.toNonIndexed() : g);
+function mergeG(list) { const g = A.mergeGeometries(list.map(nonIdx), false); list.forEach((x) => x.dispose()); return g; }
+function boxAt(w, h, d, x, y, z) { const g = new T.BoxGeometry(w, h, d); g.translate(x, y, z); return g; }
+
+/* ---- 唐初五级塔（示意）：塔基每面约 140 尺（约 42 m），五级，上有相轮、露槃，通高约 180 尺（约 54 m） ---- */
+function buildStupaHolo() {
+  const shell = [], core = [], edges = [];
+  const add = (g, list) => { list.push(g); edges.push(new T.EdgesGeometry(g, 20)); };
+  add(boxAt(41.4, 3.0, 41.4, 0, 1.5, 0), shell);
+  const hw = [13.6, 11.9, 10.3, 8.8, 7.4], th = [8.2, 6.9, 6.1, 5.4, 4.8], tiers = [];
+  let y = 3.0;
+  for (let i = 0; i < 5; i++) {
+    const bh = th[i] - 0.8;
+    add(boxAt(hw[i] * 2, bh, hw[i] * 2, 0, y + bh / 2, 0), shell);
+    add(boxAt(hw[i] * 2 + 1.8, 0.8, hw[i] * 2 + 1.8, 0, y + bh + 0.4, 0), shell);
+    core.push(boxAt(hw[i] * 2 - 3.4, th[i] - 0.4, hw[i] * 2 - 3.4, 0, y + th[i] / 2, 0));
+    tiers.push([y, y + th[i], hw[i]]);
+    y += th[i];
+  }
+  add(boxAt(7.2, 1.6, 7.2, 0, y + 0.8, 0), shell); y += 1.6;                     // 平头
+  { const g = new T.SphereGeometry(4.2, 24, 10, 0, Math.PI * 2, 0, Math.PI / 2); g.scale(1, 0.72, 1); g.translate(0, y, 0); shell.push(g); edges.push(new T.EdgesGeometry(g, 35)); y += 3.0; }   // 覆钵
+  { const g = new T.CylinderGeometry(3.4, 3.4, 0.5, 32); g.translate(0, y + 0.25, 0); add(g, shell); y += 0.5; }   // 露槃
+  { const g = new T.CylinderGeometry(0.32, 0.36, 13.0, 10); g.translate(0, y + 6.5, 0); shell.push(g); }          // 刹杆
+  const spireY0 = y;
+  for (let k = 0; k < 7; k++) {                                                  // 相轮七重
+    const r = lerp(2.5, 1.25, k / 6), g = new T.CylinderGeometry(r, r, 0.3, 28);
+    g.translate(0, y + 1.25 + k * 1.5, 0); add(g, shell);
+  }
+  { const g = new T.SphereGeometry(0.9, 16, 10); g.translate(0, y + 13.6, 0); shell.push(g); }                    // 宝珠
+  const H = y + 14.5;
+  const U = holoUniforms(0x58d8ff, 0xffa852, 0, H);
+  const grp = new T.Group();
+  const gShell = mergeG(shell), gCore = mergeG(core), gEdge = mergeG(edges);
+  const fill = new T.Mesh(gShell, holoMaterial(U, 'fill')); fill.renderOrder = 6;
+  const glow = new T.Mesh(gShell, holoMaterial(U, 'glow')); glow.renderOrder = 7;
+  const cm = new T.Mesh(gCore, holoMaterial(U, 'core')); cm.renderOrder = 7;
+  const ln = new T.LineSegments(gEdge, holoMaterial(U, 'line')); ln.renderOrder = 8;
+  grp.add(fill, glow, cm, ln);
+  grp.position.set(PG.x, 0, PG.z);
+  HOLO.U = U;
+  const W = (x, yy, z) => [PG.x + x, yy, PG.z + z];
+  HOLO.anchors = {
+    shell: W(hw[0] * 0.55, 7.2, hw[0]), core: W(-hw[1] * 0.25, 14, hw[1] - 2.2), tier: W(hw[2] + 0.9, tiers[2][0] + 3.2, hw[2] + 0.9),
+    spire: W(0, spireY0 + 6.5, 0), top: W(0, H, 0), base: W(-20.7, 3.0, 20.7), H,
+    dimA: W(23.5, 0, 20.7), dimB: W(23.5, H, 20.7),
+  };
+  return grp;
+}
+// 沿塔身上移的方形扫描框：贴合各层面宽
+function buildScanFrame() {
+  const U = { uColor: { value: new T.Color(0x6fe2ff) }, uAlpha: { value: 0 }, uGain: { value: 1 } };
+  const ps = [];
+  for (let k = 0; k < 4; k++) { const g = new T.PlaneGeometry(2, 1); g.translate(0, 0, 1); g.rotateY(k * Math.PI / 2); ps.push(g); }
+  const m = holoBlend(new T.ShaderMaterial({
+    uniforms: U, transparent: true, depthWrite: false, side: T.DoubleSide, fog: false,
+    vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
+    fragmentShader: `uniform vec3 uColor; uniform float uAlpha; uniform float uGain; varying vec2 vUv;
+      void main(){ float c = 1.0 - abs(vUv.y * 2.0 - 1.0); float k = pow(c, 6.0) * 1.6 + pow(c, 1.5) * 0.18; gl_FragColor = vec4(uColor * k * uAlpha * uGain, 1.0); }`,
+  }));
+  const mesh = new T.Mesh(mergeG(ps), m); mesh.renderOrder = 8; mesh.frustumCulled = false;
+  HOLO.scanU = U;
+  return mesh;
+}
+// 地面全息网格与扩散的测量环
+function buildHoloGrid() {
+  const U = { uColor: { value: new T.Color(0x5fd6ff) }, uAlpha: { value: 0 }, uGain: { value: 1 }, uTime: { value: 0 }, uR: { value: 70 } };
+  const g = new T.PlaneGeometry(1, 1); g.rotateX(-Math.PI / 2);
+  const m = holoBlend(new T.ShaderMaterial({
+    uniforms: U, transparent: true, depthWrite: false, fog: false, polygonOffset: true, polygonOffsetFactor: -4, polygonOffsetUnits: -8,
+    vertexShader: 'varying vec2 vP; void main(){ vec4 w = modelMatrix * vec4(position, 1.0); vP = w.xz; gl_Position = projectionMatrix * viewMatrix * w; }',
+    fragmentShader: `uniform vec3 uColor; uniform float uAlpha; uniform float uGain; uniform float uTime; uniform float uR; varying vec2 vP;
+      float gridL(vec2 p, float s, float w) { vec2 q = abs(fract(p / s + 0.5) - 0.5) * s; vec2 f = fwidth(p) * 1.2; vec2 l = 1.0 - smoothstep(w - f, w + f, q); return max(l.x, l.y); }
+      void main(){
+        vec2 p = vP - vec2(${PG.x.toFixed(1)}, ${PG.z.toFixed(1)}); float r = length(p);
+        float fade = 1.0 - smoothstep(uR * 0.55, uR, r);
+        float g = gridL(p, 3.0, 0.05) * 0.35 + gridL(p, 15.0, 0.12) * 0.7;
+        float ring = mod(uTime * 14.0, uR * 1.1); float rk = exp(-abs(r - ring) * 0.9) * (1.0 - ring / (uR * 1.1));
+        float rr = 1.0 - smoothstep(0.08, 0.3, abs(r - 34.0));
+        gl_FragColor = vec4(uColor * (g * fade * 0.55 + rk * 0.9 + rr * 0.5 * fade) * uAlpha * uGain, 1.0);
+      }`,
+  }));
+  const mesh = new T.Mesh(g, m); mesh.scale.set(160, 1, 160); mesh.position.set(PG.x, 0.12, PG.z); mesh.renderOrder = 5;
+  HOLO.gridU = U;
+  return mesh;
+}
+function holoInit() {
+  if (HOLO.ready) return;
+  HOLO.group = new T.Group(); HOLO.group.name = 'holo';
+  HOLO.stupa = buildStupaHolo(); HOLO.scan = buildScanFrame(); HOLO.grid = buildHoloGrid();
+  HOLO.group.add(HOLO.stupa, HOLO.scan, HOLO.grid);
+  for (const o of [HOLO.stupa, HOLO.scan, HOLO.grid]) o.visible = false;
+  scene.add(HOLO.group);
+  AO_HIDE.push(HOLO.group);
+  reflection.hide.push(HOLO.group);
+  HOLO.ready = true;
+}
+// 每帧：亮度随曝光补偿，保证白天、夜晚看起来一样亮
+function holoFrame(time) {
+  if (!HOLO.ready) return;
+  const gain = 0.62 / Math.max(0.12, renderer.toneMappingExposure);
+  HOLO.U.uGain.value = gain; HOLO.U.uTime.value = time;
+  HOLO.scanU.uGain.value = gain; HOLO.gridU.uGain.value = gain; HOLO.gridU.uTime.value = time;
+  HOLO.stupa.visible = HOLO.U.uAlpha.value > 0.002 && HOLO.U.uReveal.value > 0.001 && HOLO.U.uDis.value < 0.999;
+  HOLO.scan.visible = HOLO.scanU.uAlpha.value > 0.002;
+  HOLO.grid.visible = HOLO.gridU.uAlpha.value > 0.002;
+}
+function holoReset() {
+  if (!HOLO.ready) return;
+  HOLO.U.uAlpha.value = 0; HOLO.U.uReveal.value = 0; HOLO.U.uDis.value = 0;
+  HOLO.scanU.uAlpha.value = 0; HOLO.gridU.uAlpha.value = 0;
+  holoFrame(0);
+}
+// 扫描框放到高度 y：按所在层的面宽（含出檐）设定大小
+function pagodaHalfAt(y) {
+  if (y < PG.PH) return Math.max(PG.PW, PG.PD) + 0.6;
+  let yb = PG.PH;
+  for (let i = 0; i < 7; i++) { if (y < yb + PG.H[i]) return PG.S[i] / 2 + PG.OUT[5] + 0.5; yb += PG.H[i]; }
+  if (y < PG.top - PG.finialH) { const k = (y - yb) / (PG.top - PG.finialH - yb); return lerp(PG.S[6] / 2 + PG.OUT[5], 1.4, k) + 0.6; }
+  return 1.9;
+}
+function placeScan(y, alpha) {
+  const s = pagodaHalfAt(y);
+  HOLO.scan.position.set(PG.x, y, PG.z); HOLO.scan.scale.set(s, 1.6, s);
+  HOLO.scanU.uAlpha.value = alpha;
+}
+
+// ==== app_54_anno.js ====
+/* =====================================================================
+ * 10b. 动画标注：三维锚点投影到屏幕的引线标签、尺寸线、轮廓线（SVG + HTML）
+ *      每帧按需调用（即时模式），未被调用的元素自动隐藏；进度 r 控制“画出”动画。
+ * ===================================================================== */
+const SVGNS = 'http://www.w3.org/2000/svg';
+const svgEl = (tag, attrs, parent) => { const e = document.createElementNS(SVGNS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; };
+const HOLO_C = '#8be6ff', AMBER_C = '#ffcf7a';
+class AnnoLayer {
+  constructor(svg, box) { this.svg = svg; this.box = box; this.items = new Map(); this.frame = 0; this.time = 0; this.W = 1; this.H = 1; }
+  begin(time, W, H) { this.frame++; this.time = time; this.W = W; this.H = H; }
+  _get(id, make) { let it = this.items.get(id); if (!it) { it = make(); it.id = id; this.items.set(id, it); } it.f = this.frame; return it; }
+  end() { for (const it of this.items.values()) if (it.f !== this.frame && !it.hid) { it.hid = true; if (it.g) it.g.style.display = 'none'; if (it.el) it.el.style.display = 'none'; } }
+  clear() { for (const it of this.items.values()) { if (it.g) it.g.remove(); if (it.el) it.el.remove(); } this.items.clear(); }
+  _show(it) { if (it.hid) { it.hid = false; if (it.g) it.g.style.display = ''; if (it.el) it.el.style.display = ''; } }
+  _label(it, cls, t, s) {
+    if (!it.el) { it.el = document.createElement('div'); it.el.innerHTML = '<div class="bx"><b></b><span></span></div>'; this.box.appendChild(it.el); it.bEl = it.el.querySelector('b'); it.sEl = it.el.querySelector('span'); }
+    const c = 'cl ' + cls; if (it.cls !== c) { it.el.className = c; it.cls = c; it.w = 0; }
+    if (it.t !== t || it.s !== s) { it.t = t; it.s = s; it.w = 0; it.nb = -1; it.ns = -1; if (!s) it.sEl.style.display = 'none'; else it.sEl.style.display = ''; }
+  }
+  _type(it, k) {      // 打字机效果
+    const nb = Math.ceil(it.t.length * clamp(k * 1.6, 0, 1)), ns = it.s ? Math.ceil(it.s.length * clamp(k * 1.6 - 0.6, 0, 1)) : 0;
+    if (nb !== it.nb) { it.nb = nb; it.bEl.textContent = it.t.slice(0, nb) || ' '; }
+    if (it.s && ns !== it.ns) { it.ns = ns; it.sEl.textContent = it.s.slice(0, ns) || ' '; }
+  }
+  _width(it) { if (!it.w) { const t0 = it.bEl.textContent, s0 = it.sEl.textContent; it.bEl.textContent = it.t; it.sEl.textContent = it.s || ''; it.w = it.el.firstChild.offsetWidth || 120; it.hgt = it.el.firstChild.offsetHeight || 30; it.bEl.textContent = t0; it.sEl.textContent = s0; } return it.w; }
+  // 引线标签：锚点 (ax, ay) → 折线 → 标签；o = { t, s, dx, dy, a, r, amber, pin, tag }
+  call(id, ax, ay, o) {
+    const it = this._get(id, () => {
+      const g = svgEl('g', {}, this.svg);
+      const glow = svgEl('path', { fill: 'none', 'stroke-width': 5, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', opacity: 0.22 }, g);
+      const ln = svgEl('path', { fill: 'none', 'stroke-width': 1.3, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, g);
+      const pulse = svgEl('circle', { fill: 'none', 'stroke-width': 1.2, r: 6 }, g);
+      const dot = svgEl('circle', { r: 3.4 }, g);
+      const halo = svgEl('circle', { fill: 'none', 'stroke-width': 1, r: 7, opacity: 0.6 }, g);
+      return { g, glow, ln, pulse, dot, halo };
+    });
+    const a = clamp(o.a === undefined ? 1 : o.a, 0, 1), r = clamp(o.r === undefined ? 1 : o.r, 0, 1);
+    if (a < 0.003 || r <= 0 || !isFinite(ax) || !isFinite(ay)) { if (!it.hid) { it.hid = true; it.g.style.display = 'none'; if (it.el) it.el.style.display = 'none'; } return; }
+    this._show(it);
+    const col = o.amber ? AMBER_C : HOLO_C;
+    if (it.col !== col) { it.col = col; for (const e of [it.glow, it.ln, it.pulse, it.halo]) e.setAttribute('stroke', col); it.dot.setAttribute('fill', col); }
+    this._label(it, (o.amber ? 'amb ' : '') + (o.tag ? 'tag ' : ''), o.t, o.s || '');
+    let dx = o.dx === undefined ? 70 : o.dx, dy = o.dy === undefined ? -40 : o.dy;
+    if (o.pin) dx = 0;
+    // 标签放不下时换到另一侧
+    const w = this._width(it) + 12;
+    if (!o.pin) {
+      if (dx > 0 && ax + dx + w > this.W - 6 && ax - dx - w > 6) dx = -dx;
+      else if (dx < 0 && ax + dx - w < 6 && ax - dx + w < this.W - 6) dx = -dx;
+    }
+    const kx = o.pin ? 0 : Math.sign(dx) * Math.min(Math.abs(dy), Math.abs(dx) * 0.6);
+    const K = [ax + kx, ay + dy], L = [ax + dx, ay + dy];
+    const d = `M${ax.toFixed(1)} ${ay.toFixed(1)}L${K[0].toFixed(1)} ${K[1].toFixed(1)}L${L[0].toFixed(1)} ${L[1].toFixed(1)}`;
+    const len = Math.hypot(kx, dy) + Math.abs(dx - kx) + 0.01;
+    const kl = smooth01((r - 0.12) / 0.4);
+    it.ln.setAttribute('d', d); it.glow.setAttribute('d', d);
+    const da = `${len.toFixed(1)} ${(len + 4).toFixed(1)}`, off = (len * (1 - kl)).toFixed(1);
+    it.ln.setAttribute('stroke-dasharray', da); it.ln.setAttribute('stroke-dashoffset', off);
+    it.glow.setAttribute('stroke-dasharray', da); it.glow.setAttribute('stroke-dashoffset', off);
+    const kd = smooth01(r / 0.14);
+    it.dot.setAttribute('cx', ax.toFixed(1)); it.dot.setAttribute('cy', ay.toFixed(1)); it.dot.setAttribute('r', (3.4 * kd).toFixed(2));
+    it.halo.setAttribute('cx', ax.toFixed(1)); it.halo.setAttribute('cy', ay.toFixed(1)); it.halo.setAttribute('r', (7 * kd).toFixed(2));
+    const ph = (this.time * 0.75 + (id.length * 0.37)) % 1;
+    it.pulse.setAttribute('cx', ax.toFixed(1)); it.pulse.setAttribute('cy', ay.toFixed(1)); it.pulse.setAttribute('r', (6 + 16 * ph).toFixed(1)); it.pulse.setAttribute('opacity', ((1 - ph) * 0.8 * kd).toFixed(3));
+    it.g.setAttribute('opacity', a.toFixed(3));
+    // 标签
+    const kt = clamp((r - 0.45) / 0.55, 0, 1);
+    this._type(it, kt);
+    const side = dx < 0 ? 'l' : '';
+    if (it.side !== side) { it.side = side; it.el.classList.toggle('l', side === 'l'); }
+    const lx = o.pin ? L[0] : L[0] + (dx < 0 ? -4 : 4), ly = L[1];
+    const tr = o.pin ? `translate(${lx.toFixed(1)}px,${(ly - 2).toFixed(1)}px) translate(-50%,-100%)` : `translate(${lx.toFixed(1)}px,${ly.toFixed(1)}px) translate(${dx < 0 ? '-100%' : '0'},-50%)`;
+    it.el.style.transform = tr; it.el.style.opacity = (a * smooth01(kt * 3)).toFixed(3);
+  }
+  // 尺寸线：两端点 (x0,y0)-(x1,y1)，向一侧偏移 off 像素；o = { t, off, a, r }
+  dim(id, x0, y0, x1, y1, o) {
+    const it = this._get(id, () => {
+      const g = svgEl('g', { stroke: AMBER_C, fill: 'none', 'stroke-linecap': 'round' }, this.svg);
+      const ext = svgEl('path', { 'stroke-width': 1, opacity: 0.6, 'stroke-dasharray': '3 3' }, g);
+      const glow = svgEl('path', { 'stroke-width': 5, opacity: 0.2 }, g);
+      const ln = svgEl('path', { 'stroke-width': 1.4 }, g);
+      const tk = svgEl('path', { 'stroke-width': 2 }, g);
+      return { g, ext, glow, ln, tk };
+    });
+    const a = clamp(o.a === undefined ? 1 : o.a, 0, 1), r = clamp(o.r === undefined ? 1 : o.r, 0, 1);
+    if (a < 0.003 || r <= 0 || ![x0, y0, x1, y1].every(isFinite)) { if (!it.hid) { it.hid = true; it.g.style.display = 'none'; if (it.el) it.el.style.display = 'none'; } return; }
+    this._show(it);
+    const L = Math.hypot(x1 - x0, y1 - y0) || 1, nx = -(y1 - y0) / L, ny = (x1 - x0) / L, off = o.off === undefined ? 24 : o.off;
+    const q0 = [x0 + nx * off, y0 + ny * off], q1 = [x1 + nx * off, y1 + ny * off], m = [(q0[0] + q1[0]) / 2, (q0[1] + q1[1]) / 2];
+    const k = smooth01(r / 0.55), e = 1 + Math.sign(off) * 6 / Math.max(Math.abs(off), 1);
+    const p = (v) => v.toFixed(1);
+    it.ext.setAttribute('d', `M${p(x0)} ${p(y0)}L${p(x0 + nx * off * e)} ${p(y0 + ny * off * e)}M${p(x1)} ${p(y1)}L${p(x1 + nx * off * e)} ${p(y1 + ny * off * e)}`);
+    it.ext.setAttribute('opacity', (0.6 * smooth01(r / 0.2)).toFixed(3));
+    const a0 = [lerp(m[0], q0[0], k), lerp(m[1], q0[1], k)], a1 = [lerp(m[0], q1[0], k), lerp(m[1], q1[1], k)];
+    const d = `M${p(a0[0])} ${p(a0[1])}L${p(a1[0])} ${p(a1[1])}`;
+    it.ln.setAttribute('d', d); it.glow.setAttribute('d', d);
+    const tx = (x1 - x0) / L, ty = (y1 - y0) / L, s = 6, tk = (q) => `M${p(q[0] - (tx + nx) * s * 0.7)} ${p(q[1] - (ty + ny) * s * 0.7)}L${p(q[0] + (tx + nx) * s * 0.7)} ${p(q[1] + (ty + ny) * s * 0.7)}`;
+    it.tk.setAttribute('d', k > 0.98 ? tk(q0) + tk(q1) : '');
+    it.g.setAttribute('opacity', a.toFixed(3));
+    this._label(it, 'dim amb', o.t, o.s || '');
+    const kt = clamp((r - 0.5) / 0.5, 0, 1);
+    this._type(it, kt);
+    const lo = o.lab === undefined ? 0 : o.lab;
+    it.el.style.transform = `translate(${p(m[0] + nx * lo)}px,${p(m[1] + ny * lo)}px) translate(-50%,-50%)`;
+    it.el.style.opacity = (a * smooth01(kt * 3)).toFixed(3);
+  }
+  // 折线（屏幕坐标数组）；o = { a, r, dash, amber, w }
+  path(id, pts, o) {
+    const it = this._get(id, () => {
+      const g = svgEl('g', { fill: 'none', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, this.svg);
+      const glow = svgEl('path', { 'stroke-width': 5, opacity: 0.18 }, g);
+      const ln = svgEl('path', { 'stroke-width': 1.4 }, g);
+      return { g, glow, ln };
+    });
+    const a = clamp(o.a === undefined ? 1 : o.a, 0, 1), r = clamp(o.r === undefined ? 1 : o.r, 0, 1);
+    const ok = pts.length > 1 && pts.every((q) => q && isFinite(q[0]) && isFinite(q[1]));
+    if (a < 0.003 || r <= 0 || !ok) { if (!it.hid) { it.hid = true; it.g.style.display = 'none'; } return; }
+    this._show(it);
+    const col = o.color || (o.amber ? AMBER_C : HOLO_C);
+    if (it.col !== col) { it.col = col; it.g.setAttribute('stroke', col); }
+    let len = 0; for (let i = 1; i < pts.length; i++) len += Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]);
+    // 只画出前 r 部分
+    let rem = len * smooth01(r), d = `M${pts[0][0].toFixed(1)} ${pts[0][1].toFixed(1)}`;
+    for (let i = 1; i < pts.length && rem > 0; i++) {
+      const sl = Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]), f = Math.min(1, rem / (sl || 1));
+      d += `L${lerp(pts[i - 1][0], pts[i][0], f).toFixed(1)} ${lerp(pts[i - 1][1], pts[i][1], f).toFixed(1)}`; rem -= sl;
+    }
+    it.ln.setAttribute('d', d); it.glow.setAttribute('d', d);
+    it.ln.setAttribute('stroke-width', String(o.w || 1.4));
+    if (o.dash) it.ln.setAttribute('stroke-dasharray', o.dash); else it.ln.removeAttribute('stroke-dasharray');
+    it.g.setAttribute('opacity', a.toFixed(3));
+  }
+  // 单独的锚点圆环（无标签）
+  ring(id, x, y, o) {
+    const it = this._get(id, () => { const g = svgEl('g', { fill: 'none' }, this.svg); const c1 = svgEl('circle', { 'stroke-width': 1.4, r: 8 }, g); const c2 = svgEl('circle', { 'stroke-width': 1, r: 8 }, g); return { g, c1, c2 }; });
+    const a = clamp(o.a === undefined ? 1 : o.a, 0, 1), r = clamp(o.r === undefined ? 1 : o.r, 0, 1);
+    if (a < 0.003 || r <= 0 || !isFinite(x) || !isFinite(y)) { if (!it.hid) { it.hid = true; it.g.style.display = 'none'; } return; }
+    this._show(it);
+    const col = o.amber ? AMBER_C : HOLO_C;
+    if (it.col !== col) { it.col = col; it.g.setAttribute('stroke', col); }
+    const R = (o.R || 9) * smooth01(r / 0.3), ph = (this.time * 0.8 + (o.ph || 0)) % 1;
+    for (const c of [it.c1, it.c2]) { c.setAttribute('cx', x.toFixed(1)); c.setAttribute('cy', y.toFixed(1)); }
+    it.c1.setAttribute('r', R.toFixed(1)); it.c2.setAttribute('r', (R + 14 * ph).toFixed(1)); it.c2.setAttribute('opacity', ((1 - ph) * 0.8).toFixed(3));
+    it.g.setAttribute('opacity', a.toFixed(3));
+  }
+}
+
+/* ---------- 屏幕投影 ---------- */
+const _pv = new T.Vector3();
+function projW(p) {
+  _pv.set(p[0], p[1], p[2]).project(camera);
+  if (_pv.z > 1 || _pv.z < -1) return [NaN, NaN];
+  return [(_pv.x * 0.5 + 0.5) * canvas.clientWidth, (-_pv.y * 0.5 + 0.5) * canvas.clientHeight];
+}
+// 出现窗口：u0 起淡入（dur 秒级换算为进度），u1 后淡出
+const win = (u, u0, u1, f) => { f = f || 0.05; return smooth01((u - u0) / f) * (u1 === undefined ? 1 : 1 - smooth01((u - u1) / f)); };
+const rev = (u, u0, d) => clamp((u - u0) / (d || 0.1), 0, 1);
+
+/* ---------- 资料卡片（左栏 HUD） ---------- */
+const HUD = { cards: new Map() };
+function hudCard(id, cls, html) {
+  let c = HUD.cards.get(id);
+  if (!c) {
+    const el = document.createElement('div'); el.className = 'hc ' + (cls || ''); el.innerHTML = html; el.style.display = 'none';
+    $('hudL').appendChild(el);
+    c = { el, on: false, data: {} }; HUD.cards.set(id, c);
+  }
+  c.f = HUD.frame;
+  return c;
+}
+// 隐藏的卡片淡出后不再占位（左栏为纵向排列）
+function hudShow(c, on) {
+  if (c.on === on) return;
+  c.on = on; clearTimeout(c.tm);
+  if (on) { c.el.style.display = ''; void c.el.offsetWidth; c.el.classList.add('on'); }
+  else { c.el.classList.remove('on'); c.tm = setTimeout(() => { if (!c.on) c.el.style.display = 'none'; }, 600); }
+}
+function hudBegin() { HUD.frame = (HUD.frame || 0) + 1; }
+function hudEnd() { for (const c of HUD.cards.values()) if (c.f !== HUD.frame) hudShow(c, false); }
+function hudClear() { for (const c of HUD.cards.values()) c.el.remove(); HUD.cards.clear(); }
+function typeInto(el, text, k) { const n = Math.ceil(text.length * clamp(k, 0, 1)); if (el._n !== n) { el._n = n; el.textContent = text.slice(0, n); } }
+
+// ==== app_55_demo.js ====
+/* =====================================================================
+ * 10. 讲解演示：自动运镜 + 字幕 + 语音解说（11 节，约 4 分钟）
+ *     固定使用 audio/narration.mp3，以录音播放位置驱动章节与画面。
+ *     场景内的历史场景、动画标注、资料卡片与立体展示见 10a–10d。
+ * ===================================================================== */
+const DEMO_FX = { build: 10, tilt: 0, tiltApplied: 0, hl: 0, hlApplied: 0, fin: 1, finMode: 'fall', quake: 0 };
+const TILT_AXIS = new T.Vector3(-0.3827, 0, 0.9239);           // 绕此轴转动 → 塔顶偏向西北偏西
+const TILT_SHOW = 10 * 1.0105 / 64.5;                           // 1996 年倾斜 1010.5 mm，放大 10 倍示意（弧度）
+const ease = easeInOut, S = smooth01;
+
+/* ---------- 构件特效：建造动画（逐件落下）、倾斜示意、外层高亮 ---------- */
+function applyPartFx() {
+  let changed = false;
+  for (const p of parts) {
+    const i = p.userData.idx, a = clamp(DEMO_FX.build - i, 0, 1), e = 1 - Math.pow(1 - a, 3);
+    if (a < 1) p.position.y += (1 - e) * 24;
+    let op = S(a / 0.6), vis = a > 0.002;
+    // 塔刹：地震中倾倒坠落（绕刹座转动），重修时从上方落回
+    if (p.userData.id === 'finial') {
+      const f = DEMO_FX.fin, y0 = PG.top - PG.finialH;
+      if (f < 0.9999) {
+        changed = true;
+        if (DEMO_FX.finMode === 'fall') {
+          const k = 1 - f, th = -k * 1.35;
+          p.rotation.z = th; p.position.x = y0 * Math.sin(-th) * -1 + k * 7; p.position.y += y0 * (1 - Math.cos(th)) - k * k * 30;
+          op *= 1 - S((k - 0.5) / 0.5);
+        } else {
+          p.rotation.z = 0; p.position.x = 0; p.position.y += (1 - (1 - Math.pow(1 - f, 3))) * 14; op *= S(f / 0.4);
+        }
+        if (op < 0.002) vis = false;
+      } else if (p.position.x !== 0 || p.rotation.z !== 0) { p.position.x = 0; p.rotation.z = 0; changed = true; }
+    }
+    if (p.visible !== vis) { p.visible = vis; changed = true; }
+    if (p.userData.fxOp === undefined) p.userData.fxOp = 1;
+    if (Math.abs(p.userData.fxOp - op) > 1e-4) {
+      p.userData.fxOp = op;
+      for (const m of Object.values(p.userData.mats)) { const tr = op < 0.999; if (m.transparent !== tr) { m.transparent = tr; m.needsUpdate = true; } m.opacity = op; m.depthWrite = op > 0.5; }
+      changed = true;
+    }
+    if (a < 1) changed = true;
+  }
+  if (DEMO_FX.tiltApplied !== DEMO_FX.tilt) { pagodaGroup.quaternion.setFromAxisAngle(TILT_AXIS, DEMO_FX.tilt); DEMO_FX.tiltApplied = DEMO_FX.tilt; changed = true; }
+  if (DEMO_FX.hlApplied !== DEMO_FX.hl) {
+    DEMO_FX.hlApplied = DEMO_FX.hl;
+    for (const p of parts) {
+      if (p.userData.id === 'base' || p.userData.id === 'finial') continue;
+      const m = p.userData.mats.brick;
+      if (selected !== p.userData.id) { m.emissive.setRGB(1.0, 0.42, 0.1); m.emissiveIntensity = 0.32 * DEMO_FX.hl; }
+    }
+  }
+  if (changed) { updateCastBounds(); renderer.shadowMap.needsUpdate = true; }
+  return changed;
+}
+
+/* ---------- 讲解内容 ---------- */
+const PGT = (h, x, z) => [x === undefined ? PG.x : x, h, z === undefined ? PG.z : z];
+const COURT_T = [0, 18, -19];
+const CHAPTERS = [
+  { title: '大慈恩寺与大雁塔', note: '',
+    text: '这里是西安城南的大慈恩寺，寺中这座方形砖塔，就是大雁塔。它始建于唐高宗永徽三年，也就是公元652年，是现存最早、规模最大的唐代四方楼阁式砖塔。2014年，大雁塔作为丝绸之路“长安—天山廊道”的组成部分，列入《世界遗产名录》。',
+    trees: true, shot: (u) => ({ t: COURT_T, az: -24 + 44 * u, pitch: 31 - 6 * u, dist: 330 - 70 * u, zoom: 1 }) },
+  { title: '缘起：玄奘建塔', note: '全息影像据文献记载示意（唐尺按约 0.3 m 折算），并非唐初原貌',
+    text: '贞观十九年，玄奘从天竺取经归来，带回了大量梵文经典和佛像。为了妥善保存这些经像，永徽三年，他奏请在慈恩寺建塔。原计划建一座石塔，唐高宗考虑工程浩大，改用砖砌。最初的塔仿照西域窣堵坡的形制，砖表土心，据记载共有五层。',
+    build: (t, u, k0) => lerp(k0, 0, ease(t / 2.4)),
+    shot: (u) => ({ t: PGT(24), az: -32 + 18 * u, pitch: 12, dist: 158, zoom: 1 }) },
+  { title: '改建为楼阁式', note: '坍损、重建为示意动画',
+    text: '砖表土心的塔体经不住风雨侵蚀，没过多久便逐渐坍损。一般认为，武周长安年间，塔被重新营建，改为中原传统的楼阁式样，并且加高。唐天宝年间，诗人岑参登上此塔，留下了“七层摩苍穹”的诗句。',
+    build: (t, u, k0) => (u < 0.3 ? lerp(k0, 0, ease(t / 1.5)) : 10 * S((u - 0.3) / 0.4)),
+    shot: (u) => ({ t: PGT(16 + 16 * u), az: -14 + 22 * u, pitch: 13 + 3 * u, dist: 150 + 35 * u, zoom: 1 }) },
+  { title: '明代包砌', note: '亮起的外层表示明代包砌的砖墙（示意）',
+    text: '此后，五代和宋代都曾修缮过这座塔。明代嘉靖年间的大地震震落了塔刹；万历年间重修时，在唐塔外表包砌了一层约六十厘米厚的青砖，又重新安装了木梯，形成了我们今天看到的样子。',
+    hl: (t, u) => S((u - 0.35) / 0.1) * (1 - S((u - 0.9) / 0.08)) * (0.8 + 0.2 * Math.sin(t * 2.6)),
+    shot: (u) => ({ t: PGT(32), az: -86 + 70 * u, pitch: 14, dist: 168, zoom: 0.95 }) },
+  { title: '方锥形的塔身', note: '',
+    text: '今天的大雁塔坐落在高约4.2米的方形台基上，塔身七层，通高约64.5米，底层边长约25.5米。各层面宽自下而上逐层收小，整座塔呈方锥形，稳重而挺拔。',
+    shot: (u) => ({ t: PGT(32), az: -44 + 28 * u, pitch: 8.6, dist: 182, zoom: 1 }) },
+  { title: '以砖仿木', note: '',
+    text: '塔身全部用砖砌成，外观却处处模仿木结构：墙面用砖隐出倚柱和阑额，柱头上砌出栌斗，把每一面分成若干开间。一、二层九间，三、四层七间，五到七层五间；每层四面的正中，各开一道券门。',
+    shot: (u) => blendPose({ t: PGT(15, 0, -29.6), az: -14 + 28 * u, pitch: 18, dist: 100, zoom: 0.48 },
+      { t: PGT(31, 0, -36), az: 6, pitch: 9, dist: 172, zoom: 1 }, ease(S((u - 0.54) / 0.12))) },
+  { title: '叠涩出檐', note: '',
+    text: '塔檐不用木椽，而是把砖一层一层向外挑出，这种做法叫做“叠涩”，中间还夹砌着斜放的菱角牙子。檐上再用砖逐层向内收回，形成上一层的平台。',
+    shot: (u) => ({ t: PGT(27.6, -11.2, -30.8), az: -54 + 20 * u, pitch: 10, dist: 96, zoom: 0.3 }) },
+  { title: '塔内结构', note: '拆解为示意，塔内楼梯与房间为示意建模',
+    text: '塔的内部是方形的塔室，每层架设木楼板，木梯盘旋而上，可以一直登到顶层。塔的重量主要由砖土结构承担，木楼板和木梯并不承重。登塔的人可以从四面的券门远眺西安城。',
+    explode: 1, shot: (u) => ({ t: PGT(66), az: -44 + 30 * u, pitch: 16, dist: 215, zoom: 1 }) },
+  { title: '圣教序碑与门楣线刻', note: '碑文与门楣图案为示意纹理',
+    text: '底层南面券门两侧的砖龛里，立着两通唐碑：西龛是唐太宗撰文的《大唐三藏圣教序》，东龛是唐高宗撰文的《圣教序记》，都由书法家褚遂良书写。四面券门的石门楣上还保留着唐代线刻，其中西门楣上刻画的佛殿，是研究唐代木构建筑的珍贵图像。',
+    shot: (u) => blendPose({ t: PGT(6.8, 0, -29.6), az: -8 + 10 * u, pitch: 22, dist: 92, zoom: 0.34 },
+      { t: PGT(8.4, -12.9, -42), az: -90 + 8 * (u - 0.5), pitch: 16, dist: 96, zoom: 0.3 }, ease(S((u - 0.57) / 0.1))) },
+  { title: '倾斜与回倾', note: '倾斜幅度放大约 10 倍示意',
+    text: '由于过量开采地下水，大雁塔曾逐渐向西北方向倾斜，1996年倾斜量达到1010.5毫米。此后，周边四百多眼自备井被封停，并开展地下水回灌，塔身开始以每年约1毫米的速度缓慢回倾。',
+    tilt: (t, u) => TILT_SHOW * S((u - 0.12) / 0.22) * (1 - S((u - 0.72) / 0.2)),
+    shot: (u) => ({ t: PGT(32), az: -24 + 3 * u, pitch: 10, dist: 200, zoom: 1 }) },
+  { title: '月下雁塔', note: '月亮高度与大小为示意；月相按 2026 年 10 月 22 日推算',
+    text: '夜幕降临，塔身亮起金色的灯光，一轮盈凸月挂在东南方的天空。一千三百多年来，大雁塔见证了这座城市的兴衰，也成为西安最为人熟知的地标。',
+    trees: true, night: true, shot: (u) => ({ t: COURT_T, az: -146.9 + 6 * u, pitch: 8.5 + 0.6 * u, dist: 262 - 8 * u, zoom: 1 }) },
+];
+const DEMO_DAY = 870;      // 演示白天用 14:30 的光线：太阳在西南，塔的南面、西面受光
+
+/* ---------- 镜头姿态 ---------- */
+function blendPose(a, b, k) {
+  let dAz = b.az - a.az; dAz = Math.atan2(Math.sin(dAz * DEG), Math.cos(dAz * DEG)) / DEG;
+  return { t: [lerp(a.t[0], b.t[0], k), lerp(a.t[1], b.t[1], k), lerp(a.t[2], b.t[2], k)], az: a.az + dAz * k, pitch: lerp(a.pitch, b.pitch, k),
+    dist: Math.exp(lerp(Math.log(a.dist), Math.log(b.dist), k)), zoom: lerp(a.zoom, b.zoom, k) };
+}
+function currentPose() {
+  const s = currentSph();
+  return { t: controls.target.toArray(), az: s.az / DEG, pitch: s.pitch / DEG, dist: s.dist, zoom: camera.fov / (fovFor(camera.aspect) / DEG) };
+}
+function poseEye(P) { const t = new T.Vector3(...P.t); return { eye: sph(P.az * DEG, P.pitch * DEG, P.dist, t), target: t }; }
+function applyPose(P) {
+  const { eye, target } = poseEye(P);
+  controls.target.copy(target); camera.position.copy(eye); camera.lookAt(target);
+  const fov = fovFor(camera.aspect) / DEG * P.zoom;
+  if (Math.abs(camera.fov - fov) > 1e-4) { camera.fov = fov; camera.updateProjectionMatrix(); }
+}
+
+const LS = { get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }, set(k, v) { try { localStorage.setItem(k, v); } catch (e) { /* 忽略 */ } } };
+/* ---------- 固定解说录音 ----------
+ * 当前录音来自 narration_v2.mp3，章节起点取十处段间停顿的中点。
+ * 使用同一个播放器连续播放；切章不重新加载音频，所有进度以 currentTime 为准。 */
+const NARRATION = {
+  url: 'audio/narration.mp3?v=7103fd05',
+  starts: [0, 28.149, 57.169, 84.468, 104.172, 126.192, 149.173, 168.246, 188.325, 217.031, 240.337],
+  duration: 0, loading: null,
+};
+const AUDIO = new Audio();
+AUDIO.preload = 'metadata';
+AUDIO.src = NARRATION.url;
+let previewTimer = 0;
+function probeAudio() {
+  if (NARRATION.loading) return NARRATION.loading;
+  NARRATION.loading = new Promise((resolve, reject) => {
+    let timer;
+    const cleanup = () => { clearTimeout(timer); AUDIO.removeEventListener('loadedmetadata', ok); AUDIO.removeEventListener('error', bad); };
+    const ok = () => {
+      cleanup();
+      if (!Number.isFinite(AUDIO.duration) || AUDIO.duration <= NARRATION.starts[NARRATION.starts.length - 1]) {
+        reject(new Error('解说录音时长不完整，请重新加载页面。')); return;
+      }
+      NARRATION.duration = AUDIO.duration; resolve(AUDIO.duration);
+    };
+    const bad = () => { cleanup(); reject(new Error('解说录音加载失败，请检查网络后重试。')); };
+    if (AUDIO.readyState >= 1 && !AUDIO.error) { ok(); return; }
+    AUDIO.addEventListener('loadedmetadata', ok, { once: true });
+    AUDIO.addEventListener('error', bad, { once: true });
+    timer = setTimeout(bad, 15000);
+    AUDIO.load();
+  }).catch((err) => { NARRATION.loading = null; throw err; });
+  return NARRATION.loading;
+}
+function chapterAt(time) {
+  let i = 0;
+  while (i + 1 < NARRATION.starts.length && time >= NARRATION.starts[i + 1]) i++;
+  return i;
+}
+function playbackError(err) {
+  if (!DEMO.on || DEMO.exiting) return;
+  AUDIO.pause(); DEMO.paused = true;
+  demoStatus(`录音播放失败，点击继续可重试：${err.message}`);
+  setPlayIcon();
+}
+function playNarration() {
+  AUDIO.playbackRate = DEMO.speed;
+  const playback = AUDIO.play();
+  if (playback && playback.catch) playback.catch((err) => {
+    if (DEMO.on && !DEMO.exiting && !DEMO.paused && !DEMO.dialog && err.name !== 'AbortError') playbackError(err);
+  });
+}
+function scriptText() {
+  return `大雁塔讲解演示 · 固定录音讲解词（共 ${CHAPTERS.length} 节）\n\n` +
+    CHAPTERS.map((c, i) => `第 ${i + 1} 节 · ${c.title}\n${c.text}\n`).join('\n');
+}
+const splitSentences = (s) => s.match(/[^。！？；]+[。！？；]?/g) || [s];
+
+/* ---------- 一节解说在整段录音中的范围 ---------- */
+function makeNarration(text, idx) {
+  const sents = splitSentences(text), total = sents.reduce((a, b) => a + b.length, 0);
+  const start = NARRATION.starts[idx], end = NARRATION.starts[idx + 1] ?? NARRATION.duration;
+  const bounds = []; { let acc = 0; for (const s of sents) { bounds.push(acc / total); acc += s.length; } }
+  return {
+    start, end, dur: end - start, sents,
+    sentenceAt(frac) { let i = 0; while (i + 1 < bounds.length && bounds[i + 1] <= frac) i++; return i; },
+    progress: () => clamp((AUDIO.currentTime - start) / (end - start), 0, 1),
+    pause: () => AUDIO.pause(), resume: playNarration, stop: () => AUDIO.pause(),
+  };
+}
+
+/* ---------- 演示引擎 ---------- */
+const DEMO = { speed: 1, on: false, dialog: false, i: -1, t: 0, paused: false, narr: null, from: null, k0: 10, tilt0: 0, time0: DEMO_DAY, saved: null, exiting: false, exitT: 0, finished: false, status: '', treesHidden: false, resumeAfterDialog: false };
+const TR = 3.2;      // 镜头从上一节过渡到本节的时间（秒）
+function demoStatus(s) { DEMO.status = s; $('demoStatus').textContent = s; }
+function setTreesHidden(on) { if (DEMO.treesHidden === on) return; DEMO.treesHidden = on; hideTreesNearPagoda(on); }
+function enterChapter(i, followAudio = false) {
+  if (!DEMO.on || DEMO.exiting) return;
+  i = clamp(Math.trunc(i), 0, CHAPTERS.length - 1);
+  DEMO.i = i; DEMO.t = 0; DEMO.finished = false;
+  DEMO.from = currentPose(); DEMO.k0 = DEMO_FX.build; DEMO.tilt0 = DEMO_FX.tilt; DEMO.time0 = timeMin;
+  const ch = CHAPTERS[i];
+  explodeGoal = ch.explode ? 1 : 0;
+  setTreesHidden(!ch.trees);
+  if (wxKey !== 'clear') setWeather('clear');
+  DEMO.narr = makeNarration(ch.text, i);
+  if (!followAudio) {
+    AUDIO.currentTime = DEMO.narr.start;
+    if (!DEMO.paused && !DEMO.dialog) playNarration();
+  }
+  $('demoChap').textContent = `第 ${i + 1} 节 / 共 ${CHAPTERS.length} 节`;
+  $('demoTitle').textContent = ch.title;
+  $('demoNote').textContent = ch.note || '';
+  $('demoSub').textContent = '';
+  const segs = $('demoProg').children;
+  for (let k = 0; k < segs.length; k++) { segs[k].classList.toggle('done', k < i); segs[k].firstChild.style.width = k < i ? '100%' : '0'; }
+  demoStatus('');
+  setPlayIcon();
+  dfxEnter(i);
+  requestRender();
+}
+function finishDemo() {
+  AUDIO.pause();
+  DEMO.finished = true;
+  $('demoSub').textContent = '讲解结束。点「退出」回到自由浏览，或点 ▶ 重新播放。';
+  $('demoNote').textContent = '';
+  for (const s of $('demoProg').children) { s.classList.add('done'); s.firstChild.style.width = '100%'; }
+  setPlayIcon();
+}
+function stepDemo(dt) {
+  if (!DEMO.on) return false;
+  if (DEMO.exiting) {
+    DEMO.exitT = Math.min(1, DEMO.exitT + dt / 2.2);
+    const I = MODES.court.init, to = { t: MODES.court.target.toArray(), az: I.az / DEG, pitch: I.pitch / DEG, dist: I.dist, zoom: 1 };
+    applyPose(blendPose(DEMO.from, to, ease(DEMO.exitT)));
+    if (DEMO.exitT >= 1) endDemo();
+    return true;
+  }
+  if (DEMO.finished) return false;
+  // 自然切章只更新画面；音频保持连续。掉帧或后台恢复也直接跟上录音的位置。
+  const audioChapter = chapterAt(AUDIO.currentTime);
+  if (audioChapter !== DEMO.i) enterChapter(audioChapter, true);
+  const ch = CHAPTERS[DEMO.i], N = DEMO.narr;
+  DEMO.t = clamp(AUDIO.currentTime - N.start, 0, N.dur);
+  const Dn = N.dur, u = N.progress();
+  // 场景：建造 / 倾斜 / 高亮 / 时间
+  DEMO_FX.build = ch.build ? ch.build(DEMO.t, u, DEMO.k0) : lerp(DEMO.k0, 10, ease(Math.min(1, DEMO.t / 2)));
+  DEMO_FX.tilt = ch.tilt ? ch.tilt(DEMO.t, u) : lerp(DEMO.tilt0, 0, ease(Math.min(1, DEMO.t / 1.5)));
+  DEMO_FX.hl = ch.hl ? ch.hl(DEMO.t, u) : 0;
+  const goalTime = ch.night ? 1230 : DEMO_DAY;
+  if (Math.abs(timeMin - goalTime) > 0.01) {
+    const dur = ch.night ? clamp(Dn * 0.6, 3, 8) : 3, k = ease(Math.min(1, DEMO.t / dur));
+    setTime(lerp(DEMO.time0, goalTime, k), k >= 1);
+    $('time').value = String(Math.round(timeMin)); $('timeOut').textContent = fmtTime(Math.round(timeMin));
+  }
+  // 镜头（地震时轻微晃动）
+  applyPose(blendPose(DEMO.from, ch.shot(u), ease(Math.min(1, DEMO.t / TR))));
+  if (DEMO_FX.quake > 0.001) {
+    const q = DEMO_FX.quake, s = simTime;
+    camera.position.x += q * 0.9 * (Math.sin(s * 41) + 0.6 * Math.sin(s * 67)); camera.position.y += q * 0.55 * Math.sin(s * 53 + 1); camera.position.z += q * 0.9 * Math.sin(s * 47 + 2);
+    camera.lookAt(controls.target);
+  }
+  camera.updateMatrixWorld();
+  // 场景特效、动画标注、资料卡片、立体展示
+  dfxFrame(DEMO.i, u, DEMO.t);
+  // 字幕和章节进度均使用同一录音时钟。
+  if (!DEMO.finished) {
+    const si = N.sentenceAt(u);
+    const s = N.sents[si] || '';
+    if ($('demoSub').textContent !== s) $('demoSub').textContent = s;
+    const seg = $('demoProg').children[DEMO.i]; if (seg) seg.firstChild.style.width = `${(u * 100).toFixed(1)}%`;
+  }
+  if (!DEMO.paused && !DEMO.dialog && AUDIO.ended) finishDemo();
+  return true;
+}
+function setPlayIcon() {
+  const playing = !DEMO.paused && !DEMO.finished;
+  $('demoPlayIcon').setAttribute('d', playing ? 'M4 2h3v12H4zM9 2h3v12H9z' : 'M4 2 L13 8 L4 14 Z');
+  $('demoPlay').setAttribute('aria-label', playing ? '暂停' : DEMO.finished ? '重新播放' : '继续');
+}
+function demoPause(on) {
+  if (DEMO.finished) { DEMO.paused = false; enterChapter(0); return; }
+  DEMO.paused = on;
+  if (DEMO.narr) { if (on) DEMO.narr.pause(); else { demoStatus(''); DEMO.narr.resume(); } }
+  setPlayIcon();
+}
+function startDemo(fromChapter) {
+  if (DEMO.on || !NARRATION.duration) return;
+  if (PT.on) setPathTrace(false);
+  if (document.body.classList.contains('zen')) setZen(false);
+  setOrbit(false);
+  DEMO.saved = { time: timeMin, wx: wxKey, labels: !document.body.classList.contains('no-labels') };
+  if (mode === 'explode') { exitExplode(false); }
+  leaveDetailState();
+  camTween = null; killInertia(); controls.enabled = false;
+  mode = 'court';
+  DEMO.on = true; DEMO.exiting = false; DEMO.paused = false;
+  EXH.instant = false; $("demo").classList.remove("instant");
+  document.body.classList.add('demo'); $('demo').hidden = false;
+  updateViewOffset(false);
+  enterChapter(fromChapter || 0);
+}
+// 退出：镜头回到初始视角，场景复原
+function stopDemo() {
+  if (!DEMO.on || DEMO.exiting) return;
+  if (DEMO.narr) DEMO.narr.stop();
+  DEMO.exiting = true; DEMO.exitT = 0; DEMO.from = currentPose();
+  explodeGoal = 0; DEMO_FX.build = 10; DEMO_FX.tilt = 0; DEMO_FX.hl = 0;
+  dfxClear();
+  setTreesHidden(false);
+  const sv = DEMO.saved;
+  if (sv) { applyTime(sv.time); if (wxKey !== sv.wx) setWeather(sv.wx); }
+}
+function endDemo() {
+  DEMO.on = false; DEMO.exiting = false;
+  dfxClear(); $("demo").classList.remove("instant");
+  document.body.classList.remove('demo'); $('demo').hidden = true;
+  camera.fov = fovFor(camera.aspect) / DEG; camera.updateProjectionMatrix();
+  controls.target.copy(MODES.court.target); applyLimits('court'); controls.enabled = true; killInertia(); controls.update(); killInertia();
+  updateViewOffset(false); updatePtUI(); requestRender();
+}
+
+/* ---------- 演示设置对话框 ---------- */
+function openDemoDialog(resume) {
+  DEMO.dialog = true; DEMO.resumeAfterDialog = !!resume && !DEMO.paused && !DEMO.finished;
+  if (DEMO.resumeAfterDialog) demoPause(true);
+  $('dsGo').textContent = resume ? '继续演示' : '开始演示';
+  $('dsMsg').textContent = '';
+  $('demoStart').hidden = false;
+  $('dsFileInfo').textContent = '正在加载固定解说录音…';
+  $('dsGo').disabled = true; $('dsTest').disabled = true;
+  probeAudio().then((duration) => {
+    $('dsFileInfo').textContent = `已载入固定解说录音 · ${Math.floor(duration / 60)} 分 ${Math.round(duration % 60)} 秒 · ${CHAPTERS.length} 节`;
+    $('dsGo').disabled = false; $('dsTest').disabled = DEMO.on;
+  }).catch((err) => {
+    $('dsFileInfo').textContent = err.message;
+    $('dsMsg').textContent = '本演示固定使用此录音。关闭窗口后重新打开可重试加载。';
+  });
+  setTimeout(() => $('dsGo').focus(), 30);
+}
+function closeDemoDialog() {
+  DEMO.dialog = false; $('demoStart').hidden = true;
+  clearTimeout(previewTimer); if (!DEMO.on) AUDIO.pause();
+}
+async function dialogGo() {
+  try { await probeAudio(); }
+  catch (err) { $('dsMsg').textContent = err.message; return; }
+  closeDemoDialog();
+  if (DEMO.on) demoPause(false);
+  else startDemo(0);
+}
+async function dialogTest() {
+  if (DEMO.on) return;
+  const msg = $('dsMsg');
+  msg.textContent = '';
+  try {
+    await probeAudio();
+    if (!DEMO.dialog || DEMO.on) return;
+    clearTimeout(previewTimer); AUDIO.currentTime = 0; AUDIO.playbackRate = 1;
+    await AUDIO.play(); msg.textContent = '正在试听固定解说录音。';
+    previewTimer = setTimeout(() => { if (!DEMO.on) { AUDIO.pause(); msg.textContent = '试听结束。'; } }, 6000);
+  }
+  catch (err) { msg.textContent = '浏览器没能播放音频：' + err.message; }
+}
+function downloadScript() {
+  const url = URL.createObjectURL(new Blob(['﻿' + scriptText()], { type: 'text/plain;charset=utf-8' }));
+  const a = document.createElement('a'); a.href = url; a.download = '大雁塔讲解词.txt'; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 4000);
+}
+function demoKey(e) {
+  if (DEMO.dialog) { if (e.key === 'Escape') { e.preventDefault(); closeDemoDialog(); if (DEMO.on && DEMO.resumeAfterDialog) demoPause(false); } return; }
+  if (e.key === 'Escape') { e.preventDefault(); stopDemo(); }
+  else if (e.key === ' ' || e.key === 'Spacebar') { e.preventDefault(); demoPause(!DEMO.paused); }
+  else if (e.key === 'ArrowRight') { e.preventDefault(); if (DEMO.i + 1 < CHAPTERS.length) enterChapter(DEMO.i + 1); }
+  else if (e.key === 'ArrowLeft') { e.preventDefault(); enterChapter(Math.max(0, DEMO.i - 1)); }
+}
+function bindDemoUI() {
+  const prog = $('demoProg');
+  CHAPTERS.forEach((c, i) => { const s = document.createElement('span'); s.title = `${i + 1}. ${c.title}`; s.appendChild(document.createElement('i')); s.addEventListener('click', () => enterChapter(i)); prog.appendChild(s); });
+  $('btnDemo').addEventListener('click', () => openDemoDialog(false));
+  $('dsGo').addEventListener('click', dialogGo);
+  $('dsTest').addEventListener('click', dialogTest);
+  $('dsScript').addEventListener('click', downloadScript);
+  $('dsCancel').addEventListener('click', () => { closeDemoDialog(); if (DEMO.on && DEMO.resumeAfterDialog) demoPause(false); });
+  $('demoPlay').addEventListener('click', () => demoPause(!DEMO.paused));
+  $('demoPrev').addEventListener('click', () => enterChapter(Math.max(0, DEMO.i - 1)));
+  $('demoNext').addEventListener('click', () => { if (DEMO.i + 1 < CHAPTERS.length) enterChapter(DEMO.i + 1); else finishDemo(); });
+  $('demoExit').addEventListener('click', stopDemo);
+  $('demoVoice').addEventListener('click', () => openDemoDialog(true));
+  AUDIO.addEventListener('error', () => playbackError(new Error('固定解说录音无法播放，请重新加载页面。')));
+}
+// 自动化测试与截图用
+function demoApi() {
+  return {
+    on: DEMO.on, i: DEMO.i, t: DEMO.t, paused: DEMO.paused, finished: DEMO.finished, exiting: DEMO.exiting, engine: 'file', status: DEMO.status,
+    audio: { src: AUDIO.currentSrc || AUDIO.src, currentTime: AUDIO.currentTime, duration: NARRATION.duration, paused: AUDIO.paused, ended: AUDIO.ended },
+    narr: DEMO.narr ? { start: DEMO.narr.start, end: DEMO.narr.end, dur: DEMO.narr.dur, progress: DEMO.narr.progress() } : null,
+    fx: { build: DEMO_FX.build, tilt: DEMO_FX.tilt, hl: DEMO_FX.hl }, sub: $('demoSub').textContent, chapters: CHAPTERS.length,
+    start: async (i) => { await probeAudio(); startDemo(i || 0); }, go: (i) => enterChapter(i), pause: (on) => demoPause(on), exit: () => stopDemo(),
+    speed: (k) => { DEMO.speed = clamp(k, 0.25, 4); AUDIO.playbackRate = DEMO.speed; }, script: () => scriptText(),
+    // 截图：按第 i 节在进度 u 处的状态摆放场景，返回镜头参数
+    dbg: () => { const m = NIGHT.moon, c = camera.position; return { sky: NIGHT.sky, moon: m ? m.disp.toArray() : null, scr: m ? projW([c.x + m.disp.x * 3000, c.y + m.disp.y * 3000, c.z + m.disp.z * 3000]) : null }; },
+    preview: async (i, u) => {
+      await probeAudio();
+      if (!DEMO.on) startDemo(i); else enterChapter(i);
+      AUDIO.pause(); DEMO.paused = true; setPlayIcon();
+      $("demo").classList.add("instant");
+      const ch = CHAPTERS[DEMO.i], N = DEMO.narr;
+      u = clamp(u, 0, 0.999999);
+      AUDIO.currentTime = N.start + u * N.dur; DEMO.t = u * N.dur;
+      DEMO.from = ch.shot(u); DEMO.k0 = ch.build ? 0 : 10; DEMO.time0 = ch.night ? 1230 : DEMO_DAY;
+      if (ch.night) setTime(1230, true);
+      explodeGoal = explodeK = ch.explode ? 1 : 0; fadeK = 1 - explodeK; setCompoundOpacity(fadeK);
+      EXH.instant = true;
+      stepDemo(0); stepExplode(0);
+      return { u, t: DEMO.t, dur: N.dur };
+    },
+    shot: (i, u) => {
+      const ch = CHAPTERS[i], t = 30;
+      DEMO_FX.build = ch.build ? ch.build(t, u, 10) : 10; DEMO_FX.tilt = ch.tilt ? ch.tilt(t, u) : 0; DEMO_FX.hl = ch.hl ? ch.hl(1.7, u) : 0;
+      explodeGoal = explodeK = ch.explode ? 1 : 0; fadeK = 1 - explodeK; setCompoundOpacity(fadeK); stepExplode(0);
+      hideTreesNearPagoda(!ch.trees);
+      const P = ch.shot(u), { eye, target } = poseEye(P);
+      return { eye: eye.toArray(), target: target.toArray(), fovK: P.zoom, time: ch.night ? 1230 : DEMO_DAY };
+    },
+  };
+}
+
+// ==== app_56_exhibit.js ====
+/* =====================================================================
+ * 10c. 立体展示窗：把构件单独拿出来，在画面一角的“展柜”里立体放大展示
+ *      独立的小场景（棚拍光 + 渐变环境）先渲染到多重采样的离屏目标，再以圆角窗口叠加到主画面上；
+ *      出现时自下而上扫描显现，转台缓慢摆动，标签与引线随模型投影。
+ * ===================================================================== */
+const EXH = {
+  ready: false, scene: null, cam: null, rt: null, quad: null, items: {}, cur: null, vis: false, alpha: 0, want: null, wantA: 0, p: 0, t0: 0,
+  rect: null, layer: null, reveal: new T.Plane(new T.Vector3(0, -1, 0), 100), cut: new T.Plane(new T.Vector3(-1, 0, 0), 100), expo: 0.82,
+};
+const EX_COMP_FS = `
+uniform sampler2D tEx; uniform float uAlpha; uniform float uTime; uniform vec2 uRes; uniform float uSweep; uniform float uRad;
+varying vec2 vUv;
+void main() {
+  vec4 c = texture2D(tEx, vUv);
+  vec2 p = vUv * uRes;
+  vec3 bg = mix(vec3(0.004, 0.011, 0.016), vec3(0.018, 0.045, 0.06), pow(vUv.y, 1.2));
+  vec2 gp = abs(fract(p / 26.0) - 0.5) * 26.0; float gl = 1.0 - smoothstep(0.0, 1.0, min(gp.x, gp.y));
+  bg += vec3(0.03, 0.09, 0.12) * gl * 0.3;
+  float vg = 1.0 - smoothstep(0.35, 1.0, length((vUv - 0.5) * vec2(1.0, 1.15)) * 1.35); bg *= mix(0.55, 1.0, vg);
+  vec3 col = bg * (1.0 - c.a) + c.rgb;
+  float sy = 1.0 - uSweep;
+  float sw = exp(-abs(vUv.y - sy) * 70.0) * step(0.001, uSweep) * (1.0 - step(0.999, uSweep));
+  col += vec3(0.35, 0.85, 1.0) * sw * 0.9;
+  col *= 0.975 + 0.025 * sin(p.y * 1.3 + uTime * 5.0);
+  vec2 q = abs(p - uRes * 0.5) - (uRes * 0.5 - uRad); float d = length(max(q, 0.0)) + min(max(q.x, q.y), 0.0) - uRad;
+  float m = 1.0 - smoothstep(-1.0, 0.5, d);
+  gl_FragColor = vec4(col, m * uAlpha);
+  #include <tonemapping_fragment>
+  #include <colorspace_fragment>
+}`;
+// 展台：发光圆环 + 刻度（加法混合）
+function exPedestal(R) {
+  const g = new T.PlaneGeometry(2 * R * 1.25, 2 * R * 1.25); g.rotateX(-Math.PI / 2);
+  const m = holoBlend(new T.ShaderMaterial({
+    uniforms: { uR: { value: R }, uTime: EXH_TIME }, transparent: true, depthWrite: false,
+    vertexShader: 'varying vec2 vP; void main(){ vP = position.xz; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
+    fragmentShader: `uniform float uR; uniform float uTime; varying vec2 vP;
+      void main(){ float r = length(vP) / uR, a = atan(vP.y, vP.x);
+        float f = fwidth(r) * 1.5;
+        float ring = 1.0 - smoothstep(0.0, f + 0.004, abs(r - 1.0));
+        float ring2 = (1.0 - smoothstep(0.0, f + 0.002, abs(r - 0.9))) * 0.45;
+        float tick = step(0.93, r) * step(r, 0.985) * (1.0 - smoothstep(0.0, 0.035, abs(fract(a / 6.2832 * 48.0) - 0.5) * 2.0 - 0.9 + 0.9));
+        float sweep = pow(max(0.0, cos(a - uTime * 0.9)), 24.0) * step(r, 1.0) * (1.0 - r) * 0.5;
+        float fill = step(r, 1.0) * 0.05;
+        gl_FragColor = vec4(vec3(0.35, 0.86, 1.0) * (ring * 1.2 + ring2 + tick * 0.5 + sweep + fill), 1.0); }`,
+  }));
+  const mesh = new T.Mesh(g, m); mesh.position.y = 0.01; mesh.renderOrder = 2;
+  return mesh;
+}
+const EXH_TIME = { value: 0 };
+function exMat(key, extra) {
+  const m = M[key].clone();
+  if (m.isMeshPhysicalMaterial) { m.clearcoat = 0; m.sheen = 0; }
+  m.side = T.FrontSide; m.shadowSide = T.FrontSide;
+  m.clippingPlanes = [EXH.reveal];
+  if (key === 'brick' || key === 'brickIn') m.color.multiplyScalar(0.8);     // 主场景的砖面另有风化着色，这里略压暗以接近实景
+  if (extra) Object.assign(m, extra);
+  return m;
+}
+function exMats(keys, extra) { const o = {}; for (const k of keys) o[k] = exMat(k, extra); return o; }
+function studioEnv() {
+  const s = new T.Scene();
+  const m = new T.ShaderMaterial({ side: T.BackSide, depthWrite: false,
+    vertexShader: 'varying vec3 vD; void main(){ vD = normalize(position); gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
+    fragmentShader: `varying vec3 vD; void main(){ float y = vD.y;
+      vec3 c = mix(vec3(0.05, 0.06, 0.07), vec3(0.55, 0.62, 0.7), smoothstep(-0.3, 0.9, y));
+      c += vec3(1.6, 1.5, 1.35) * pow(max(0.0, dot(vD, normalize(vec3(0.5, 0.7, 0.5)))), 18.0);
+      c += vec3(0.4, 0.8, 1.1) * pow(max(0.0, dot(vD, normalize(vec3(-0.7, 0.3, -0.6)))), 10.0);
+      gl_FragColor = vec4(c, 1.0); }` });
+  s.add(new T.Mesh(new T.SphereGeometry(10, 32, 16), m));
+  const pm = new T.PMREMGenerator(renderer);
+  const rt = pm.fromScene(s, 0.02);
+  pm.dispose(); s.children[0].geometry.dispose(); m.dispose();
+  return rt.texture;
+}
+function exhInit() {
+  if (EXH.ready) return;
+  EXH.scene = new T.Scene();
+  EXH.scene.add(new T.HemisphereLight(0xe2ecff, 0x3b3128, 0.8));
+  const key = new T.DirectionalLight(0xfff0da, 2.6); key.position.set(6, 10, 8);
+  const rim = new T.DirectionalLight(0x9fdcff, 1.5); rim.position.set(-8, 5, -7);
+  const fill = new T.DirectionalLight(0xffffff, 0.45); fill.position.set(-6, 2, 9);
+  EXH.scene.add(key, rim, fill);
+  EXH.scene.environment = studioEnv(); EXH.scene.environmentIntensity = 0.55;
+  EXH.cam = new T.PerspectiveCamera(30, 1.3, 0.05, 500);
+  EXH.rt = new T.WebGLRenderTarget(2, 2, { type: halfFloatOK ? T.HalfFloatType : T.UnsignedByteType, samples: Math.min(4, GL_MAX_SAMPLES || 0) });
+  EXH.quad = new A.FullScreenQuad(new T.ShaderMaterial({
+    uniforms: { tEx: { value: EXH.rt.texture }, uAlpha: { value: 1 }, uTime: { value: 0 }, uRes: { value: new T.Vector2(1, 1) }, uSweep: { value: 0 }, uRad: { value: 10 } },
+    vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }',
+    fragmentShader: EX_COMP_FS, transparent: true, depthTest: false, depthWrite: false,
+  }));
+  renderer.localClippingEnabled = true;
+  EXH.layer = new AnnoLayer($('exSvg'), $('exLbl'));
+  EXH.ready = true;
+}
+
+/* ---------- 展品 ---------- */
+const EX_DEFS = {
+  // 明代包砌：唐代塔体 + 外包约 60 cm 的青砖层
+  section: { title: '明代包砌', sub: '墙体剖切（示意）', foot: 'MING CASING · 剖面示意', target: [0.2, 1.3, -0.7], dist: 13.2, pitch: 22, camAz: 38, rot0: 0, rotA: 12, rotS: 0.3, R: 2.9,
+    build() {
+      const g = new T.Group();
+      const gb = new GB();
+      gb.box('brickIn', -1.7, 0, -2.6, 1.7, 3.0, 0, { ao: 0.85, bottom: true });
+      const core = gb.toGroup(exMats(['brickIn'], { color: new T.Color(0x9a8270) })); g.add(core);
+      const gc = new GB();
+      gc.box('brick', -1.7, 0, 0, 1.7, 3.0, 0.6, { ao: 0.85, bottom: true });
+      gc.box('brick', -0.23, 0, 0.6, 0.23, 2.45, 0.72, { col: 1.04, ao: 0.9 });
+      gc.box('brick', -1.7, 2.45, 0.6, 1.7, 2.75, 0.69, { col: 1.05, ao: 0.9 });
+      const cm = exMats(['brick'], { emissive: new T.Color(1.0, 0.42, 0.1), emissiveIntensity: 0 });
+      const casing = gc.toGroup(cm); g.add(casing);
+      this.casing = casing; this.cm = cm.brick;
+      return g;
+    },
+    labels: [
+      { p: [-0.8, 2.3, -1.5], t: '唐代塔体', s: '内部原有的砖砌结构', dx: -60, dy: -46, u0: 0.12 },
+      { p: [1.0, 1.4, 0.62], t: '明代包砌青砖', s: '万历年间外包一层', dx: 64, dy: 34, u0: 0.32, amber: true },
+    ],
+    dims: [{ a: [1.75, 3.08, 0], b: [1.75, 3.08, 0.6], t: '约 60 cm', off: -26, u0: 0.5 }],
+    update(p, t) {
+      const out = smooth01((p - 0.28) / 0.16) * (1 - smooth01((p - 0.82) / 0.12));
+      this.casing.position.z = out * 0.95;
+      this.cm.emissiveIntensity = (0.1 + 0.07 * Math.sin(t * 2.6)) * smooth01((p - 0.3) / 0.1);
+      this.dimOff = out * 0.95;
+    },
+  },
+  // 以砖仿木：砖砌的倚柱、阑额、栌斗，与木构框架（全息）对照
+  bay: { title: '以砖仿木', sub: '砖砌仿木构件与木构对照', foot: 'BRICK IMITATING TIMBER', target: [0, 2.35, 0.3], dist: 14.5, pitch: 9, camAz: 24, rot0: 0, rotA: 14, rotS: 0.28, R: 4.0,
+    build() {
+      const g = new T.Group(), gb = new GB(), lt = 3.65, lb = 4.05;
+      gb.box('brick', -2.95, 0, -0.7, 2.95, 4.62, 0, { ao: 0.86, bottom: true });
+      for (const u of [-2.64, 0, 2.64]) {
+        gb.box('brick', u - 0.23, 0, 0, u + 0.23, lt, 0.12, { col: 1.04, ao: 0.9 });
+        gb.box('brick', u - 0.4, lb, 0, u + 0.4, lb + 0.36, 0.22, { col: 1.02, ao: 0.9 });
+      }
+      gb.box('brick', -2.95, lt, 0, 2.95, lb, 0.1, { col: 1.05, ao: 0.9 });
+      gb.box('brick', -3.05, 4.62, -0.8, 3.05, 4.81, 0.12, { col: 0.92, ao: 0.9 });
+      gb.box('brick', -3.15, 4.81, -0.9, 3.15, 5.0, 0.24, { col: 0.92, ao: 0.9 });
+      g.add(gb.toGroup(exMats(['brick'])));
+      // 木构框架（全息）：木柱、阑额、栌斗、泥道栱
+      const parts = [];
+      for (const u of [-2.64, 0, 2.64]) {
+        const c = new T.CylinderGeometry(0.2, 0.22, lt, 14); c.translate(u, lt / 2, 0); parts.push(c);
+        parts.push(boxAt(0.78, 0.22, 0.78, u, lb + 0.25, 0));
+        const d = new T.CylinderGeometry(0.39 * Math.SQRT2, 0.28 * Math.SQRT2, 0.16, 4, 1); d.rotateY(Math.PI / 4); d.translate(u, lb + 0.06, 0); parts.push(d);
+        parts.push(boxAt(1.9, 0.22, 0.28, u, lb + 0.5, 0));
+      }
+      parts.push(boxAt(5.9, lb - lt, 0.32, 0, (lt + lb) / 2, 0));
+      const U = holoUniforms(0xffb45c, 0xffb45c, 0, 4.8); this.U = U;
+      const geo = mergeG(parts.map((x) => x.clone())), edges = mergeG(parts.map((x) => new T.EdgesGeometry(x, 25)));
+      parts.forEach((x) => x.dispose());
+      const ghost = new T.Group();
+      const glow = new T.Mesh(geo, holoMaterial(U, 'glow')), ln = new T.LineSegments(edges, holoMaterial(U, 'line'));
+      glow.renderOrder = 7; ln.renderOrder = 8; ghost.add(glow, ln);
+      g.add(ghost); this.ghost = ghost;
+      return g;
+    },
+    labels: [
+      { p: [2.64, 1.6, 0.12], t: '倚柱', s: '仿木柱', dx: 56, dy: 30, u0: 0.42 },
+      { p: [-1.4, 3.85, 0.1], t: '阑额', s: '仿柱头间的木额', dx: -60, dy: -40, u0: 0.5 },
+      { p: [0, 4.25, 0.22], t: '栌斗', s: '仿斗栱的大斗', dx: 54, dy: -44, u0: 0.58 },
+      { p: [-2.64, 2.4, 0.9], t: '木构框架（对照）', s: '全息示意', dx: -52, dy: 34, u0: 0.14, amber: true },
+    ],
+    update(p, t) {
+      this.U.uReveal.value = smooth01((p - 0.04) / 0.22);
+      const k = smooth01((p - 0.3) / 0.22);
+      this.ghost.position.z = lerp(1.7, 0.18, k);
+      this.U.uAlpha.value = lerp(1.0, 0.5, smooth01((p - 0.6) / 0.15)) * (0.9 + 0.1 * Math.sin(t * 3));
+      this.U.uTime.value = t;
+      this.lblZ = this.ghost.position.z;
+    },
+  },
+  // 叠涩出檐：砖层层挑出（夹两道菱角牙子），檐上反叠涩逐层收回
+  corbel: { title: '叠涩出檐', sub: '檐角构造 · 逐皮砌筑', foot: 'CORBELLED EAVES', target: [-1.3, 2.45, -1.1], dist: 12.5, pitch: -4, camAz: 30, rot0: 0, rotA: 12, rotS: 0.26, R: 3.4,
+    build() {
+      const g = new T.Group(), L = -3.3, mats = exMats(['brick', 'bell']);
+      const lay = PG.LAY * 1.0, y0 = 2.2, lt = y0 - 0.95 + 0.4, lb = lt + 0.4;
+      const gw = new GB();
+      gw.box('brick', L, 0, L, 0, y0, 0, { ao: 0.85, bottom: true });
+      gw.box('brick', -0.46, 0, 0, 0, lt, 0.12, { col: 1.04 }); gw.box('brick', 0, 0, -0.46, 0.12, lt, 0, { col: 1.04 });
+      gw.box('brick', L, lt, 0, 0, lb, 0.1, { col: 1.05 }); gw.box('brick', 0, lt, L, 0.1, lb, 0, { col: 1.05 });
+      gw.box('brick', -0.62, lb, 0, -0.02, lb + 0.36, 0.22, { col: 1.02 }); gw.box('brick', 0, lb, -0.62, 0.22, lb + 0.36, -0.02, { col: 1.02 });
+      g.add(gw.toGroup(mats));
+      this.courses = [];
+      let y = y0;
+      for (let c = 0; c < 6; c++) {
+        const o = PG.OUT[c], gb = new GB();
+        gb.box('brick', L, y, L, o, y + lay, o, { col: c === 5 ? 1.0 : 0.93, ao: 0.9, bottom: true });
+        if (c === 1 || c === 3) {
+          if (!TOOTH) { TOOTH = new T.BoxGeometry(0.28, 1, 0.28).toNonIndexed(); TOOTH.userData.worldUV = true; }
+          const m = new T.Matrix4(), rot = new T.Matrix4().makeRotationY(Math.PI / 4), sc = new T.Matrix4().makeScale(1, lay, 1);
+          for (let u = L + 0.2; u <= o + 0.01; u += 0.4) {
+            m.makeTranslation(u, y + lay / 2, o).multiply(rot).multiply(sc); gb.geom('brick', TOOTH, m, 0.82);
+            if (u < o - 0.05) { m.makeTranslation(o, y + lay / 2, u).multiply(rot).multiply(sc); gb.geom('brick', TOOTH, m, 0.82); }
+          }
+        }
+        const grp = gb.toGroup(mats); grp.userData = { o, kind: 'out', c }; g.add(grp); this.courses.push(grp);
+        y += lay;
+      }
+      this.bellY = y0 + 5 * lay;
+      for (const [c, oo] of [[0, 0.62], [1, 0.38], [2, 0.14]]) {
+        const o = -0.7 + oo, gb = new GB();
+        gb.box('brick', L, y, L, o, y + lay, o, { col: 0.95 - c * 0.02, ao: 0.9, bottom: true });
+        const grp = gb.toGroup(mats); grp.userData = { o, kind: 'back', c }; g.add(grp); this.courses.push(grp);
+        y += lay;
+      }
+      { const gb = new GB(); gb.box('brick', L, y, L, -0.7, y + 1.1, -0.7, { ao: 0.85 }); const grp = gb.toGroup(mats); grp.userData = { kind: 'wall' }; g.add(grp); this.courses.push(grp); }
+      const bell = new T.Mesh(bellGeometry(), mats.bell); const o5 = PG.OUT[5] - 0.12;
+      bell.position.set(o5, this.bellY, o5); bell.rotation.y = Math.PI / 4; g.add(bell); this.bell = bell;
+      this.lay = lay; this.y0 = y0;
+      return g;
+    },
+    labels: [
+      { p: [PG.OUT[2] + 0.02, 2.2 + 2.5 * PG.LAY, -1.7], t: '叠涩出檐', s: '砖层逐皮向外挑出', dx: 64, dy: 28, u0: 0.42 },
+      { p: [-1.6, 2.2 + 1.5 * PG.LAY, PG.OUT[1] + 0.18], t: '菱角牙子', s: '斜放的砖露出三角齿', dx: -60, dy: 62, u0: 0.6 },
+      { p: [-1.5, 2.2 + 7.5 * PG.LAY, -0.7 + 0.38], t: '反叠涩', s: '檐上逐皮收回', dx: -60, dy: -44, u0: 0.82 },
+      { p: [PG.OUT[5] - 0.12, 2.2 + 5 * PG.LAY - 1.2, PG.OUT[5] - 0.12], t: '檐角铜铃', s: '风铎（示意）', dx: 58, dy: 36, u0: 0.93 },
+    ],
+    update(p, t) {
+      for (const grp of this.courses) {
+        const d = grp.userData;
+        if (d.kind === 'out') {
+          const k = smooth01((p - (0.06 + d.c * 0.065)) / 0.08);
+          grp.visible = k > 0.001; const s = -(d.o + 0.32) * (1 - k); grp.position.set(s, 0, s);
+        } else if (d.kind === 'back') {
+          const k = smooth01((p - (0.74 + d.c * 0.05)) / 0.06);
+          grp.visible = k > 0.001; grp.position.set(0, (1 - k) * 0.9, 0);
+        } else { const k = smooth01((p - 0.88) / 0.06); grp.visible = k > 0.001; grp.position.set(0, (1 - k) * 1.4, 0); }
+      }
+      const kb = smooth01((p - 0.91) / 0.05);
+      this.bell.visible = kb > 0.001; this.bell.scale.setScalar(Math.max(0.001, kb));
+      this.bell.rotation.z = Math.sin(t * 1.7) * 0.05; this.bell.rotation.x = Math.sin(t * 1.3 + 1) * 0.04;
+    },
+  },
+  // 塔内结构：一层塔身剖开，看楼板、木梯、塔心室与券洞
+  storey: { title: '塔内结构', sub: '第四层塔身剖切（示意）', foot: 'SECTION · 塔心室与木梯为示意建模', target: [-1.0, 3.0, 0], dist: 44, pitch: 24, camAz: 90, rot0: 0, rotA: 10, rotS: 0.22, R: 13.5,
+    build() {
+      const s = buildStorey(3, 0), g = new T.Group();
+      const keys = [...s.gb.b.keys()];
+      const mats = exMats(keys, { clippingPlanes: [EXH.reveal, EXH.cut] });
+      const grp = s.gb.toGroup(mats);
+      const cap = new T.MeshBasicMaterial({ color: 0x9e4f2e, side: T.BackSide, clippingPlanes: [EXH.reveal, EXH.cut] });
+      for (const m of [...grp.children]) { const c = new T.Mesh(m.geometry, cap); grp.add(c); }
+      g.add(grp);
+      if (s.bells.length) {
+        const im = new T.InstancedMesh(bellGeometry(), exMat('bell', { clippingPlanes: [EXH.reveal, EXH.cut] }), s.bells.length), m4 = new T.Matrix4();
+        s.bells.forEach((b, k) => { m4.makeRotationY(Math.atan2(b[0], b[2])).setPosition(b[0], b[1], b[2]); im.setMatrixAt(k, m4); });
+        g.add(im);
+      }
+      // 剖切面指示
+      const pg = new T.PlaneGeometry(24, 9); pg.rotateY(Math.PI / 2); pg.translate(0, 3.4, 0);
+      this.planeU = { uAlpha: { value: 0 } };
+      const pm = holoBlend(new T.ShaderMaterial({ uniforms: this.planeU, transparent: true, depthWrite: false, side: T.DoubleSide,
+        vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
+        fragmentShader: `uniform float uAlpha; varying vec2 vUv; void main(){ vec2 g = abs(fract(vUv * vec2(24.0, 9.0)) - 0.5); float l = 1.0 - smoothstep(0.42, 0.5, max(g.x, g.y));
+          float e = 1.0 - smoothstep(0.0, 0.02, min(min(vUv.x, 1.0 - vUv.x), min(vUv.y, 1.0 - vUv.y)));
+          gl_FragColor = vec4(vec3(0.35, 0.85, 1.0) * (0.06 + l * 0.25 + e * 0.8) * uAlpha, 1.0); }` }));
+      this.plane = new T.Mesh(pg, pm); this.plane.renderOrder = 9; g.add(this.plane);
+      return g;
+    },
+    labels: [
+      { p: [0, 0.02, -3.1], t: '木楼板', s: '各层架设，中留楼梯井', dx: 56, dy: 50, u0: 0.32 },
+      { p: [0, 4.6, 0.3], t: '木梯', s: '绕中柱盘旋而上', dx: -50, dy: -62, u0: 0.42 },
+      { p: [0, 2.6, -2.6], t: '塔心室', s: '方形塔室', dx: 54, dy: -62, u0: 0.52 },
+      { p: [0, 2.0, 7.0], t: '券洞', s: '贯通厚墙，四面各一', dx: -56, dy: 46, u0: 0.62 },
+    ],
+    update(p) {
+      const k = smooth01((p - 0.04) / 0.22), c = lerp(12, 0.0, k);
+      // 剖切面随展品转动（在展品自身坐标中为 x = c）
+      EXH.cut.set(new T.Vector3(-1, 0, 0), c).applyMatrix4(this.grp.matrixWorld);
+      this.plane.position.x = c;
+      this.planeU.uAlpha.value = Math.sin(Math.PI * clamp(k * 1.1, 0, 1)) * 0.9;
+      this.plane.visible = this.planeU.uAlpha.value > 0.01;
+    },
+  },
+  // 圣教序碑：两通唐碑并列
+  stele: { title: '圣教序碑', sub: '两通唐碑，均为褚遂良书', foot: '永徽四年（653）立 · 碑文为示意纹理', target: [0, 2.2, 0], dist: 11.5, pitch: 8, camAz: 16, rot0: 0, rotA: 15, rotS: 0.25, R: 2.9,
+    build() {
+      const g = new T.Group(), gb = new GB();
+      for (const x of [-1.05, 1.05]) {
+        gb.box('stone', x - 0.62, 0, -0.28, x + 0.62, 0.3, 0.28, { ao: 0.85 });
+        gb.box('stele', x - 0.5, 0.3, -0.13, x + 0.5, 3.675, 0.13, { skip: { pz: true } });
+        gb.quad('stele', [x - 0.5, 0.3, 0.13], [x + 0.5, 0.3, 0.13], [x + 0.5, 3.675, 0.13], [x - 0.5, 3.675, 0.13], [0, 0, 1], { uv: [[0, 0], [1, 0], [1, 1], [0, 1]] });
+      }
+      g.add(gb.toGroup(exMats(['stone', 'stele'])));
+      return g;
+    },
+    labels: [
+      { p: [-1.05, 3.0, 0.13], t: '《圣教序》', s: '西龛 · 唐太宗撰文', dx: -34, dy: -34, u0: 0.2 },
+      { p: [1.05, 2.2, 0.13], t: '《圣教序记》', s: '东龛 · 唐高宗撰文', dx: 34, dy: -40, u0: 0.4 },
+    ],
+    dims: [{ a: [1.72, 0.3, 0], b: [1.72, 3.675, 0], t: '碑身高约 3.4 m', off: -30, u0: 0.6 }],
+    update() {},
+  },
+  // 西门楣线刻：唐代佛殿图像
+  lintel: { title: '门楣线刻', sub: '底层西门石门楣（纹样为示意）', foot: '梁思成曾据此研究唐代木构建筑', target: [0, 0.5, 0], dist: 3.9, pitch: 5, camAz: 0, rot0: 0, rotA: 20, rotS: 0.3, R: 1.25,
+    build() {
+      const g = new T.Group(), gb = new GB(), r = 0.95, th = 0.14;
+      for (let a = 0; a < ARC.length - 1; a++) {
+        const [c0, s0] = ARC[a], [c1, s1] = ARC[a + 1];
+        gb.tri('lintelHall', [0, 0.02, th], [r * c0, 0.02 + r * s0, th], [r * c1, 0.02 + r * s1, th], [0, 0, 1], { uv: [[0.5, 0.02], [0.5 + c0 * 0.5, 0.02 + s0 * 0.96], [0.5 + c1 * 0.5, 0.02 + s1 * 0.96]] });
+        gb.tri('stone', [0, 0.02, 0], [r * c1, 0.02 + r * s1, 0], [r * c0, 0.02 + r * s0, 0], [0, 0, -1]);
+        gb.quad('stone', [r * c0, 0.02 + r * s0, 0], [r * c1, 0.02 + r * s1, 0], [r * c1, 0.02 + r * s1, th], [r * c0, 0.02 + r * s0, th], [(c0 + c1) / 2, (s0 + s1) / 2, 0]);
+      }
+      gb.box('stone', -1.08, 0, -0.06, 1.08, 0.02, th + 0.06);
+      g.add(gb.toGroup(exMats(['lintelHall', 'stone'])));
+      return g;
+    },
+    labels: [{ p: [0.32, 0.5, 0.14], t: '唐代佛殿图像', s: '五开间殿堂、斗栱与鸱尾', dx: 56, dy: -46, u0: 0.25 }],
+    update() {},
+  },
+};
+function exItem(id) {
+  let it = EXH.items[id];
+  if (it) return it;
+  const D = EX_DEFS[id];
+  it = Object.create(D);
+  it.grp = new T.Group();
+  const body = D.build.call(it);
+  it.grp.add(body, exPedestal(D.R));
+  it.grp.visible = false;
+  EXH.scene.add(it.grp);
+  EXH.items[id] = it;
+  return it;
+}
+
+/* ---------- 布局：桌面放在右侧，手机放在标题下方 ---------- */
+function exLayout() {
+  const W = canvas.clientWidth, H = canvas.clientHeight, f = $('exFrame');
+  const bot = document.querySelector('.demo-bottom').getBoundingClientRect();
+  let r;
+  if (W <= 640) {
+    const top = 74, w = W - 20, h = Math.round(Math.min(H * 0.34, w * 0.74, Math.max(150, bot.top - top - 150)));
+    r = { left: 10, top, w, h, side: 'top' };
+  } else {
+    const top = 92, w0 = Math.min(W * 0.36, 540), hMax = bot.top - top - 18;
+    let w = w0, h = Math.min(w0 * 0.8, hMax);
+    if (h < w * 0.62) w = Math.max(260, h / 0.62);
+    r = { left: Math.round(W - w - Math.max(20, 0)), top, w: Math.round(w), h: Math.round(h), side: 'right' };
+  }
+  EXH.rect = r;
+  Object.assign(f.style, { left: r.left + 'px', top: r.top + 'px', width: r.w + 'px', height: r.h + 'px' });
+  return r;
+}
+// 每帧由讲解脚本调用：希望展示的展品与透明度、本段进度
+function exhSet(id, a, p) { if (a > EXH.wantA || !EXH.want) { EXH.want = id; EXH.wantA = a; EXH.p = p; } }
+function exhFrame(time) {
+  const id = EXH.wantA > 0.002 ? EXH.want : null, a = EXH.wantA;
+  EXH.want = null; EXH.wantA = 0;
+  const f = $('exFrame');
+  if (!id) {
+    // 淡出：窗口与其中的三维画面一起在约 0.45 秒内消失
+    if (EXH.vis) {
+      if (!EXH.hiding) { EXH.hiding = true; EXH.hideStart = time; EXH.hideA = EXH.alpha; f.style.opacity = ''; f.classList.remove('on'); document.body.classList.remove('ex-on'); updateViewOffset(false); }
+      const k = 1 - (time - EXH.hideStart) / 0.45;
+      if (k <= 0 || !EXH.cur) { EXH.vis = false; EXH.hiding = false; f.hidden = true; if (EXH.layer) EXH.layer.clear(); }
+      else EXH.alpha = EXH.hideA * k;
+    }
+    return;
+  }
+  exhInit();
+  if (EXH.hiding) { EXH.hiding = false; f.classList.add('on'); document.body.classList.add('ex-on'); updateViewOffset(false); }
+  if (!EXH.vis) { f.hidden = false; exLayout(); void f.offsetWidth; f.classList.add('on'); EXH.vis = true; document.body.classList.add('ex-on'); updateViewOffset(false); }
+  if (EXH.cur !== id) {
+    if (EXH.cur && EXH.items[EXH.cur]) EXH.items[EXH.cur].grp.visible = false;
+    EXH.cur = id; EXH.t0 = EXH.instant ? time - 10 : time; EXH.layer.clear();
+    const it = exItem(id); it.grp.visible = true;
+    $('exTitle').textContent = it.title; $('exSub').textContent = it.sub; $('exFoot').textContent = it.foot || '';
+  }
+  EXH.alpha = a; EXH.time = time;
+  f.style.opacity = a < 0.999 ? String(a) : '';
+  const it = EXH.items[id], r = EXH.rect || exLayout();
+  // 显现：水平剖切面自下而上扫过
+  const age = time - EXH.t0, sweep = clamp(age / 1.3, 0, 1);
+  const bb = it.bbY || (it.bbY = new T.Box3().setFromObject(it.grp));
+  EXH.reveal.constant = lerp(bb.min.y - 0.05, bb.max.y + 0.05, smooth01(sweep));
+  EXH.sweep = sweep;
+  it.grp.rotation.y = (it.rot0 + it.rotA * Math.sin(time * it.rotS)) * DEG;
+  it.grp.updateMatrixWorld(true);
+  it.update(EXH.p, time);
+  // 镜头
+  const cam = EXH.cam, tgt = new T.Vector3(...it.target);
+  cam.aspect = r.w / r.h; cam.fov = it.fov || 30;
+  const k = clamp(1.3 / cam.aspect, 1, 1.6);        // 窗口偏窄时退远一些
+  cam.position.copy(sph(it.camAz * DEG, it.pitch * DEG, it.dist * k, tgt)); cam.lookAt(tgt); cam.updateProjectionMatrix(); cam.updateMatrixWorld();
+  it.grp.updateMatrixWorld(true);
+  // 标签
+  const L = EXH.layer; L.begin(time, r.w, r.h);
+  const pr = (p) => { const v = new T.Vector3(...p).applyMatrix4(it.grp.matrixWorld).project(cam); return v.z > 1 ? [NaN, NaN] : [(v.x * 0.5 + 0.5) * r.w, (-v.y * 0.5 + 0.5) * r.h]; };
+  const show = sweep > 0.85 ? 1 : 0;
+  (it.labels || []).forEach((lb, i) => {
+    const p = lb.p.slice(); if (id === 'bay' && i === 3) p[2] += (it.lblZ || 0) - 0.9;
+    const [x, y] = pr(p);
+    L.call(`x${i}`, x, y, { t: lb.t, s: lb.s, dx: lb.dx * (r.w < 420 ? 0.7 : 1), dy: lb.dy * (r.w < 420 ? 0.75 : 1), a: show, r: rev(EXH.p, lb.u0, 0.14), amber: lb.amber });
+  });
+  (it.dims || []).forEach((d, i) => {
+    const off = it.dimOff || 0, a0 = d.a.slice(), b0 = d.b.slice();
+    if (id === 'section') { b0[2] += off; }
+    const [x0, y0] = pr(a0), [x1, y1] = pr(b0);
+    L.dim(`d${i}`, x0, y0, x1, y1, { t: d.t, off: d.off, a: show, r: rev(EXH.p, d.u0, 0.12), lab: d.off < 0 ? -16 : 16 });
+  });
+  L.end();
+}
+// 叠加到主画面（在主后期处理之后调用）
+const _exCC = new T.Color();
+function exhRender() {
+  if (!EXH.vis || !EXH.rect) return;
+  const r = EXH.rect, dpr = renderer.getPixelRatio(), W = canvas.clientWidth, H = canvas.clientHeight;
+  const w = Math.max(2, Math.round(r.w * dpr)), h = Math.max(2, Math.round(r.h * dpr));
+  if (EXH.rt.width !== w || EXH.rt.height !== h) EXH.rt.setSize(w, h);
+  const prevT = renderer.getRenderTarget(), prevA = renderer.getClearAlpha(); renderer.getClearColor(_exCC);
+  const shU = renderer.shadowMap.needsUpdate, auto = renderer.autoClear, ex = renderer.toneMappingExposure;
+  renderer.shadowMap.needsUpdate = false;
+  EXH_TIME.value = EXH.time || 0;
+  renderer.setRenderTarget(EXH.rt); renderer.setClearColor(0x000000, 0); renderer.clear(); renderer.render(EXH.scene, EXH.cam);
+  renderer.setRenderTarget(null);
+  const U = EXH.quad.material.uniforms;
+  U.uRes.value.set(r.w, r.h); U.uAlpha.value = EXH.alpha; U.uTime.value = EXH.time || 0; U.uSweep.value = EXH.sweep || 0;
+  renderer.autoClear = false; renderer.toneMappingExposure = EXH.expo;
+  renderer.setViewport(r.left, H - r.top - r.h, r.w, r.h); renderer.setScissor(r.left, H - r.top - r.h, r.w, r.h); renderer.setScissorTest(true);
+  EXH.quad.render(renderer);
+  renderer.setScissorTest(false); renderer.setViewport(0, 0, W, H);
+  renderer.autoClear = auto; renderer.toneMappingExposure = ex; renderer.shadowMap.needsUpdate = shU;
+  renderer.setClearColor(_exCC, prevA); renderer.setRenderTarget(prevT);
+}
+function exhClear() {
+  EXH.want = null; EXH.wantA = 0;
+  if (EXH.cur && EXH.items[EXH.cur]) EXH.items[EXH.cur].grp.visible = false;
+  EXH.cur = null; EXH.vis = false; EXH.hiding = false;
+  const f = $('exFrame'); f.classList.remove('on'); f.hidden = true; f.style.opacity = '';
+  document.body.classList.remove('ex-on');
+  if (EXH.layer) EXH.layer.clear();
+}
+
+// ==== app_57_demofx.js ====
+/* =====================================================================
+ * 10d. 讲解演示的分节编排：历史场景（全息原塔、西行路线、地震、建造）、
+ *      场景内动画标注、资料卡片与立体展示。u 为本节解说进度（0–1），与字幕同步。
+ * ===================================================================== */
+const DFX = { i: -1, layer: null, st: {} };
+const PGW = (x, y, z) => [PG.x + x, y, PG.z + z];
+const FLOOR = (() => { const a = [PG.PH]; for (let i = 0; i < 7; i++) a.push(a[i] + PG.H[i]); return a; })();   // 各层底面标高（第 i 层）
+const stWallH = (i) => PG.H[i] - (i === 6 ? 6 : 9) * PG.LAY - (i === 0 ? PG.PLINTH : 0);
+const stY0 = (i) => FLOOR[i] + (i === 0 ? PG.PLINTH : 0);
+const stApex = (i) => (i === 0 ? 4.7 : Math.min(stWallH(i) * 0.62, 3.9));
+const CN_NUM = ['一', '二', '三', '四', '五', '六', '七'];
+// 世界坐标标注的便捷写法
+function wCall(L, id, p, o) { const [x, y] = projW(p); L.call(id, x, y, o); }
+function wDim(L, id, a, b, o) { const [x0, y0] = projW(a), [x1, y1] = projW(b); L.dim(id, x0, y0, x1, y1, o); }
+function wPath(L, id, pts, o) { L.path(id, pts.map(projW), o); }
+function wRing(L, id, p, o) { const [x, y] = projW(p); L.ring(id, x, y, o); }
+// 锚点是否被塔身挡住（沿视线采样，按各高度的塔身半宽判断）；结果平滑过渡，避免标签闪烁
+function pagodaHides(p) {
+  const c = camera.position;
+  for (let k = 1; k < 28; k++) {
+    const f = k / 28, x = lerp(c.x, p[0], f), y = lerp(c.y, p[1], f), z = lerp(c.z, p[2], f);
+    if (y < 0 || y > PG.top) continue;
+    const h = pagodaHalfAt(y) - 0.9;
+    if (Math.abs(x - PG.x) < h && Math.abs(z - PG.z) < h) return true;
+  }
+  return false;
+}
+function visK(id, p) {
+  const o = DFX.st.occ || (DFX.st.occ = {}), goal = pagodaHides(p) ? 0 : 1;
+  o[id] = o[id] === undefined ? goal : o[id] + (goal - o[id]) * 0.25;
+  return o[id];
+}
+// 拆解态构件上的点：随构件上移
+function partPt(idx, x, y, z) { const p = parts[idx]; return PGW(x, y + (p ? p.position.y : 0), z); }
+
+/* ---------- 资料卡片 ---------- */
+function cardLoc(u, show, extra) {
+  const c = hudCard('loc', '', `<div class="hk">LOCATION<i>定位</i></div><div class="ht">大雁塔 · 大慈恩寺</div>
+    <p class="mono" data-k="c"></p><p data-k="a"></p><p data-k="b"></p><p data-k="w"></p><p class="src" data-k="s"></p>`);
+  hudShow(c, show > 0);
+  const q = (k) => c.el.querySelector(`[data-k=${k}]`), k = clamp(show, 0, 1);
+  const n = smooth01(k * 1.4);
+  const lat = (34.22 * n).toFixed(2), lon = (108.96 * n).toFixed(2);
+  const txt = `N ${lat}°  E ${lon}°`; if (q('c').textContent !== txt) q('c').textContent = txt;
+  typeInto(q('a'), '陕西省西安市雁塔区', k * 2 - 0.3);
+  typeInto(q('b'), extra || '始建于唐永徽三年（652 年）', k * 2 - 0.6);
+  typeInto(q('w'), '2014 年列入《世界遗产名录》', (u - 0.62) * 6);
+  typeInto(q('s'), '丝绸之路：长安—天山廊道的路网', (u - 0.68) * 5);
+  return c;
+}
+// 玄奘西行求法路线（示意）
+const XZ_PTS = { 长安: [108.94, 34.26], 凉州: [102.64, 37.93], 瓜州: [95.78, 40.52], 高昌: [89.19, 42.85], 龟兹: [82.96, 41.72], 碎叶: [75.35, 42.8], 飒秣建: [66.96, 39.65],
+  缚喝: [66.9, 36.76], 犍陀罗: [71.58, 34.01], 那烂陀: [85.44, 25.14], 葱岭: [75.23, 37.77], 于阗: [79.92, 37.11], 敦煌: [94.66, 40.14] };
+const xzXY = (n) => { const [lo, la] = XZ_PTS[n]; return [14 + (lo - 64) * 5.6, 10 + (46 - la) * 6.2]; };
+const xzD = (names) => names.map((n, i) => `${i ? 'L' : 'M'}${xzXY(n)[0].toFixed(1)} ${xzXY(n)[1].toFixed(1)}`).join('');
+function cardMap(u, show) {
+  const out = xzD(['长安', '凉州', '瓜州', '高昌', '龟兹', '碎叶', '飒秣建', '缚喝', '犍陀罗', '那烂陀']);
+  const back = xzD(['那烂陀', '犍陀罗', '葱岭', '于阗', '敦煌', '长安']);
+  const lab = (n, t, dx, dy, cls) => { const [x, y] = xzXY(n); return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${n === '长安' ? 3.4 : 2.2}" fill="${n === '长安' ? AMBER_C : HOLO_C}"/><text x="${(x + dx).toFixed(1)}" y="${(y + dy).toFixed(1)}" class="${cls || ''}">${t}</text>`; };
+  let grat = '';
+  for (let lo = 70; lo <= 110; lo += 10) { const x = 14 + (lo - 64) * 5.6; grat += `<line x1="${x}" y1="6" x2="${x}" y2="150" />`; }
+  for (let la = 25; la <= 45; la += 10) { const y = 10 + (46 - la) * 6.2; grat += `<line x1="6" y1="${y}" x2="296" y2="${y}" />`; }
+  const c = hudCard('map', '', `<div class="hk">ROUTE<i>示意</i></div><div class="ht">玄奘西行求法</div>
+    <svg viewBox="0 0 300 156" aria-hidden="true" style="font-family:var(--sans)">
+      <g stroke="rgba(139,230,255,.12)" stroke-width="0.6" stroke-dasharray="1 3">${grat}</g>
+      <text x="96" y="48" fill="rgba(214,236,242,.34)" font-size="11" letter-spacing="4">西 域</text>
+      <text x="150" y="116" fill="rgba(214,236,242,.34)" font-size="11" letter-spacing="4">天 竺</text>
+      <path d="${out}" fill="none" stroke="${HOLO_C}" stroke-opacity=".55" stroke-width="1.2" stroke-dasharray="3 3" data-k="out"/>
+      <path d="${back}" fill="none" stroke="${AMBER_C}" stroke-width="5" stroke-opacity=".16" stroke-linecap="round" stroke-linejoin="round" data-k="bg"/>
+      <path d="${back}" fill="none" stroke="${AMBER_C}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" data-k="back"/>
+      <g fill="rgba(232,244,247,.82)" font-size="9.5">
+        ${lab('长安', '长安', -8, -7, 'big')}${lab('高昌', '高昌', -9, -6)}${lab('碎叶', '碎叶', -9, -6)}${lab('飒秣建', '撒马尔罕', -14, -6)}
+        ${lab('犍陀罗', '犍陀罗', -32, 4)}${lab('那烂陀', '那烂陀寺', 6, 4)}${lab('于阗', '于阗', 4, 11)}${lab('敦煌', '敦煌', -6, 12)}
+      </g>
+      <circle r="4" fill="#fff" data-k="dot"/><circle r="9" fill="none" stroke="${AMBER_C}" stroke-width="1.2" data-k="dot2"/>
+    </svg>
+    <p data-k="t1"></p><p class="src">实线为归程，虚线为去程；地名位置为示意</p>`);
+  c.el.querySelector('text.big') && c.el.querySelector('text.big').setAttribute('fill', AMBER_C);
+  hudShow(c, show > 0);
+  const bp = c.el.querySelector('[data-k=back]'), bg = c.el.querySelector('[data-k=bg]');
+  if (!c.data.len) c.data.len = bp.getTotalLength();
+  const len = c.data.len, k = smooth01((u - 0.03) / 0.24);
+  for (const e of [bp, bg]) { e.setAttribute('stroke-dasharray', `${len} ${len + 2}`); e.setAttribute('stroke-dashoffset', String(len * (1 - k))); }
+  const pt = bp.getPointAtLength(len * k), d1 = c.el.querySelector('[data-k=dot]'), d2 = c.el.querySelector('[data-k=dot2]');
+  for (const d of [d1, d2]) { d.setAttribute('cx', pt.x.toFixed(1)); d.setAttribute('cy', pt.y.toFixed(1)); }
+  const ph = (simTime * 0.9) % 1; d2.setAttribute('r', (4 + 9 * ph).toFixed(1)); d2.setAttribute('opacity', ((1 - ph) * (k > 0 ? 1 : 0)).toFixed(2));
+  d1.setAttribute('opacity', k > 0.001 ? '1' : '0');
+  typeInto(c.el.querySelector('[data-k=t1]'), '贞观十九年（645 年）回到长安，带回经论 657 部', (u - 0.18) * 5);
+  return c;
+}
+function cardQuote(u, show) {
+  const c = hudCard('quote', '', `<div class="hk">ARCHIVE<i>文献</i></div><div class="ht">《大慈恩寺三藏法师传》</div>
+    <p data-k="q" style="font-family:var(--serif);font-size:14.5px;line-height:1.75;color:#fff7e6"></p><p class="src" data-k="n"></p>`);
+  hudShow(c, show > 0);
+  typeInto(c.el.querySelector('[data-k=q]'), '“其塔基面各一百四十尺……塔有五级，并相轮露槃，凡高一百八十尺。”', show * 1.6);
+  typeInto(c.el.querySelector('[data-k=n]'), '唐尺约合 0.3 m：塔基每面约 42 m，通高约 54 m', show * 1.6 - 0.8);
+  return c;
+}
+function cardTimeline(id, items, u) {
+  const c = hudCard(id, '', `<div class="hk">TIMELINE<i>年表</i></div><ul class="tl">${items.map((it) => `<li><b>${it.y}</b>${it.t}</li>`).join('')}</ul>`);
+  hudShow(c, true);
+  const lis = c.el.querySelectorAll('li');
+  items.forEach((it, i) => {
+    const u1 = it.u1 !== undefined ? it.u1 : i + 1 < items.length ? items[i + 1].u0 : 9, on = u >= it.u0, hot = on && u < u1;   // 正在讲的一条高亮
+    lis[i].classList.toggle('on', on && !hot); lis[i].classList.toggle('hot', hot);
+  });
+  return c;
+}
+function cardPoem(u, show) {
+  const c = hudCard('poem', 'poem', `<div class="pv" data-k="p"></div><div class="pm">岑参《与高适薛据同登慈恩寺浮图》<br>唐天宝十一载（752 年）</div>`);
+  hudShow(c, show > 0);
+  typeInto(c.el.querySelector('[data-k=p]'), '四角碍白日，七层摩苍穹', show * 1.5);
+  return c;
+}
+// 倾斜量折线图（单一数据序列：标题即说明，不需图例；关键点直接标注数值）
+const TILT_DATA = [[1719, 198], [1941, 413], [1964, 873], [1983, 998], [1996, 1010.5]];
+function cardTilt(u, show) {
+  const X = (y) => 36 + (y - 1700) / (2030 - 1700) * 252, Y = (v) => 122 - v / 1100 * 106;
+  const pts = TILT_DATA.map(([y, v]) => [X(y), Y(v)]);
+  const d = pts.map((p, i) => `${i ? 'L' : 'M'}${p[0].toFixed(1)} ${p[1].toFixed(1)}`).join('');
+  const reb = `M${X(1996).toFixed(1)} ${Y(1010.5).toFixed(1)}L${X(2006).toFixed(1)} ${Y(1001.1).toFixed(1)}`;
+  const c = hudCard('tilt', '', `<div class="hk">MONITOR<i>监测</i></div><div class="ht">塔身倾斜量（向西北）</div>
+    <svg viewBox="0 0 300 150" aria-hidden="true" style="font-family:var(--mono)">
+      <g stroke="rgba(214,236,242,.14)" stroke-width="1">${[0, 500, 1000].map((v) => `<line x1="36" x2="290" y1="${Y(v)}" y2="${Y(v)}"/>`).join('')}</g>
+      <g fill="rgba(214,236,242,.6)" font-size="9.5" text-anchor="end">${[0, 500, 1000].map((v) => `<text x="31" y="${Y(v) + 3}">${v}</text>`).join('')}</g>
+      <g fill="rgba(214,236,242,.6)" font-size="9.5" text-anchor="middle">${[1700, 1800, 1900, 2000].map((y) => `<text x="${X(y)}" y="138">${y}</text>`).join('')}</g>
+      <text x="36" y="10" fill="rgba(214,236,242,.6)" font-size="9.5">mm</text>
+      <path d="${d}" fill="none" stroke="${AMBER_C}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" data-k="ln"/>
+      <path d="${reb}" fill="none" stroke="${HOLO_C}" stroke-width="2" stroke-dasharray="3 3" data-k="rb"/>
+      ${pts.map((p, i) => `<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="4" fill="#120d06" stroke="${AMBER_C}" stroke-width="2" data-k="m${i}"/>`).join('')}
+      <text x="${(pts[0][0] + 6).toFixed(1)}" y="${(pts[0][1] - 8).toFixed(1)}" fill="#f3fbff" font-size="10.5" data-k="l0">1719 · 198</text>
+      <text x="${(pts[4][0] - 6).toFixed(1)}" y="${(pts[4][1] - 10).toFixed(1)}" fill="#f3fbff" font-size="10.5" text-anchor="end" data-k="l4">1996 · 1010.5</text>
+    </svg>
+    <p data-k="t"></p><p class="src">资料：文汇报（2016）；1997 年起回倾，2006 年已回位约 9.4 mm</p>`);
+  hudShow(c, show > 0);
+  const ln = c.el.querySelector('[data-k=ln]');
+  if (!c.data.len) c.data.len = ln.getTotalLength();
+  const k = smooth01((u - 0.08) / 0.34), len = c.data.len;
+  ln.setAttribute('stroke-dasharray', `${len} ${len + 2}`); ln.setAttribute('stroke-dashoffset', String(len * (1 - k)));
+  // 各点在线画到时出现
+  let acc = 0; const seg = [0]; for (let i = 1; i < pts.length; i++) { acc += Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]); seg.push(acc); }
+  pts.forEach((_, i) => c.el.querySelector(`[data-k=m${i}]`).setAttribute('opacity', k * acc >= seg[i] - 0.5 ? '1' : '0'));
+  c.el.querySelector('[data-k=l0]').setAttribute('opacity', k > 0.02 ? '1' : '0');
+  c.el.querySelector('[data-k=l4]').setAttribute('opacity', k > 0.99 ? '1' : '0');
+  c.el.querySelector('[data-k=rb]').setAttribute('opacity', u > 0.55 ? '1' : '0');
+  typeInto(c.el.querySelector('[data-k=t]'), u < 0.5 ? '1996 年达到最大值 1010.5 mm' : '封井、回灌后，每年回倾约 1 mm', u < 0.5 ? (u - 0.38) * 6 : (u - 0.52) * 5);
+  return c;
+}
+
+/* ---------- 分节编排 ---------- */
+const COURT_PINS = ['大雄宝殿', '法堂', '钟楼', '鼓楼', '山门', '玄奘三藏院'];
+const DFX_CH = [
+  // 1 大慈恩寺与大雁塔
+  { frame(u, t, L) {
+    let k = 0;
+    for (const name of COURT_PINS) {
+      const lb = COURT_LABELS.find((x) => x.t === name); if (!lb) continue;
+      wCall(L, 'pin' + name, lb.p, { t: name, pin: true, tag: true, dy: -26, a: win(u, 0.04 + k * 0.035, 0.97) * visK(name, lb.p), r: rev(u, 0.04 + k * 0.035, 0.12) }); k++;
+    }
+    wCall(L, 'pg', PGW(0, PG.top + 1.5, 0), { t: '大雁塔', s: '唐代四方楼阁式砖塔', dx: 86, dy: -34, a: win(u, 0.22, 0.98), r: rev(u, 0.22, 0.14) });
+    HOLO.gridU.uAlpha.value = 0.75 * win(u, 0.3, 0.92, 0.08); HOLO.gridU.uR.value = 90;
+    cardLoc(u, win(u, 0.02, 1.2) * rev(u, 0.02, 0.2));
+  } },
+  // 2 缘起：玄奘建塔（全息：唐初五级塔，示意）
+  { frame(u, t, L) {
+    cardMap(u, win(u, 0.0, 0.5));
+    cardQuote(u, rev(u, 0.58, 0.3));
+    const U = HOLO.U; U.uAlpha.value = 1; U.uDis.value = 0; U.uReveal.value = smooth01((u - 0.3) / 0.26);
+    HOLO.gridU.uAlpha.value = 0.6 * win(u, 0.27, 1.2, 0.08); HOLO.gridU.uR.value = 70;
+    const A = HOLO.anchors;
+    wCall(L, 'spire', A.spire, { t: '相轮 · 露槃', s: '塔顶刹杆与相轮', dx: 76, dy: -26, a: win(u, 0.6, 1.2), r: rev(u, 0.6, 0.12) });
+    wCall(L, 'tier', A.tier, { t: '塔有五级', s: '仿西域窣堵坡形制', dx: 74, dy: 26, a: win(u, 0.7, 1.2), r: rev(u, 0.7, 0.12) });
+    wCall(L, 'shell', A.shell, { t: '砖表', s: '外表砌砖', dx: 70, dy: 40, a: win(u, 0.8, 1.2), r: rev(u, 0.8, 0.1) });
+    wCall(L, 'core', A.core, { t: '土心', s: '内为夯土', dx: -70, dy: 46, amber: true, a: win(u, 0.85, 1.2), r: rev(u, 0.85, 0.1) });
+    wDim(L, 'h', A.dimA, A.dimB, { t: '约 180 尺 ≈ 54 m', off: 22, a: win(u, 0.62, 1.2), r: rev(u, 0.62, 0.16) });
+  } },
+  // 3 改建为楼阁式：原塔坍损（风雨），长安年间重建为七层
+  { enter() { setWeather('rain'); DFX.st.rain = true; },
+    frame(u, t, L) {
+      if (DFX.st.rain && u > 0.27) { DFX.st.rain = false; setWeather('clear'); }
+      const U = HOLO.U; U.uAlpha.value = 1; U.uReveal.value = 1; U.uDis.value = smooth01((u - 0.05) / 0.24);
+      HOLO.gridU.uAlpha.value = 0.55 * (1 - smooth01((u - 0.75) / 0.15)); HOLO.gridU.uR.value = 70;
+      wCall(L, 'crumble', HOLO.anchors.tier, { t: '风雨侵蚀，逐渐坍损', s: '砖表土心的塔体', amber: true, dx: 76, dy: -30, a: win(u, 0.06, 0.27), r: rev(u, 0.06, 0.08) });
+      // 逐层落成：左侧依次标出层数
+      const b = DEMO_FX.build;
+      for (let i = 0; i < 7; i++) {
+        const landed = clamp(b - (i + 1), 0, 1);
+        if (landed >= 1) wCall(L, 'lv' + i, PGW(-PG.S[i] / 2 - 0.6, stY0(i) + stWallH(i) * 0.5, PG.S[i] / 2), { t: CN_NUM[i], tag: true, dx: -34, dy: 0, a: win(u, 0.3, 0.97), r: 1 });
+      }
+      if (b >= 8.2) wCall(L, 'seven', PGW(PG.S[6] / 2 + 0.8, stY0(6) + 3, PG.S[6] / 2), { t: '七层楼阁式砖塔', s: '武周长安年间改建（一般认为）', dx: 80, dy: -36, a: win(u, 0.5, 1.2), r: rev(u, 0.6, 0.12) });
+      cardTimeline('tl1', [{ y: '652', t: '永徽三年建塔，五级', u0: 0 }, { y: '701–704', t: '长安年间改建，七层', u0: 0.3, u1: 0.68 }, { y: '752', t: '岑参登塔赋诗', u0: 0.68 }], u);
+      cardPoem(u, rev(u, 0.7, 0.24));
+    } },
+  // 4 明代包砌：嘉靖大地震震落塔刹，万历年间外包青砖
+  { frame(u, t, L) {
+    DEMO_FX.quake = win(u, 0.22, 0.31, 0.02);
+    if (u < 0.44) { DEMO_FX.fin = 1 - smooth01((u - 0.24) / 0.08); DEMO_FX.finMode = 'fall'; }
+    else { DEMO_FX.fin = smooth01((u - 0.46) / 0.07); DEMO_FX.finMode = 'drop'; }
+    cardTimeline('tl2', [{ y: '五代、宋', t: '多次修缮', u0: 0, u1: 0.21 }, { y: '1556', t: '嘉靖年间关中大地震，塔刹震落', u0: 0.21, u1: 0.4 }, { y: '1604', t: '万历三十二年重修，外包青砖', u0: 0.4 }], u);
+    wCall(L, 'fin', PGW(0, PG.top - 2, 0), { t: '塔刹震落', s: '嘉靖年间大地震', amber: true, dx: 70, dy: -24, a: win(u, 0.23, 0.44), r: rev(u, 0.23, 0.08) });
+    wCall(L, 'fin2', PGW(0, PG.top - 2, 0), { t: '重修塔刹', s: '万历年间', dx: 70, dy: -24, a: win(u, 0.5, 0.97), r: rev(u, 0.5, 0.1) });
+    wCall(L, 'case', PGW(-PG.S[1] / 2 - 0.1, stY0(1) + 3.2, 4.5), { t: '明代包砌青砖', s: '厚约 60 cm', amber: true, dx: -74, dy: 30, a: win(u, 0.42, 0.97), r: rev(u, 0.42, 0.12) });
+    exhSet('section', win(u, 0.5, 1.2, 0.04), clamp((u - 0.5) / 0.48, 0, 1));
+  } },
+  // 5 方锥形的塔身：尺寸标注 + 扫描框逐层上移
+  { frame(u, t, L) {
+    HOLO.gridU.uAlpha.value = 0.6 * win(u, 0.02, 0.97, 0.06); HOLO.gridU.uR.value = 75;
+    wDim(L, 'base', PGW(-PG.PW - 0.3, 0, -PG.PD - 0.3), PGW(-PG.PW - 0.3, PG.PH, -PG.PD - 0.3), { t: '台基高约 4.2 m', off: -18, lab: -50, a: win(u, 0.06, 0.66), r: rev(u, 0.06, 0.14) });
+    wDim(L, 'h', PGW(PG.PW + 2.5, 0, PG.PD - 6), PGW(PG.PW + 2.5, PG.top, PG.PD - 6), { t: '通高约 64.5 m', off: 20, lab: 0, a: win(u, 0.3, 0.66), r: rev(u, 0.3, 0.16) });
+    const hs = PG.S[0] / 2;
+    wDim(L, 'w', PGW(-hs, stY0(0), hs + 0.75), PGW(hs, stY0(0), hs + 0.75), { t: '底层边长约 25.5 m', off: 22, lab: 14, a: win(u, 0.44, 0.66), r: rev(u, 0.44, 0.14) });
+    const top6 = stY0(6) + stWallH(6), h6 = PG.S[6] / 2;
+    for (const [id, sx, sz] of [['tSE', 1, 1], ['tNW', -1, -1]]) {
+      wPath(L, id, [PGW(sx * hs, stY0(0), sz * hs), PGW(sx * h6, top6, sz * h6)], { dash: '6 5', a: win(u, 0.64, 0.98), r: rev(u, 0.64, 0.12) });
+    }
+    wCall(L, 'taper', PGW(lerp(hs, h6, 0.55), lerp(stY0(0), top6, 0.55), lerp(hs, h6, 0.55)), { t: '逐层收分', s: '整座塔呈方锥形', dx: 78, dy: -20, a: win(u, 0.7, 0.98), r: rev(u, 0.7, 0.12) });
+    const sk = smooth01((u - 0.64) / 0.3), sy = lerp(0.6, PG.top - 1, sk);
+    placeScan(sy, win(u, 0.64, 0.95, 0.03));
+    for (let i = 0; i < 7; i++) {
+      const y = stY0(i) + stWallH(i) * 0.45;
+      wCall(L, 'n' + i, PGW(-PG.S[i] / 2 - 0.4, y, PG.S[i] / 2), { t: `第${CN_NUM[i]}层`, tag: true, dx: -30, dy: 0, a: win(u, 0.64, 0.98) * (sy > y ? 1 : 0), r: sy > y ? 1 : 0 });
+    }
+  } },
+  // 6 以砖仿木：立体展示（木构对照）→ 立面标注 → 各层开间与券门
+  { frame(u, t, L) {
+    exhSet('bay', win(u, 0.04, 0.55, 0.04), clamp((u - 0.04) / 0.5, 0, 1));
+    const hs = PG.S[1] / 2, z = hs + 0.13, y0 = stY0(1), wh = stWallH(1), bw = 2 * hs / 9;
+    wCall(L, 'col', PGW(-hs + 2 * bw, y0 + 2.6, z), { t: '倚柱', s: '砖砌，仿木柱', dx: -64, dy: 34, a: win(u, 0.24, 0.55), r: rev(u, 0.24, 0.1) });
+    wCall(L, 'beam', PGW(-hs + 3.5 * bw, y0 + wh - 0.75, z), { t: '阑额', s: '仿木额', dx: -66, dy: -40, a: win(u, 0.31, 0.55), r: rev(u, 0.31, 0.1) });
+    wCall(L, 'dou', PGW(-hs + 5 * bw, y0 + wh - 0.37, z + 0.1), { t: '栌斗', s: '柱头上的斗形砖', dx: 66, dy: -40, a: win(u, 0.38, 0.55), r: rev(u, 0.38, 0.1) });
+    // 开间：每层倚柱高亮 + 间数
+    for (let i = 0; i < 7; i++) {
+      const s = PG.S[i] / 2, n = PG.BAYS[i], yb = stY0(i), lt = stWallH(i) - 0.95, a = win(u, 0.58 + i * 0.022, 0.98, 0.03), r = rev(u, 0.58 + i * 0.022, 0.08);
+      for (let j = 0; j <= n; j++) {
+        const x = j === 0 ? -s + 0.23 : j === n ? s - 0.23 : -s + j * (2 * s / n);
+        wPath(L, `b${i}_${j}`, [PGW(x, yb, s + 0.13), PGW(x, yb + lt, s + 0.13)], { a, r, w: 1.6 });
+      }
+      wCall(L, 'bn' + i, PGW(s + 0.3, yb + lt * 0.5, s), { t: `${['九', '九', '七', '七', '五', '五', '五'][i]}间`, tag: true, dx: 36, dy: 0, a, r: rev(u, 0.6 + i * 0.022, 0.08) });
+    }
+    for (let i = 0; i < 7; i++) wRing(L, 'dr' + i, PGW(0, stY0(i) + stApex(i) * 0.5, PG.S[i] / 2 + 0.1), { a: win(u, 0.78 + i * 0.01, 0.99), r: rev(u, 0.78 + i * 0.01, 0.06), R: 7, ph: i * 0.13 });
+    wCall(L, 'door', PGW(PG.R[2] + 0.2, stY0(2) + stApex(2) * 0.6, PG.S[2] / 2 + 0.1), { t: '券门', s: '每层四面正中各开一道', dx: 70, dy: -26, a: win(u, 0.8, 0.99), r: rev(u, 0.8, 0.1) });
+  } },
+  // 7 叠涩出檐：檐口立体展示（逐皮砌筑）+ 实景标注
+  { frame(u, t, L) {
+    exhSet('corbel', win(u, 0.03, 1.2, 0.04), clamp((u - 0.03) / 0.9, 0, 1));
+    const i = 2, hs = PG.S[i] / 2, y0 = stY0(i) + stWallH(i), lay = PG.LAY;
+    wCall(L, 'die', PGW(-hs - PG.OUT[3] - 0.05, y0 + 3.5 * lay, hs - 3.2), { t: '叠涩出檐', s: '砖层逐皮挑出', dx: -70, dy: -34, a: win(u, 0.4, 0.98), r: rev(u, 0.4, 0.1) });
+    wCall(L, 'tooth', PGW(-hs - PG.OUT[1] - 0.15, y0 + 1.5 * lay, hs - 5.5), { t: '菱角牙子', s: '斜砌的砖', dx: -66, dy: 40, a: win(u, 0.56, 0.98), r: rev(u, 0.56, 0.1) });
+    wCall(L, 'back', PGW(-PG.S[i + 1] / 2 - 0.38, y0 + 7.5 * lay, hs - 4.2), { t: '反叠涩', s: '逐层收回，形成平台', dx: 60, dy: -46, a: win(u, 0.72, 0.98), r: rev(u, 0.72, 0.1) });
+    const o5 = hs + PG.OUT[5] - 0.12;
+    wCall(L, 'bell', PGW(-o5, y0 + 5 * lay - 1.3, o5), { t: '檐角铜铃', tag: true, dx: 50, dy: 30, a: win(u, 0.84, 0.98), r: rev(u, 0.84, 0.1) });
+  } },
+  // 8 塔内结构：拆解标注 + 剖切展示
+  { frame(u, t, L) {
+    const ex = explodeK;
+    const a = (u0) => win(u, u0, 0.98) * smooth01((ex - 0.7) / 0.3);
+    wCall(L, 'room', partPt(4, -1.5, FLOOR[3] + 3.0, 0), { t: '塔心室', s: '每层一间方形塔室', dx: -88, dy: -20, a: a(0.1), r: rev(u, 0.1, 0.1) });
+    wCall(L, 'slab', partPt(3, -3.0, FLOOR[2] + 0.02, -3.0), { t: '木楼板', s: '中央留出楼梯井', dx: -80, dy: 18, a: a(0.2), r: rev(u, 0.2, 0.1) });
+    wCall(L, 'stair', partPt(2, -1.2, FLOOR[1] + 3.6, -0.6), { t: '木梯', s: '盘旋而上，可登至顶层', dx: -84, dy: 26, a: a(0.3), r: rev(u, 0.3, 0.1) });
+    wCall(L, 'wall', partPt(5, -PG.S[4] / 2, FLOOR[4] + 3.4, 0), { t: '砖土结构承重', s: '木楼板、木梯不承重', amber: true, dx: -70, dy: -30, a: a(0.47), r: rev(u, 0.47, 0.1) });
+    wCall(L, 'door', partPt(6, 0, FLOOR[5] + 1.6, PG.S[5] / 2), { t: '券门', s: '四面远眺西安城', dx: 70, dy: -30, a: a(0.78), r: rev(u, 0.78, 0.1) });
+    exhSet('storey', win(u, 0.08, 1.2, 0.04), clamp((u - 0.08) / 0.8, 0, 1));
+  } },
+  // 9 圣教序碑与门楣线刻
+  { frame(u, t, L) {
+    const hs = PG.S[0] / 2, nz = hs - 0.95, ny = stY0(0) + 2.4;
+    wCall(L, 'sw', PGW(-2 * hs / 9 * 2, ny, nz), { t: '《大唐三藏圣教序》碑', s: '西龛 · 唐太宗撰文', dx: -70, dy: -44, a: win(u, 0.2, 0.56), r: rev(u, 0.2, 0.12) });
+    wCall(L, 'se', PGW(2 * hs / 9 * 2, ny, nz), { t: '《圣教序记》碑', s: '东龛 · 唐高宗撰文', dx: 70, dy: -44, a: win(u, 0.36, 0.56), r: rev(u, 0.36, 0.12) });
+    wCall(L, 'chu', PGW(0, stY0(0) + 5.3, hs + 0.1), { t: '均由褚遂良书写', tag: true, pin: true, dy: -30, a: win(u, 0.48, 0.56), r: rev(u, 0.48, 0.06) });
+    wCall(L, 'lin', PGW(-hs + 0.36, stY0(0) + 3.75 + 0.5, 0.3), { t: '西门楣线刻', s: '唐代佛殿图像', dx: 70, dy: -40, a: win(u, 0.68, 0.98), r: rev(u, 0.68, 0.1) });
+    exhSet(u < 0.59 ? 'stele' : 'lintel', u < 0.59 ? win(u, 0.1, 0.56, 0.03) : win(u, 0.62, 1.2, 0.04), u < 0.59 ? clamp((u - 0.1) / 0.46, 0, 1) : clamp((u - 0.62) / 0.36, 0, 1));
+  } },
+  // 10 倾斜与回倾：竖直参考线、倾斜后的塔轴（放大约 10 倍示意）、监测数据
+  { frame(u, t, L) {
+    const base = PGW(0, 0, 0), up = PGW(0, 74, 0);
+    const q = new T.Quaternion().setFromAxisAngle(TILT_AXIS, DEMO_FX.tilt), tv = new T.Vector3(0, 74, 0).applyQuaternion(q);
+    const tip = [base[0] + tv.x, tv.y, base[2] + tv.z];
+    wPath(L, 'ref', [base, up], { dash: '5 6', color: '#e9f3f6', a: win(u, 0.06, 0.98) * 0.8, r: rev(u, 0.06, 0.12) });
+    wPath(L, 'axis', [base, tip], { amber: true, w: 2, a: win(u, 0.1, 0.98), r: rev(u, 0.1, 0.12) });
+    const arc = []; for (let k = 0; k <= 8; k++) { const qq = new T.Quaternion().setFromAxisAngle(TILT_AXIS, DEMO_FX.tilt * k / 8), v = new T.Vector3(0, 70, 0).applyQuaternion(qq); arc.push([base[0] + v.x, v.y, base[2] + v.z]); }
+    wPath(L, 'arc', arc, { amber: true, a: win(u, 0.16, 0.98) * smooth01(DEMO_FX.tilt / TILT_SHOW * 3), r: 1 });
+    wCall(L, 'tip', tip, { t: '塔顶向西北偏移', s: '倾斜幅度放大约 10 倍示意', amber: true, dx: 80, dy: 20, a: win(u, 0.2, 0.8), r: rev(u, 0.2, 0.1) });
+    wCall(L, 'nw', PGW(-34, 0.4, -34), { t: '西北', tag: true, pin: true, dy: -22, amber: true, a: win(u, 0.22, 0.7), r: rev(u, 0.22, 0.08) });
+    cardTilt(u, win(u, 0.03, 1.2));
+  } },
+  // 11 月下雁塔
+  { frame(u, t, L) {
+    if (NIGHT.moon && NIGHT.moon.disp) {
+      const d = NIGHT.moon.disp, c = camera.position;
+      wCall(L, 'moon', [c.x + d.x * 3000, c.y + d.y * 3000, c.z + d.z * 3000], { t: '盈凸月', s: '东南方天空', dx: -70, dy: 34, a: win(u, 0.32, 0.97) * smooth01((NIGHT.sky - 0.5) / 0.3), r: rev(u, 0.32, 0.1) });
+    }
+    wCall(L, 'tang', [0, 24, 760], { t: '大唐不夜城', s: '示意街区', tag: true, pin: true, dy: -24, a: win(u, 0.5, 0.97), r: rev(u, 0.5, 0.08) });
+    wCall(L, 'fur', [905, 30, 640], { t: '大唐芙蓉园', s: '示意园林', tag: true, pin: true, dy: -24, a: win(u, 0.58, 0.97), r: rev(u, 0.58, 0.08) });
+    cardLoc(1, rev(u, 0.62, 0.3), '始建于公元 652 年，迄今一千三百余年');
+  } },
+];
+function dfxInit() { if (!DFX.layer) DFX.layer = new AnnoLayer($('annoSvg'), $('annoLbl')); holoInit(); }
+function dfxEnter(i) {
+  dfxInit();
+  DFX.layer.clear(); hudClear(); DFX.i = i; DFX.st = {};
+  DEMO_FX.fin = 1; DEMO_FX.quake = 0;
+  const S = DFX_CH[i]; if (S && S.enter) S.enter();
+}
+function dfxFrame(i, u, t) {
+  dfxInit();
+  const L = DFX.layer;
+  L.begin(simTime, canvas.clientWidth, canvas.clientHeight); hudBegin();
+  // 默认关闭全部场景特效，由本节脚本按需打开
+  HOLO.U.uAlpha.value = 0; HOLO.scanU.uAlpha.value = 0; HOLO.gridU.uAlpha.value = 0;
+  DEMO_FX.quake = 0;
+  const S = DFX_CH[i]; if (S && S.frame) S.frame(u, t, L);
+  L.end(); hudEnd();
+  holoFrame(simTime); exhFrame(simTime);
+}
+function dfxClear() {
+  if (DFX.layer) DFX.layer.clear();
+  hudClear(); holoReset(); exhClear();
+  DEMO_FX.fin = 1; DEMO_FX.quake = 0; DFX.i = -1;
+  if (DFX.st && DFX.st.rain) { DFX.st.rain = false; }
+}
+
+// ==== app_58_tour.js ====
+/* =====================================================================
+ * 11. 登塔游览：第一人称自动游览
+ *     从院中走到塔下，沿南面踏道登上塔基，看两侧碑龛与门楣，穿过券洞进入塔心室，
+ *     沿木梯盘旋而上；在第二层、第四层与第七层走到券门前远眺，最后在顶层四面眺望。
+ *     路线按塔内模型（楼梯井、木梯、券洞）逐段设计，镜头始终在通道之内；可拖动环顾、滚轮调视野。
+ * ===================================================================== */
+const TOUR = {
+  on: false, legs: [], stops: [], T: 0, t: 0, speed: 1, paused: false, ended: false, yaw: 0, pitch: 0, snap: true,
+  dYaw: 0, dPitch: 0, drag: null, idle: 9, fovK: 1, inside: 0, busy: false, cap: '', hintT: 0, built: false,
+};
+const TOUR_EYE = 1.62;
+const TWP = (x, y, z) => new T.Vector3(PG.x + x, y, PG.z + z);          // 塔的局部坐标 → 世界坐标
+const STAIR_TURN = 1.15 * Math.PI * 2;
+const stairA0 = (i) => i * 1.3;                                         // 第 i 层木梯起步角
+function stairRise(i) { const h0 = stY0(i) + 0.02, top = FLOOR[i] + PG.H[i]; return { h0, top, rise: top - h0, steps: Math.round((top - h0) / 0.2) }; }
+// 站在楼板上的最小半径：避开中央楼梯井（|x|,|z| < 2.35）
+const slabR = (a) => 2.35 / Math.max(Math.abs(Math.cos(a)), Math.abs(Math.sin(a))) + 0.18;
+const angPt = (a, r) => [Math.cos(a) * r, Math.sin(a) * r];
+const wrapA = (a) => Math.atan2(Math.sin(a), Math.cos(a));
+// 方向：yaw = 0 朝北（−z），π/2 朝东（+x）
+const yawOf = (dx, dz) => Math.atan2(dx, -dz);
+function lookAtYP(eye, p) { const dx = p.x - eye.x, dy = p.y - eye.y, dz = p.z - eye.z; return { yaw: yawOf(dx, dz), pitch: Math.atan2(dy, Math.hypot(dx, dz)) }; }
+
+/* ---------- 路段 ---------- */
+// 梯形速度曲线：起步 ci、收步 co 段内匀加速 / 匀减速，中间匀速（位置与速度都连续）
+function trap(k, ci, co) {
+  k = clamp(k, 0, 1); const v = 1 / (1 - ci / 2 - co / 2);
+  if (ci > 0 && k < ci) return v * k * k / (2 * ci);
+  if (co > 0 && k > 1 - co) return 1 - v * (1 - k) * (1 - k) / (2 * co);
+  return v * (k - ci / 2);
+}
+// 沿折线行走：pts 为局部坐标 [x, 地面高, z]；look：'path'（沿前进方向）、{ at: 世界点 }、{ yaw, pitch }，或函数 k → 以上之一
+function legWalk(pts, o) {
+  const P = [];
+  for (const [x, y, z] of pts) { const v = TWP(x, y, z); if (!P.length || P[P.length - 1].distanceTo(v) > 0.06) P.push(v); }
+  if (P.length < 2) P.push(P[0].clone().add(new T.Vector3(0, 0, 0.01)));
+  let curve;
+  if (o.linear || P.length < 3) { curve = new T.CurvePath(); for (let i = 0; i + 1 < P.length; i++) curve.add(new T.LineCurve3(P[i], P[i + 1])); }
+  else curve = new T.CatmullRomCurve3(P, false, 'centripetal', 0.5);
+  const ci = o.ei ? 0.2 : 0, co = o.eo ? 0.2 : 0;
+  const len = curve.getLength(), dur = o.dur || len / (o.speed || 1.2) / (1 - ci / 2 - co / 2);
+  const ramp = (k) => trap(k, ci, co);
+  return { dur, title: o.title, sub: o.sub, pitch: o.pitch || 0,
+    pose(k) {
+      const s = clamp(ramp(k), 0, 1), p = curve.getPointAt(s), tg = curve.getTangentAt(Math.min(0.999, Math.max(0.001, s)));
+      const bob = o.noBob ? 0 : Math.sin(s * len / 0.72 * Math.PI) * 0.022 * Math.min(1, k * 8, (1 - k) * 8);
+      const eye = new T.Vector3(p.x, p.y + TOUR_EYE + bob, p.z);
+      let lk = typeof o.look === 'function' ? o.look(k, eye) : o.look;
+      let yp;
+      if (!lk || lk === 'path') yp = { yaw: yawOf(tg.x, tg.z), pitch: (o.pitch || 0) * DEG + Math.atan2(tg.y, Math.hypot(tg.x, tg.z)) * 0.5 };
+      else if (lk.at) yp = lookAtYP(eye, lk.at);
+      else yp = { yaw: lk.yaw, pitch: lk.pitch };
+      return { eye, yaw: yp.yaw, pitch: yp.pitch };
+    } };
+}
+// 原地环顾：keys 为 [k, 目标] 序列（目标为世界点或 {yaw,pitch}），其间平滑过渡
+function legLook(at, dur, keys, o) {
+  const eye = TWP(at[0], at[1] + TOUR_EYE, at[2]);
+  const yp = keys.map(([k, tg]) => [k, tg.isVector3 ? lookAtYP(eye, tg) : { yaw: tg.yaw, pitch: tg.pitch }]);
+  return { dur, title: o && o.title, sub: o && o.sub,
+    pose(k) {
+      let i = 0; while (i + 1 < yp.length && yp[i + 1][0] <= k) i++;
+      const a = yp[i], b = yp[Math.min(i + 1, yp.length - 1)];
+      const f = b === a ? 0 : easeInOut(clamp((k - a[0]) / (b[0] - a[0]), 0, 1));
+      const dy = wrapA(b[1].yaw - a[1].yaw);
+      return { eye, yaw: a[1].yaw + dy * f, pitch: lerp(a[1].pitch, b[1].pitch, f) };
+    } };
+}
+// 木梯：从第 i0 层一直登到第 i1 层（含），途经的楼层平台不停留
+function legStairs(i0, i1, o) {
+  const segs = [];
+  let u = stairA0(i0);
+  for (let i = i0; i <= i1; i++) {
+    const S = stairRise(i), a0 = stairA0(i) + Math.PI * 2 * (i - i0), a1 = a0 + STAIR_TURN, topA = a1 - STAIR_TURN / S.steps;
+    segs.push({ i, a0, a1, topA, S }); u = a1;
+  }
+  const aS = stairA0(i0) - 0.45, aE = segs[segs.length - 1].a1 + (o.exitA || 0.24);
+  const rS = o.rS || slabR(aS), rE = o.rE || slabR(aE);
+  // 起步前沿方形回廊走（o.ring 为回廊半宽），没有回廊时保持半径 rS
+  const ringR = o.ring ? (a) => o.ring / Math.max(Math.abs(Math.cos(a)), Math.abs(Math.sin(a))) : () => rS;
+  const dur = o.dur || (i1 - i0 + 1) * 11 + 2;
+  const heightAt = (a) => {
+    for (let n = 0; n < segs.length; n++) {
+      const g = segs[n];
+      if (a < g.a0) return n === 0 ? g.S.h0 - 0.02 : segs[n - 1].S.top + 0.02;
+      if (a <= g.topA) return g.S.h0 + (a - g.a0) / (g.topA - g.a0) * g.S.rise;
+      if (a <= g.a1 || n === segs.length - 1) return g.S.top + 0.02;
+    }
+    return segs[segs.length - 1].S.top + 0.02;
+  };
+  // 半径：起步时沿楼板走到第一级踏步外端再向内；到顶时沿最上一级踏步外端走上楼板（避免悬空走过楼梯井）
+  const radiusAt = (a) => {
+    const f = segs[0], last = segs[segs.length - 1];
+    let r = 1.3;
+    if (a < f.a0 - 0.3) r = ringR(a);
+    else if (a < f.a0 - 0.02) r = lerp(ringR(f.a0 - 0.3), 2.0, smooth01((a - (f.a0 - 0.3)) / 0.28));     // 在扶手起点之前跨上第一级
+    else if (a < f.a0 + 0.6) r = lerp(2.0, 1.3, smooth01((a - f.a0 + 0.02) / 0.62));
+    if (a > last.topA - 0.75 && a > segs[0].a0 + 0.65) r = a < last.topA ? lerp(1.3, 2.1, smooth01((a - (last.topA - 0.75)) / 0.75)) : lerp(2.1, rE, smooth01((a - last.topA) / Math.max(0.05, (aE - last.topA) * 0.7)));
+    for (let n = 0; n + 1 < segs.length; n++) {
+      const g = segs[n], h = segs[n + 1];
+      // 途经的楼层：在最上一级踏步与上层第一级之间（踏步外端以内，不碰扶手）
+      if (a > g.a1 - 0.2 && a < h.a0 + 0.2) r = 1.3 + 0.75 * Math.sin(Math.PI * (a - (g.a1 - 0.2)) / (h.a0 - g.a1 + 0.4));
+    }
+    return r;
+  };
+  const posAt = (a) => { const r = radiusAt(a); return new T.Vector3(PG.x + Math.cos(a) * r, heightAt(a), PG.z + Math.sin(a) * r); };
+  const stepAng = STAIR_TURN / segs[0].S.steps;
+  return { dur, title: o.title, sub: o.sub, stairs: segs, aS, aE, posAt,
+    floorAt(k) { const a = lerp(aS, aE, k); for (const g of segs) if (a < g.a1) return g.i; return i1 + 1; },
+    pose(k) {
+      const s = trap(k, 0.06, 0.08), a = lerp(aS, aE, s), p = posAt(a);
+      const bob = Math.sin((a - aS) / stepAng * Math.PI) * 0.018;
+      const eye = new T.Vector3(p.x, p.y + TOUR_EYE + bob, p.z);
+      const ah = Math.min(a + 1.5, aE + 0.6), q = posAt(ah);
+      const yaw = yawOf(q.x - p.x, q.z - p.z);
+      return { eye, yaw, pitch: (o.pitch === undefined ? 20 : o.pitch) * DEG };
+    } };
+}
+// 在楼板上沿方形回廊行走：从角度 a0 到 a1（弧度，可跨越），回廊半宽 q
+function ringPts(a0, a1, q, y, step) {
+  const pts = [], n = Math.max(2, Math.ceil(Math.abs(a1 - a0) / (step || 0.26)));
+  for (let k = 0; k <= n; k++) { const a = lerp(a0, a1, k / n), m = Math.max(Math.abs(Math.cos(a)), Math.abs(Math.sin(a))); pts.push([Math.cos(a) / m * q, y, Math.sin(a) / m * q]); }
+  return pts;
+}
+const ringQ = (i) => (2.35 + PG.SI[i] / 2) / 2 + 0.06;
+// 走到某面券门并向外眺望，再走回回廊；dir：0 东、π/2 南、π 西、3π/2 北
+function doorVisit(legs, i, dir, fromA, o) {
+  const y = FLOOR[i], q = ringQ(i), hi = PG.SI[i] / 2, hs = PG.S[i] / 2;
+  const [dx, dz] = [Math.round(Math.cos(dir)), Math.round(Math.sin(dir))];
+  let a0 = fromA, a1 = dir; while (a1 - a0 > Math.PI) a1 -= Math.PI * 2; while (a0 - a1 > Math.PI) a1 += Math.PI * 2;
+  if (o.via) a1 = o.via(a0, a1);
+  const pts = Math.abs(a1 - a0) > 0.05 ? ringPts(a0, a1, q, y) : [[Math.cos(a0) * q, y, Math.sin(a0) * q]];
+  if (o.from) pts.unshift(o.from);
+  const outR = hs - 0.5;
+  pts.push([dx * (hi + 0.4), y, dz * (hi + 0.4)], [dx * (hi + 2.6), y, dz * (hi + 2.6)], [dx * outR, y, dz * outR]);
+  legs.push(legWalk(pts, { speed: 1.25, ei: !o.noEaseIn, eo: true, title: o.title, sub: o.walkSub || o.sub, pitch: -2 }));
+  const yawOut = yawOf(dx, dz), P = (yaw, pitch) => ({ yaw: yawOut + yaw * DEG, pitch: pitch * DEG });
+  legs.push(legLook([dx * outR, y, dz * outR], o.lookDur || 7.5, [[0, P(0, -3)], [0.18, P(0, -15)], [0.42, P(-26, -8)], [0.7, P(24, -6)], [0.92, P(0, -4)], [1, P(0, -4)]], { title: o.title, sub: o.sub }));
+  legs.push(legWalk([[dx * outR, y, dz * outR], [dx * (hi + 1.2), y, dz * (hi + 1.2)], [dx * q, y, dz * q]], { speed: 1.3, ei: true, title: o.title, sub: o.backSub || o.sub, look: { yaw: yawOut + Math.PI, pitch: -3 * DEG } }));
+  return dir;
+}
+
+function buildTour() {
+  const legs = [], stops = [];
+  const stop = (title) => stops.push({ title, leg: legs.length });
+  // 1 院中 → 塔下
+  stop('塔下');
+  legs.push(legWalk([[4.6, 0, 42.5], [2.6, 0, 39.2], [0.4, 0, 35.6], [0, 0, 33.6]], { speed: 1.15, ei: true, look: (k) => ({ at: TWP(0, lerp(44, 30, k), 0) }), title: '大雁塔南面', sub: '从大慈恩寺中轴线北端的庭院走向塔下 · 塔通高约 64.5 m' }));
+  // 2 南面踏道：登上高约 4.2 m 的塔基
+  stop('踏道');
+  legs.push(legWalk([[0, 0, 33.6], [0, 0, PG.PD + 8.7], [0, 0.32, PG.PD + 8.15], [0, PG.PH - 0.12, PG.PD + 0.3], [0, PG.PH, PG.PD - 0.4], [0, PG.PH, 19.4]], { speed: 0.95, linear: true, look: (k) => ({ at: TWP(0, lerp(30, 12, k), 0) }), title: '南面踏道', sub: '拾级登上高约 4.2 m 的方形塔基', eo: true }));
+  // 3 碑龛与门楣
+  stop('碑龛');
+  const hs0 = PG.S[0] / 2, niU = 2 * hs0 / 9 * 2, stZ = hs0 - 0.95;
+  legs.push(legLook([0, PG.PH, 19.4], 10, [[0, TWP(0, 9, hs0)], [0.12, TWP(-niU, 6.6, stZ)], [0.42, TWP(-niU, 6.6, stZ)], [0.56, TWP(niU, 6.6, stZ)], [0.84, TWP(niU, 6.6, stZ)], [1, TWP(0, 8.6, hs0)]],
+    { title: '南门两侧碑龛', sub: '西龛《大唐三藏圣教序》碑（唐太宗撰文），东龛《圣教序记》碑（唐高宗撰文），均为褚遂良书' }));
+  // 4 门楣 → 穿过券洞
+  stop('券洞');
+  legs.push(legWalk([[0, PG.PH, 19.4], [0, PG.PH, 15.2], [0, stY0(0), hs0 + 0.55], [0, stY0(0), hs0 - 1.2], [0, stY0(0), PG.SI[0] / 2 + 1.0], [0, stY0(0), 3.0]],
+    { speed: 1.05, ei: true, eo: true, look: (k) => (k < 0.38 ? { at: TWP(0, stY0(0) + 4.25, hs0 - 0.35) } : k < 0.5 ? { yaw: 0, pitch: lerp(28, 0, (k - 0.38) / 0.12) * DEG } : { yaw: 0, pitch: 0 }),
+      title: '南门 · 券洞', sub: '石门楣上保存唐代线刻；券洞穿过厚重的塔壁通向塔心室' }));
+  // 5 第一层塔心室
+  stop('塔心室');
+  legs.push(legLook([0, stY0(0), 3.0], 7, [[0, { yaw: 0, pitch: 0 }], [0.3, TWP(0, stY0(0) + 3.4, 0)], [0.65, TWP(1.3, stY0(0) + 1.4, 0.3)], [1, TWP(2.4, stY0(0) + 1.3, 0.2)]],
+    { title: '第一层 · 塔心室', sub: '方形塔室中，木梯绕中柱盘旋而上（塔心室与木梯为示意建模）' }));
+  { const aS = stairA0(0) - 0.45, rS = slabR(aS) + 0.25; const [sx, sz] = angPt(aS, rS);
+    legs.push(legWalk([[0, stY0(0), 3.0], [2.2, stY0(0), 2.7], [3.2, stY0(0), 0.5], [sx, stY0(0), sz]], { speed: 1.1, ei: true, title: '第一层 · 塔心室', sub: '走向木梯', pitch: -4 }));
+    // 6 登梯 → 第二层
+    stop('登梯');
+    legs.push(legStairs(0, 0, { rS, title: '登塔', sub: '沿木梯盘旋而上' })); }
+  // 7 第二层：南门远眺
+  stop('二层南望');
+  const endOf = (L) => { const p = L.posAt(L.aE); return [p.x - PG.x, p.z - PG.z]; };
+  { const L = legs[legs.length - 1], aE = L.aE, [x, z] = endOf(L);
+    doorVisit(legs, 1, Math.PI / 2, aE, { from: [x, FLOOR[1], z], noEaseIn: true, title: '第二层 · 南门远眺', walkSub: '走到南面券门', sub: '离地约 15 m · 南望大慈恩寺殿宇', backSub: '回到塔心室，继续登塔' }); }
+  { const i = 1, aS = stairA0(i) - 0.45, q = ringQ(i), m = Math.max(Math.abs(Math.cos(aS)), Math.abs(Math.sin(aS)));
+    const from = Math.PI / 2;
+    legs.push(legWalk(ringPts(from, aS, q, FLOOR[i]), { speed: 1.1, title: '第二层', sub: '继续登塔', pitch: -3 }));
+    stop('登梯');
+    legs.push(legStairs(1, 2, { rS: q / m, ring: q, title: '登塔', sub: '途经第三层 · 离地约 23 m' })); }
+  // 8 第四层：东门远眺
+  stop('四层东望');
+  { const L = legs[legs.length - 1], aE = L.aE, i = 3, [x, z] = endOf(L);
+    // 从西南侧绕经北面到东门（回廊在木梯外侧）
+    doorVisit(legs, i, 0, aE, { from: [x, FLOOR[i], z], noEaseIn: true, title: '第四层 · 东门远眺', walkSub: '沿塔心室走到东面券门', sub: '离地约 30 m · 东面为曲江方向（远处街区为示意）', backSub: '回到塔心室，继续登塔' }); }
+  { const i = 3, aS = stairA0(i) - 0.45, q = ringQ(i), m = Math.max(Math.abs(Math.cos(aS)), Math.abs(Math.sin(aS)));
+    legs.push(legWalk(ringPts(Math.PI * 2, aS, q, FLOOR[i]), { speed: 1.1, title: '第四层', sub: '继续登塔', pitch: -3 }));
+    stop('登顶');
+    legs.push(legStairs(3, 5, { rS: q / m, ring: q, title: '登塔', sub: '途经第五、六层 · 越往上塔室越小' })); }
+  // 9 第七层：四面远眺
+  { const L = legs[legs.length - 1], aE = L.aE, i = 6, [x, z] = endOf(L);
+    stop('七层南望');
+    let a = doorVisit(legs, i, Math.PI / 2, aE, { from: [x, FLOOR[i], z], noEaseIn: true, title: '第七层 · 南望', walkSub: '登上第七层', sub: '离地约 51 m · 俯瞰大慈恩寺殿宇，远处为大唐不夜城方向（街区为示意）', backSub: '沿塔心室走向西面' });
+    stop('西望');
+    a = doorVisit(legs, i, Math.PI, a, { title: '第七层 · 西望', walkSub: '走向西面券门', sub: '离地约 51 m · 西面城区（街区为示意）', backSub: '走向北面' });
+    stop('北望');
+    a = doorVisit(legs, i, Math.PI * 1.5, a, { title: '第七层 · 北望', walkSub: '走向北面券门', sub: '离地约 51 m · 北望大雁塔北广场与西安城区方向', backSub: '走向东面' });
+    stop('东望');
+    doorVisit(legs, i, Math.PI * 2, a, { title: '第七层 · 东望', walkSub: '走向东面券门', sub: '离地约 51 m · 东面为曲江、大唐芙蓉园方向（示意）', backSub: '游览结束' }); }
+  let t = 0; for (const L of legs) { L.t0 = t; t += L.dur; }
+  for (const s of stops) s.t0 = legs[s.leg].t0;
+  TOUR.legs = legs; TOUR.stops = stops; TOUR.T = t; TOUR.built = true;
+}
+function tourLegAt(t) { const L = TOUR.legs; let i = 0; while (i + 1 < L.length && L[i + 1].t0 <= t) i++; return i; }
+function tourPose(t) { const i = tourLegAt(t), L = TOUR.legs[i]; return Object.assign(L.pose(clamp((t - L.t0) / L.dur, 0, 1)), { leg: i }); }
+
+/* ---------- 每帧 ---------- */
+const TOUR_PAGODA_Y1 = PG.top - PG.finialH;
+function insideAmount(p) {
+  const x = p.x - PG.x, z = p.z - PG.z, y = p.y, c = Math.max(Math.abs(x), Math.abs(z));
+  if (y < stY0(0) + 0.5 || y > TOUR_PAGODA_Y1) return 0;
+  let i = 0; while (i < 6 && y > FLOOR[i + 1]) i++;
+  const hs = PG.S[i] / 2, hi = PG.SI[i] / 2;
+  if (c <= hi + 0.2) return 1;
+  return clamp(1 - (c - hi - 0.2) / Math.max(0.5, hs - hi - 0.6), 0, 1) * 0.85 + 0.15 * (c < hs ? 1 : 0);
+}
+function tourFov() { const a = camera.aspect, v = 2 * Math.atan(Math.tan(44 * DEG) / a) / DEG; return clamp(v, 54, 92) * TOUR.fovK; }
+function stepTour(dt) {
+  if (!TOUR.on) return false;
+  if (!TOUR.paused && !TOUR.ended && !TOUR.busy) {
+    TOUR.t += dt * TOUR.speed;
+    if (TOUR.t >= TOUR.T) { TOUR.t = TOUR.T; tourEnd(); }
+  }
+  const P = tourPose(TOUR.t);
+  // 视线平滑跟随脚本方向；拖动产生的偏移在松手后慢慢回正
+  const rate = 1 - Math.exp(-dt * 2.6 * Math.max(1, TOUR.speed));
+  if (TOUR.snap) { TOUR.yaw = P.yaw; TOUR.pitch = P.pitch; TOUR.snap = false; }
+  else { TOUR.yaw += wrapA(P.yaw - TOUR.yaw) * rate; TOUR.pitch += (P.pitch - TOUR.pitch) * rate; }
+  TOUR.idle += dt;
+  if (!TOUR.drag && TOUR.idle > 1.8 && !TOUR.paused) { const k = Math.exp(-dt * 1.1); TOUR.dYaw *= k; TOUR.dPitch *= k; }
+  const yaw = TOUR.yaw + TOUR.dYaw, pitch = clamp(TOUR.pitch + TOUR.dPitch, -72 * DEG, 72 * DEG);
+  camera.position.copy(P.eye);
+  const d = new T.Vector3(Math.sin(yaw) * Math.cos(pitch), Math.sin(pitch), -Math.cos(yaw) * Math.cos(pitch));
+  camera.lookAt(P.eye.x + d.x, P.eye.y + d.y, P.eye.z + d.z);
+  controls.target.copy(P.eye).add(d.multiplyScalar(10));
+  const fov = tourFov();
+  if (Math.abs(camera.fov - fov) > 1e-3) { camera.fov = fov; camera.updateProjectionMatrix(); }
+  camera.updateMatrixWorld();
+  // 塔内：提高曝光、隐藏雨雪
+  const inK = insideAmount(P.eye);
+  TOUR.inside += (inK - TOUR.inside) * (1 - Math.exp(-dt * 2.2));
+  ENV_EXPO_MUL = lerp(1, 1.42, smooth01(TOUR.inside));
+  PRECIP_OFF = TOUR.inside > 0.4;
+  tourHud(P);
+  return true;
+}
+function tourHud(P) {
+  const L = TOUR.legs[P.leg];
+  let title = L.title, sub = L.sub;
+  if (L.stairs && L.floorAt) { const f = Math.min(5, L.floorAt(clamp((TOUR.t - L.t0) / L.dur, 0, 1))); title = `登塔 · 第${CN_NUM[f]}层 → 第${CN_NUM[f + 1]}层`; }
+  const cap = title + '|' + sub;
+  if (cap !== TOUR.cap) { TOUR.cap = cap; $('tourTitle').textContent = title || ''; $('tourSub').textContent = sub || ''; }
+  const h = Math.max(0, camera.position.y);
+  const hs = h.toFixed(1); if ($('tourH').textContent !== hs) $('tourH').textContent = hs;
+  const yaw = ((TOUR.yaw + TOUR.dYaw) / DEG % 360 + 360) % 360;
+  const dir = `面向 ${['北', '东北', '东', '东南', '南', '西南', '西', '西北'][Math.round(yaw / 45) % 8]}`;
+  if ($('tourDir').textContent !== dir) $('tourDir').textContent = dir;
+  const mk = $('tourMk'); if (mk) mk.setAttribute('transform', `translate(0 ${(GAUGE_Y(h)).toFixed(1)})`);
+  // 进度
+  const segs = $('tourProg').children;
+  TOUR.stops.forEach((s, i) => {
+    const t1 = i + 1 < TOUR.stops.length ? TOUR.stops[i + 1].t0 : TOUR.T, k = clamp((TOUR.t - s.t0) / (t1 - s.t0), 0, 1);
+    const w = `${(k * 100).toFixed(1)}%`; if (segs[i] && segs[i].firstChild.style.width !== w) segs[i].firstChild.style.width = w;
+  });
+  if (TOUR.hintT && simTime > TOUR.hintT) { $('tourHint').classList.add('off'); TOUR.hintT = 0; }
+}
+const GAUGE_Y = (h) => 190 - clamp(h, 0, 66) / 66 * 182;
+function buildGauge() {
+  const svg = $('tourGaugeSvg');
+  let d = '', y = 0;
+  const xs = (w) => 32 + w / 2 * 1.15;
+  d += `M${32 - PG.PW * 0.75} ${GAUGE_Y(0)}L${32 - PG.PW * 0.75} ${GAUGE_Y(PG.PH)}`;
+  const pts = [[PG.PW * 0.75 * 2, 0], [PG.PW * 0.75 * 2, PG.PH]];
+  for (let i = 0; i < 7; i++) { pts.push([PG.S[i] * 1.15, FLOOR[i]], [PG.S[i] * 1.15, FLOOR[i] + PG.H[i] - 0.6], [(PG.S[i] / 2 + PG.OUT[5]) * 2 * 1.15, FLOOR[i] + PG.H[i] - 0.6]); }
+  pts.push([2.6, PG.top - PG.finialH], [0.6, PG.top]);
+  const right = pts.map(([w, h]) => [32 + w / 2, GAUGE_Y(h)]), left = pts.slice().reverse().map(([w, h]) => [32 - w / 2, GAUGE_Y(h)]);
+  d = 'M' + right.concat(left).map((p) => p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join('L') + 'Z';
+  void xs; void y;
+  let ticks = '';
+  for (let i = 0; i < 7; i++) { const yy = GAUGE_Y(FLOOR[i] + 1.8); ticks += `<text x="-2" y="${(yy + 3).toFixed(1)}" text-anchor="end">${i + 1}</text><line x1="2" x2="8" y1="${yy.toFixed(1)}" y2="${yy.toFixed(1)}"/>`; }
+  svg.innerHTML = `<path d="${d}" fill="rgba(139,230,255,.10)" stroke="rgba(139,230,255,.6)" stroke-width="1"/>
+    <line x1="2" x2="62" y1="${GAUGE_Y(0)}" y2="${GAUGE_Y(0)}" stroke="rgba(214,236,242,.4)"/>
+    <g fill="rgba(214,236,242,.7)" stroke="rgba(214,236,242,.4)" font-size="9" font-family="ui-monospace,Menlo,monospace">${ticks}</g>
+    <g id="tourMk"><line x1="4" x2="60" y1="0" y2="0" stroke="${AMBER_C}" stroke-width="1.6"/><path d="M60 0 l6 -4 v8z" fill="${AMBER_C}"/><circle cx="32" cy="0" r="3" fill="${AMBER_C}"/></g>`;
+}
+function tourSeek(t) { TOUR.t = clamp(t, 0, TOUR.T - 0.01); TOUR.snap = true; TOUR.dYaw = TOUR.dPitch = 0; if (TOUR.ended) { TOUR.ended = false; $('tourEnd').hidden = true; } requestRender(); }
+function tourJump(dir) {
+  const S = TOUR.stops; let i = 0; while (i + 1 < S.length && S[i + 1].t0 <= TOUR.t + 0.01) i++;
+  if (dir < 0 && TOUR.t - S[i].t0 < 2 && i > 0) i--; else if (dir > 0) i = Math.min(S.length - 1, i + 1);
+  tourSeek(S[i].t0);
+}
+function tourPlayIcon() {
+  const playing = !TOUR.paused && !TOUR.ended;
+  $('tourPlayIcon').setAttribute('d', playing ? 'M4 2h3v12H4zM9 2h3v12H9z' : 'M4 2 L13 8 L4 14 Z');
+  $('tourPlay').setAttribute('aria-label', playing ? '暂停' : '继续');
+}
+function tourPause(on) { if (TOUR.ended && !on) { tourSeek(0); } TOUR.paused = on; tourPlayIcon(); }
+function tourEnd() { TOUR.ended = true; TOUR.paused = true; tourPlayIcon(); $('tourEnd').hidden = false; }
+function fade(on) { $('fader').classList.toggle('on', on); }
+// 进入：画面淡出 → 摆好第一人称镜头 → 淡入
+function startTour() {
+  if (TOUR.on || DEMO.on || TOUR.busy) return;
+  if (!TOUR.built) buildTour();
+  if (PT.on) setPathTrace(false);
+  if (document.body.classList.contains('zen')) setZen(false);
+  setOrbit(false);
+  TOUR.busy = true; fade(true);
+  setTimeout(() => {
+    if (mode === 'explode') { exitExplode(false); }
+    leaveDetailState();
+    camTween = null; mode = 'court';
+    explodeGoal = explodeK = 0; fadeK = 1; setCompoundOpacity(1); stepExplode(0);
+    killInertia(); controls.enabled = false;
+    TOUR.on = true; TOUR.t = 0; TOUR.paused = false; TOUR.ended = false; TOUR.snap = true; TOUR.dYaw = TOUR.dPitch = 0; TOUR.fovK = 1; TOUR.inside = 0; TOUR.cap = '';
+    camera.near = 0.25; camera.updateProjectionMatrix();
+    WXU.uTourL.value = 0.62;
+    document.body.classList.add('tour'); $('tour').hidden = false; $('tourEnd').hidden = true;
+    $('tourHint').classList.remove('off'); TOUR.hintT = simTime + 7;
+    tourPlayIcon(); updateViewOffset(true);
+    stepTour(0); requestRender();
+    setTimeout(() => { fade(false); TOUR.busy = false; }, 120);
+  }, 440);
+}
+function stopTour() {
+  if (!TOUR.on || TOUR.busy) return;
+  TOUR.busy = true; fade(true);
+  setTimeout(() => {
+    TOUR.on = false; TOUR.drag = null;
+    document.body.classList.remove('tour'); $('tour').hidden = true;
+    camera.near = 2; camera.fov = fovFor(camera.aspect) / DEG; camera.updateProjectionMatrix();
+    WXU.uTourL.value = 0; ENV_EXPO_MUL = 1; PRECIP_OFF = false;
+    controls.enabled = true; placeCamera('court', MODES.court.init);
+    updateViewOffset(true); requestRender();
+    setTimeout(() => { fade(false); TOUR.busy = false; }, 120);
+  }, 440);
+}
+function tourKey(e) {
+  if (e.key === 'Escape') { e.preventDefault(); stopTour(); }
+  else if (e.key === ' ' || e.key === 'Spacebar') { e.preventDefault(); tourPause(!TOUR.paused); }
+  else if (e.key === 'ArrowRight') { e.preventDefault(); tourJump(1); }
+  else if (e.key === 'ArrowLeft') { e.preventDefault(); tourJump(-1); }
+  else if (e.key === '+' || e.key === '=') { TOUR.fovK = clamp(TOUR.fovK * 0.9, 0.55, 1.25); }
+  else if (e.key === '-' || e.key === '_') { TOUR.fovK = clamp(TOUR.fovK / 0.9, 0.55, 1.25); }
+}
+function bindTourUI() {
+  buildGauge();
+  $('btnTour').addEventListener('click', startTour);
+  $('tourExit').addEventListener('click', stopTour);
+  $('tourDone').addEventListener('click', stopTour);
+  $('tourAgain').addEventListener('click', () => { $('tourEnd').hidden = true; TOUR.ended = false; tourSeek(0); tourPause(false); });
+  $('tourPlay').addEventListener('click', () => tourPause(!TOUR.paused));
+  $('tourPrev').addEventListener('click', () => tourJump(-1));
+  $('tourNext').addEventListener('click', () => tourJump(1));
+  $('tourSpeed').addEventListener('click', () => { TOUR.speed = TOUR.speed === 1 ? 2 : 1; $('tourSpeed').textContent = TOUR.speed + '×'; $('tourSpeed').setAttribute('aria-label', `行进速度 ${TOUR.speed} 倍`); });
+  // 进度条：每个停留点一段，宽度按时长
+  if (!TOUR.built) buildTour();
+  const prog = $('tourProg');
+  TOUR.stops.forEach((s, i) => {
+    const t1 = i + 1 < TOUR.stops.length ? TOUR.stops[i + 1].t0 : TOUR.T, el = document.createElement('span');
+    el.style.flex = String(Math.max(0.4, (t1 - s.t0) / 10)); el.title = s.title; el.appendChild(document.createElement('i'));
+    el.addEventListener('click', () => tourSeek(s.t0));
+    prog.appendChild(el);
+  });
+  // 拖动环顾
+  canvas.addEventListener('pointerdown', (e) => {
+    if (!TOUR.on) return;
+    TOUR.drag = { id: e.pointerId, x: e.clientX, y: e.clientY }; TOUR.idle = 0;
+    canvas.classList.add('dragging'); try { canvas.setPointerCapture(e.pointerId); } catch (err) { /* 忽略 */ }
+  });
+  canvas.addEventListener('pointermove', (e) => {
+    if (!TOUR.on || !TOUR.drag || TOUR.drag.id !== e.pointerId) return;
+    const k = camera.fov * DEG / canvas.clientHeight;
+    TOUR.dYaw -= (e.clientX - TOUR.drag.x) * k; TOUR.dPitch += (e.clientY - TOUR.drag.y) * k;
+    TOUR.dPitch = clamp(TOUR.dPitch, -80 * DEG - TOUR.pitch, 80 * DEG - TOUR.pitch);
+    TOUR.drag.x = e.clientX; TOUR.drag.y = e.clientY; TOUR.idle = 0;
+    if (simTime > 0) { $('tourHint').classList.add('off'); TOUR.hintT = 0; }
+  });
+  const up = (e) => { if (TOUR.drag && TOUR.drag.id === e.pointerId) { TOUR.drag = null; TOUR.idle = 0; canvas.classList.remove('dragging'); } };
+  canvas.addEventListener('pointerup', up); canvas.addEventListener('pointercancel', up);
+  canvas.addEventListener('wheel', (e) => { if (!TOUR.on) return; e.preventDefault(); TOUR.fovK = clamp(TOUR.fovK * Math.exp(e.deltaY * 0.0012), 0.55, 1.25); }, { passive: false });
+}
+// 介绍卡片：收起 / 展开（记住选择；窄屏默认收起）
+function setIntroMin(on, persist) {
+  const el = $('intro'), b = $('introToggle');
+  el.classList.toggle('min', on);
+  b.setAttribute('aria-expanded', String(!on));
+  b.title = on ? '展开说明' : '收起说明'; b.querySelector('.vh').textContent = b.title;
+  if (persist) LS.set('dayanta.introMin', on ? '1' : '0');
+}
+function bindIntroUI() {
+  const st = LS.get('dayanta.introMin');
+  setIntroMin(st === null ? canvas.clientWidth <= 640 : st === '1', false);
+  $('introToggle').addEventListener('click', () => setIntroMin(!$('intro').classList.contains('min'), true));
+}
+function tourApi() {
+  return {
+    on: TOUR.on, t: TOUR.t, T: TOUR.T, paused: TOUR.paused, ended: TOUR.ended, stops: TOUR.stops.map((s) => ({ title: s.title, t0: s.t0 })), legs: TOUR.legs.length,
+    start: () => startTour(), exit: () => stopTour(), seek: (t) => tourSeek(t), pause: (on) => tourPause(on), speed: (k) => { TOUR.speed = k; },
+    pose: (t) => { if (!TOUR.built) buildTour(); const P = tourPose(t); return { eye: P.eye.toArray(), yaw: P.yaw / DEG, pitch: P.pitch / DEG, leg: P.leg }; },
+    // 整条路线采样（检查是否穿墙）
+    sample: (dt) => { if (!TOUR.built) buildTour(); const out = []; for (let t = 0; t <= TOUR.T; t += dt || 0.25) { const P = tourPose(t); out.push([+t.toFixed(2), +P.eye.x.toFixed(3), +P.eye.y.toFixed(3), +P.eye.z.toFixed(3), P.leg]); } return out; },
+    inside: () => TOUR.inside, expo: () => renderer.toneMappingExposure,
+  };
+}
 
 })();</script>
 </body>

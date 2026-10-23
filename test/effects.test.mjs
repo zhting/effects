@@ -114,6 +114,12 @@ describe('Effects Gallery 工程结构与子目录规范测试', () => {
       existsSync(resolve(rootDir, 'dist/dayan-pagoda/index.html')),
       '构建产物缺少 dist/dayan-pagoda/index.html',
     )
+    const narrationPath = 'dayan-pagoda/audio/narration.mp3'
+    assert.deepEqual(
+      readFileSync(resolve(rootDir, 'dist', narrationPath)),
+      readFileSync(resolve(rootDir, narrationPath)),
+      '生产构建必须完整保留大雁塔的固定解说录音',
+    )
     const mainChunks = readdirSync(resolve(rootDir, 'dist/assets')).filter((f) => /^main-.*\.js$/.test(f))
     for (const chunk of mainChunks) {
       const code = readFileSync(resolve(rootDir, 'dist/assets', chunk), 'utf-8')

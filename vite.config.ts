@@ -28,7 +28,7 @@ function discoverEffectEntries() {
 
 /**
  * 1. 访问 /<effect-slug>（无末尾斜杠）时自动重定向至 /<effect-slug>/
- * 2. 构建时自动复制子目录下的 offline 静态资源目录（如 qingyu-konbini/offline）
+ * 2. 构建时自动复制子目录下的 offline 和 audio 静态资源目录
  */
 function subdirEffectsPlugin(): Plugin {
   const addRedirect = (middlewares: {
@@ -74,10 +74,12 @@ function subdirEffectsPlugin(): Plugin {
         if (!dirent.isDirectory() || dirent.name.startsWith('.') || IGNORED_DIRS.has(dirent.name)) {
           continue
         }
-        const offlineSrc = resolve(rootDir, dirent.name, 'offline')
-        if (existsSync(offlineSrc)) {
-          const offlineDest = resolve(rootDir, 'dist', dirent.name, 'offline')
-          cpSync(offlineSrc, offlineDest, { recursive: true })
+        for (const staticDir of ['offline', 'audio']) {
+          const staticSrc = resolve(rootDir, dirent.name, staticDir)
+          if (existsSync(staticSrc)) {
+            const staticDest = resolve(rootDir, 'dist', dirent.name, staticDir)
+            cpSync(staticSrc, staticDest, { recursive: true })
+          }
         }
         const vrmSrc = resolve(rootDir, dirent.name, 'character.vrm')
         if (existsSync(vrmSrc)) {
