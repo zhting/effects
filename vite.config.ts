@@ -1,4 +1,4 @@
-import { readdirSync, existsSync, cpSync } from 'node:fs'
+import { readdirSync, existsSync, cpSync, readFileSync } from 'node:fs'
 import { resolve, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { defineConfig, type Plugin } from 'vite'
@@ -89,8 +89,26 @@ function subdirEffectsPlugin(): Plugin {
   }
 }
 
+/**
+ * 支持 `import title from './xxx/index.html?title'`：仅导出页面 <title> 文本。
+ * 门户只需要子页面标题作为兜底信息，避免以 ?raw 方式把整页 HTML 打进主 bundle。
+ */
+function htmlTitlePlugin(): Plugin {
+  return {
+    name: 'html-title-loader',
+    enforce: 'pre',
+    load(id) {
+      const [file, query] = id.split('?')
+      if (query !== 'title' || !file.endsWith('.html')) return null
+      const html = readFileSync(file, 'utf-8')
+      const title = html.match(/<title>([^<]+)<\/title>/i)?.[1]?.trim() ?? ''
+      return `export default ${JSON.stringify(title)}`
+    },
+  }
+}
+
 export default defineConfig({
-  plugins: [react(), subdirEffectsPlugin()],
+  plugins: [react(), htmlTitlePlugin(), subdirEffectsPlugin()],
   build: {
     target: 'es2022',
     chunkSizeWarningLimit: 2000,

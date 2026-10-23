@@ -110,5 +110,14 @@ describe('Effects Gallery 工程结构与子目录规范测试', () => {
       existsSync(resolve(rootDir, 'dist/qingyu-konbini/character.vrm')),
       '构建产物缺少 dist/qingyu-konbini/character.vrm',
     )
+    assert.ok(
+      existsSync(resolve(rootDir, 'dist/dayan-pagoda/index.html')),
+      '构建产物缺少 dist/dayan-pagoda/index.html',
+    )
+    const mainChunks = readdirSync(resolve(rootDir, 'dist/assets')).filter((f) => /^main-.*\.js$/.test(f))
+    for (const chunk of mainChunks) {
+      const code = readFileSync(resolve(rootDir, 'dist/assets', chunk), 'utf-8')
+      assert.ok(!code.includes('three.js r186 | MIT License'), `门户主 bundle ${chunk} 不应内联子页面整页 HTML`)
+    }
   })
 })

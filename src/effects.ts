@@ -69,8 +69,10 @@ const DEFAULT_PALETTES: EffectPalette[] = [
 const IGNORED_SLUGS = new Set(['src', 'dist', 'public', 'node_modules'])
 
 // 自动扫描所有一级子目录中的 index.html、meta.json、README.md
+// index.html 通过 vite.config.ts 中的 `?title` 加载器仅导入 <title> 文本，
+// 避免将体积巨大的单文件特效页（如 dayan-pagoda，约 1.2MB）整体打包进门户主 bundle
 const htmlModules = import.meta.glob('../*/index.html', {
-  query: '?raw',
+  query: '?title',
   import: 'default',
   eager: true,
 }) as Record<string, string>
@@ -92,11 +94,6 @@ function extractSlug(globPath: string): string | null {
   const slug = match[1]
   if (slug.startsWith('.') || IGNORED_SLUGS.has(slug)) return null
   return slug
-}
-
-function parseTitleFromHtml(html: string): string | undefined {
-  const match = html.match(/<title>([^<]+)<\/title>/i)
-  return match?.[1]?.trim()
 }
 
 function parseReadmeFallback(readme?: string): Partial<EffectMetaConfig> {
@@ -155,14 +152,14 @@ function hashSlug(slug: string): number {
 export function loadEffects(): EffectItem[] {
   const items: Omit<EffectItem, 'indexLabel'>[] = []
 
-  for (const [htmlPath, htmlRaw] of Object.entries(htmlModules)) {
+  for (const [htmlPath, htmlTitleRaw] of Object.entries(htmlModules)) {
     const slug = extractSlug(htmlPath)
     if (!slug) continue
 
     const meta = metaModules[`../${slug}/meta.json`] ?? {}
     const readmeRaw = readmeModules[`../${slug}/README.md`]
     const fallback = parseReadmeFallback(readmeRaw)
-    const htmlTitle = parseTitleFromHtml(htmlRaw)
+    const htmlTitle = htmlTitleRaw?.trim() || undefined
 
     const defaultPalette = DEFAULT_PALETTES[hashSlug(slug) % DEFAULT_PALETTES.length]
     const palette: EffectPalette = {

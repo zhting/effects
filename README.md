@@ -22,6 +22,7 @@ effects/
 │   ├── EffectCover.tsx     # 交互式卡片封面预览
 │   ├── effects.ts          # 自动扫描子目录 index.html / meta.json / README.md
 │   └── styles.css
+├── dayan-pagoda/           # 单文件特效：大雁塔三维院落 (/dayan-pagoda/)，内联 three.js + 路径追踪
 ├── resin-island/           # 第一个特效页面：树脂块微缩岛屿 (/resin-island/)
 │   ├── index.html
 │   ├── meta.json           # 特效卡片元数据配置

@@ -1,0 +1,24 @@
+{
+  "title": "大雁塔",
+  "subtitle": "Dayan Pagoda · 三维院落",
+  "category": "WebGL / 建筑可视化",
+  "summary": "西安大慈恩寺院落的简化三维模型：可环绕观察大雁塔与周边城市街区，支持七层塔身结构拆解、七种天气与全天光照切换，并可在镜头静止时用 GPU 路径追踪逐步收敛出真实光影。",
+  "interaction": "拖动 · 旋转视角 ｜ 滚轮 / 双指 · 缩放 ｜ 方向键 / ＋－ / Home · 键盘操作 ｜ 拆解 · 点选构件查看说明",
+  "tags": ["Three.js", "three-gpu-pathtracer", "路径追踪", "建筑拆解", "天气系统", "单文件"],
+  "highlights": [
+    "塔基至塔刹逐层爆炸拆解，点选构件或标签查看结构说明",
+    "晴 / 多云 / 阴 / 雾 / 雨 / 雷雨 / 雪七种天气 + 07:30–17:40 光照时间滑块",
+    "「光追静帧」基于 three-gpu-pathtracer + three-mesh-bvh 渐进式路径追踪",
+    "单 HTML 文件自包含（内联 three.js r186），无需构建与外部依赖"
+  ],
+  "scale": "简化模型",
+  "order": 3,
+  "featured": false,
+  "palette": {
+    "bg": "#f1ebe1",
+    "primary": "#a33a22",
+    "secondary": "#b0802f",
+    "sand": "#e3d3b8",
+    "cliff": "#5c4a38"
+  }
+}
