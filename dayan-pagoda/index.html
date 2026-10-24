@@ -64,6 +64,16 @@
   .tools button{min-height:40px;padding:0 12px;font-size:13px;display:inline-flex;align-items:center;gap:6px;background:var(--paper);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);box-shadow:var(--shadow)}
   .tools svg{width:17px;height:17px;flex:0 0 auto}
   .tools .ts{display:none}
+  /* 仿 iOS 开关：绿色为开，滑块带回弹；按住时滑块略微拉长 */
+  .tools .sw{gap:10px;padding:0 7px 0 14px}
+  .sw-track{position:relative;flex:0 0 auto;width:44px;height:26px;border-radius:13px;background:#e4e4e7;box-shadow:inset 0 0 0 1px rgba(0,0,0,.05);transition:background-color .28s ease}
+  .sw-knob{position:absolute;left:2px;top:2px;width:22px;height:22px;border-radius:11px;background:#fff;box-shadow:0 2px 5px rgba(0,0,0,.2),0 0 0 .5px rgba(0,0,0,.06);transition:transform .32s cubic-bezier(.3,1.35,.5,1),width .2s ease}
+  .sw[aria-checked="true"]{color:var(--ink)}
+  .sw[aria-checked="true"] .sw-track{background:#34c759}
+  .sw[aria-checked="true"] .sw-knob{transform:translateX(18px)}
+  .sw:active .sw-knob{width:27px}
+  .sw[aria-checked="true"]:active .sw-knob{transform:translateX(13px)}
+  .sw:focus-visible{outline:3px solid rgba(52,199,89,.45);outline-offset:2px}
   .toast{position:fixed;left:50%;top:max(16px,env(safe-area-inset-top));transform:translateX(-50%);display:flex;align-items:center;gap:10px;padding:8px 8px 8px 14px;font-size:13.5px;line-height:1.5;z-index:9;width:max-content;max-width:min(560px,calc(100vw - 24px))}
   .toast span{flex:1 1 auto;min-width:0}
   .toast button{flex:0 0 auto}
@@ -220,6 +230,7 @@
   body.tour #gl.dragging{cursor:grabbing}
   .fader{position:fixed;inset:0;background:#06080a;opacity:0;pointer-events:none;z-index:30;transition:opacity .42s ease}
   .fader.on{opacity:1}
+  .fader.soft{transition:opacity .55s ease-in-out;z-index:6}
   body.failed .tour, body.capture .tour{display:none}
 
   .dock{position:fixed;left:50%;bottom:max(14px,env(safe-area-inset-bottom));transform:translateX(-50%);padding:8px;display:flex;flex-direction:column;gap:6px;width:max-content;max-width:calc(100vw - 24px)}
@@ -306,6 +317,12 @@
     .tools{right:max(12px,env(safe-area-inset-right));top:calc(max(12px,env(safe-area-inset-top)) + 64px);flex-direction:column;gap:6px}
     .tools button{min-height:40px;width:56px;padding:0;justify-content:center;flex-direction:column;gap:1px;font-size:11px}
     .tools .tl{display:none}.tools .ts{display:inline}
+    .tools .sw{padding:3px 0 0;gap:3px}
+    .tools .sw .sw-track{width:36px;height:21px;border-radius:11px}
+    .tools .sw .sw-knob{width:17px;height:17px;border-radius:9px}
+    .tools .sw[aria-checked="true"] .sw-knob{transform:translateX(15px)}
+    .tools .sw:active .sw-knob{width:21px}
+    .tools .sw[aria-checked="true"]:active .sw-knob{transform:translateX(11px)}
     .dpanel{left:10px;right:10px;width:auto;top:auto;bottom:calc(var(--dock-h, 170px) + max(10px,env(safe-area-inset-bottom)) + 8px);max-height:44%;padding:10px 12px}
     .dp-hint{display:none}
     .dp-points{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin-bottom:8px}
@@ -395,7 +412,7 @@
     </ul>
   </div>
   <div class="actions">
-    <button id="btnDemo" type="button" title="自动运镜 + 语音解说：大雁塔的由来、建造过程与建筑特点"><svg width="13" height="13" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 1 L11 6 L2 11 Z" fill="currentColor"/></svg><span class="al">讲解演示</span><span class="as">讲解</span> <small>约 4 分钟</small></button>
+    <button id="btnDemo" type="button" title="自动运镜 + 语音解说：大雁塔的由来、建造过程与建筑特点"><svg width="13" height="13" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 1 L11 6 L2 11 Z" fill="currentColor"/></svg><span class="al">讲解演示</span><span class="as">讲解</span> <small>约 5 分钟</small></button>
     <button id="btnTour" type="button" class="tourbtn" title="第一人称自动游览：从南广场拾级而上，穿过券洞，沿木梯登上七层，凭门远眺"><svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 14h3v-3h3V8h3V5h3V2" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round"/></svg><span class="al">登塔游览</span><span class="as">登塔</span> <small>约 5 分钟</small></button>
   </div>
   <p class="note">镜头始终围绕观察中心、保持在地面上方，最近距离位于全部建筑的包围范围之外；「塔身细节」改为绕塔观察，可拉近到 36 m，再用长焦放大。「登塔游览」以第一人称沿预设路线自动行进，可拖动环顾。键盘：方向键旋转，＋／－ 缩放，Home 复位，H 隐藏界面。「讲解演示」使用固定录音，章节、镜头与字幕随录音推进；「性能版」适合低配电脑；「光追静帧」用显卡做路径追踪。院外的城市街区、道路与车辆为示意；夜景中月亮的方位按当晚实际，高度与大小为示意。</p>
@@ -414,7 +431,7 @@
 </div>
 
 <div class="tools" role="toolbar" aria-label="显示与性能">
-  <button id="btnPerf" type="button" aria-pressed="false" title="性能版：降低画质以便在低配电脑上流畅浏览"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 14a7 7 0 1 1 14 0" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M10 14 L13.6 8.4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="10" cy="14" r="1.6" fill="currentColor"/></svg><span class="tl">性能版</span><span class="ts">性能</span></button>
+  <button id="btnPerf" class="sw" type="button" role="switch" aria-checked="true" title="性能版：降低画质以便在低配电脑上流畅浏览"><span class="tl">性能版</span><span class="ts">性能</span><span class="sw-track" aria-hidden="true"><span class="sw-knob"></span></span></button>
   <button id="btnZen" type="button" title="隐藏界面，纯欣赏（快捷键 H，Esc 返回）"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 7V3h4M13 3h4v4M17 13v4h-4M7 17H3v-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="tl">隐藏界面</span><span class="ts">隐藏</span></button>
 </div>
 <div class="toast card" id="toast" hidden role="status"><span></span><button id="toastPerf" type="button">开启性能版</button><button id="toastClose" type="button" aria-label="关闭提示">×</button></div>
@@ -489,13 +506,13 @@
 </div>
 <div class="demo-start card" id="demoStart" hidden role="dialog" aria-modal="true" aria-labelledby="dsTitle">
   <h2 id="dsTitle">讲解演示</h2>
-  <p>约 4 分钟，共 11 节：从玄奘建塔、改建与明代包砌，到塔的形制、仿木构造、叠涩出檐、塔内结构、碑刻线刻、倾斜与保护，最后以夜景收尾。画面配合全息复原的历史场景、场景内的动画标注，并把关键构件单独拿出来立体放大展示。镜头自动运行，可随时暂停、跳节或按 Esc 退出。</p>
+  <p>共 11 节：从玄奘西行、建塔与重建，到明代给唐塔穿上“外套”，再看塔的轮廓、砖仿木的巧思、一层层探出的屋檐、塔里的模样、两块唐碑和一幅“图纸”，以及斜塔如何“站直”，最后在月色里收尾。画面配合全息复原的历史场景、场景内的动画标注，并把关键构件单独拿出来立体放大展示。镜头自动运行，可随时暂停、跳节或按 Esc 退出。</p>
   <fieldset>
     <legend>解说声音</legend>
     <p>使用固定解说录音，暂停、继续和跳转章节时，语音与画面同步。</p>
     <p class="hint" id="dsFileInfo"></p>
   </fieldset>
-  <p class="hint">录音时长约 4 分 19 秒。<button id="dsScript" type="button" class="linkbtn">下载讲解词</button></p>
+  <p class="hint">录音时长约 5 分 5 秒。<button id="dsScript" type="button" class="linkbtn">下载讲解词</button></p>
   <p class="msg" id="dsMsg" role="status"></p>
   <div class="row"><button id="dsTest" type="button">试听</button><button id="dsCancel" type="button">取消</button><button id="dsGo" class="primary" type="button">开始演示</button></div>
 </div>
@@ -12822,9 +12839,10 @@ function updateEnvironment(dt, time) {
     for (const p in wxTo) if (typeof wxTo[p] === 'number') wx[p] = lerp(wxFrom[p], wxTo[p], k);
     animating = true;
     envAge += dt;
-    if (envAge > 0.35 || wxT >= 1) envDirty = true;
+    if (envAge > (DEMO.on ? 0.8 : 0.35) || wxT >= 1) envDirty = true;
   }
-  if (envPending) { envAge += dt; if (envAge > 0.25 || dt === 0) { envDirty = true; envPending = false; } }
+  // 讲解演示中时间连续变化：环境贴图更新得稀一些（每次更新需回读像素，会造成短暂停顿）
+  if (envPending) { envAge += dt; if (envAge > (DEMO.on ? 0.7 : 0.25) || dt === 0) { envDirty = true; envPending = false; } }
   const s = sunAt(timeMin), eDeg = s.elev / DEG;
   const center = castBounds.getCenter(new T.Vector3());
   // 夜景：天色（日落后约 1 小时完全入夜）、人工照明（日落前后开灯）、月亮
@@ -12928,14 +12946,15 @@ function updateEnvironment(dt, time) {
   bloomPass.threshold = lerp(10, 1.0, nightSky); bloomPass.strength = lerp(0.16, 0.6, nightSky); bloomPass.radius = lerp(0.45, 0.62, nightSky);
   if (rainOn || snowOn || wx.cShadow > 0.05 || wx.wind > 0.2) animating = true;
   const sig = [ld.x, ld.y, ld.z, castBounds.min.x, castBounds.min.y, castBounds.min.z, castBounds.max.x, castBounds.max.y, castBounds.max.z].map((v) => v.toFixed(3)).join(',') + (compoundVisibleSig());
-  if (sig !== shadowSig) { shadowSig = sig; fitShadow(ld); renderer.shadowMap.needsUpdate = true; }
+  // 构件动画时（讲解演示）阴影每两帧重新贴合、重绘一次
+  if (sig !== shadowSig && !(DEMO.on && (shadowSkip = (shadowSkip + 1) % 2) === 1)) { shadowSig = sig; fitShadow(ld); renderer.shadowMap.needsUpdate = true; }
   const fsig = ld.toArray().map((v) => v.toFixed(4)).join();
   if (fsig !== farSig) { farSig = fsig; fitShadowFar(ld); sunFar.shadow.needsUpdate = true; renderer.shadowMap.needsUpdate = true; }
   sunFar.shadow.intensity = sun.shadow.intensity; sunFar.shadow.radius = Math.max(1.5, wx.sRad * 0.5);
   return animating;
 }
 
-let shadowSig = '', projKey = '', farSig = '';
+let shadowSig = '', projKey = '', farSig = '', shadowSkip = 0;
 function compoundVisibleSig() { return typeof compound !== 'undefined' && compound ? (compound.visible ? 'v' : 'h') + (typeof explodeK === 'number' ? explodeK.toFixed(3) : '') : ''; }
 // 阴影相机贴合当前投影物范围（含其在地面上的影长）
 const _shadowTmp = new T.Object3D();
@@ -13371,13 +13390,15 @@ function updateNight(nightSky, lights, moon, time, sunDir, skyA) {
 
 // ==== app_44_perf.js ====
 /* =====================================================================
- * 6c. 性能版：为低配电脑降低渲染开销（可随时切换，选择记在本机浏览器）
+ * 6c. 性能版：为低配电脑降低渲染开销（默认开启以降低资源要求，可随时切换；
+ *     关闭后恢复完整画质，用户的选择记在本机浏览器——明确关闭过则之后不再默认开启）
  *     像素比 ≤ 1、关闭环境光遮蔽 / 辉光 / 多重采样 / 平面反射、缩小阴影贴图、
  *     远处行道树不绘制、近处树木换用简化树形、降水粒子减量；静止时仍做少量累积抗锯齿。
  * ===================================================================== */
 const PERF = { on: false, base: null, suggested: false };
 const PERF_KEY = 'dayanta.perf';
-function perfStored() { try { return localStorage.getItem(PERF_KEY) === '1'; } catch (e) { return false; } }
+// 默认状态：本机没有明确关闭记录（存值 '0'）时默认开启性能版
+function perfDefault() { try { return localStorage.getItem(PERF_KEY) !== '0'; } catch (e) { return true; } }
 // 近处树木：完整树形 / 简化树形按性能版切换（同时服从拆解时的院落淡出）
 function applyTreeSwap() {
   const vis = !!(compound && compound.visible), lite = PERF.on;
@@ -13411,7 +13432,7 @@ function applyPerf(on, persist) {
   applyTreeSwap();
   composer._w = -1;           // 下一帧按新像素比重设渲染目标尺寸
   const b = $('btnPerf');
-  if (b) { b.setAttribute('aria-pressed', String(on)); b.title = on ? '已开启性能版：画质较低、更流畅。再点一次恢复高画质' : '性能版：降低画质以便在低配电脑上流畅浏览'; }
+  if (b) { b.setAttribute('aria-checked', String(on)); b.title = on ? '已开启性能版：画质较低、更流畅。再点一次恢复高画质' : '性能版：降低画质以便在低配电脑上流畅浏览'; }
   document.body.classList.toggle('perf', on);
   if (persist) { try { localStorage.setItem(PERF_KEY, on ? '1' : '0'); } catch (e) { /* 存储不可用时只在本次生效 */ } }
   hideToast();
@@ -13428,18 +13449,6 @@ function suggestPerf() {
   clearTimeout(PERF.tt); PERF.tt = setTimeout(hideToast, 12000);
 }
 function hideToast() { const t = $('toast'); if (t) t.hidden = true; }
-// 首次打开时，若显卡像是集成显卡或软件渲染，提示可以改用性能版
-function perfHintForGPU() {
-  if (PERF.on || CAPTURE) return;
-  let stored = null; try { stored = localStorage.getItem(PERF_KEY); } catch (e) { /* 忽略 */ }
-  if (stored !== null) return;
-  let name = '';
-  try { const ext = gl.getExtension('WEBGL_debug_renderer_info'); name = ext ? gl.getParameter(ext.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER); } catch (e) { /* 忽略 */ }
-  if (/SwiftShader|llvmpipe|Software|Intel.*(HD|UHD) Graphics|Mali|Adreno \(TM\) [3-6]|PowerVR/i.test(String(name))) {
-    PERF.gpu = name; suggestPerf();
-    $('toast').querySelector('span').textContent = '检测到集成显卡或软件渲染，可切换到「性能版」以获得更流畅的画面。';
-  }
-}
 
 // ==== app_45_pathtrace.js ====
 /* =====================================================================
@@ -13836,7 +13845,7 @@ function updateViewOffset(snap) {
   if (snap) { viewOff.x = viewOff.tx; viewOff.y = viewOff.ty; }
 }
 function stepViewOffset(dt) {
-  const k = 1 - Math.exp(-dt * 6);
+  const k = 1 - Math.exp(-dt * (DEMO.on ? 2.4 : 6));     // 演示中让画面中心缓缓让位给展示窗
   const nx = lerp(viewOff.x, viewOff.tx, k), ny = lerp(viewOff.y, viewOff.ty, k);
   const moved = Math.abs(nx - viewOff.x) > 0.05 || Math.abs(ny - viewOff.y) > 0.05;
   viewOff.x = Math.abs(nx - viewOff.tx) < 0.05 ? viewOff.tx : nx; viewOff.y = Math.abs(ny - viewOff.ty) < 0.05 ? viewOff.ty : ny;
@@ -14252,8 +14261,12 @@ function start() {
     bindDemoUI();
     bindTourUI();
     bindIntroUI();
-    if (!CAPTURE && (QS.has('perf') || perfStored())) applyPerf(true, false);
-    else setTimeout(perfHintForGPU, 1500);
+    // 性能版默认开启（低资源要求优先），本机明确关闭过（存值 '0'）才以完整画质启动；
+    // 截帧 / 录制模式保持完整画质，仍可用 ?perf 强制开启。两种分支都经 applyPerf 同步开关 UI。
+    if (!CAPTURE) {
+      if (QS.has('perf') || (!RECORD && perfDefault())) applyPerf(true, false);
+      else if (!RECORD) applyPerf(false, false);   // 用户在本机关闭过性能版：仅同步开关状态
+    }
     setCompoundOpacity(1);
     resizeRenderer(); updateViewOffset(true); applyViewOffset();
     placeCamera('court', MODES.court.init);
@@ -14556,7 +14569,12 @@ function bindModesUI() {
   };
   window.addEventListener('pointermove', wake, { passive: true });
   window.addEventListener('pointerdown', wake, { passive: true });
-  $('btnPerf').addEventListener('click', () => applyPerf(!PERF.on, true));
+  // 开关先完成滑动动画，再切换画质（切换会重建渲染目标，避免卡住动画）
+  $('btnPerf').addEventListener('click', () => {
+    const b = $('btnPerf'), on = b.getAttribute('aria-checked') !== 'true';
+    b.setAttribute('aria-checked', String(on));
+    clearTimeout(PERF.swT); PERF.swT = setTimeout(() => { if (PERF.on !== on) applyPerf(on, true); }, 300);
+  });
   $('toastPerf').addEventListener('click', () => applyPerf(true, true));
   $('toastClose').addEventListener('click', hideToast);
   document.addEventListener('keydown', (e) => {
@@ -14710,12 +14728,27 @@ function buildHoloGrid() {
   HOLO.gridU = U;
   return mesh;
 }
+// 比例参照：二十层住宅楼（每层约 3.2 m）的全息体块，立在塔的东侧
+function buildFloorsHolo() {
+  const W = 14, H = 64, x = 37, z = 4, U = holoUniforms(0x7fe3ff, 0x7fe3ff, 0, H);
+  const shell = boxAt(W, H, W, 0, H / 2, 0), pts = [];
+  for (let k = 1; k < 20; k++) { const y = k * 3.2, h = W / 2; pts.push(-h, y, -h, h, y, -h, h, y, -h, h, y, h, h, y, h, -h, y, h, -h, y, h, -h, y, -h); }
+  const lines = new T.BufferGeometry(); lines.setAttribute('position', new T.Float32BufferAttribute(pts, 3));
+  const edges = mergeG([new T.EdgesGeometry(shell.clone(), 20), lines]);
+  const g = new T.Group();
+  const fill = new T.Mesh(shell, holoMaterial(U, 'fill')); fill.renderOrder = 6;
+  const glow = new T.Mesh(shell, holoMaterial(U, 'glow')); glow.renderOrder = 7;
+  const ln = new T.LineSegments(edges, holoMaterial(U, 'line')); ln.renderOrder = 8;
+  g.add(fill, glow, ln); g.position.set(PG.x + x, 0, PG.z + z);
+  HOLO.bU = U; HOLO.bAnchor = [PG.x + x + W / 2, 0, PG.z + z + W / 2];
+  return g;
+}
 function holoInit() {
   if (HOLO.ready) return;
   HOLO.group = new T.Group(); HOLO.group.name = 'holo';
-  HOLO.stupa = buildStupaHolo(); HOLO.scan = buildScanFrame(); HOLO.grid = buildHoloGrid();
-  HOLO.group.add(HOLO.stupa, HOLO.scan, HOLO.grid);
-  for (const o of [HOLO.stupa, HOLO.scan, HOLO.grid]) o.visible = false;
+  HOLO.stupa = buildStupaHolo(); HOLO.scan = buildScanFrame(); HOLO.grid = buildHoloGrid(); HOLO.bldg = buildFloorsHolo();
+  HOLO.group.add(HOLO.stupa, HOLO.scan, HOLO.grid, HOLO.bldg);
+  for (const o of [HOLO.stupa, HOLO.scan, HOLO.grid, HOLO.bldg]) o.visible = false;
   scene.add(HOLO.group);
   AO_HIDE.push(HOLO.group);
   reflection.hide.push(HOLO.group);
@@ -14730,11 +14763,13 @@ function holoFrame(time) {
   HOLO.stupa.visible = HOLO.U.uAlpha.value > 0.002 && HOLO.U.uReveal.value > 0.001 && HOLO.U.uDis.value < 0.999;
   HOLO.scan.visible = HOLO.scanU.uAlpha.value > 0.002;
   HOLO.grid.visible = HOLO.gridU.uAlpha.value > 0.002;
+  HOLO.bU.uGain.value = gain; HOLO.bU.uTime.value = time;
+  HOLO.bldg.visible = HOLO.bU.uAlpha.value > 0.002 && HOLO.bU.uReveal.value > 0.001;
 }
 function holoReset() {
   if (!HOLO.ready) return;
   HOLO.U.uAlpha.value = 0; HOLO.U.uReveal.value = 0; HOLO.U.uDis.value = 0;
-  HOLO.scanU.uAlpha.value = 0; HOLO.gridU.uAlpha.value = 0;
+  HOLO.scanU.uAlpha.value = 0; HOLO.gridU.uAlpha.value = 0; HOLO.bU.uAlpha.value = 0; HOLO.bU.uReveal.value = 0;
   holoFrame(0);
 }
 // 扫描框放到高度 y：按所在层的面宽（含出檐）设定大小
@@ -14802,6 +14837,13 @@ class AnnoLayer {
       if (dx > 0 && ax + dx + w > this.W - 6 && ax - dx - w > 6) dx = -dx;
       else if (dx < 0 && ax + dx - w < 6 && ax - dx + w < this.W - 6) dx = -dx;
     }
+    // 标签不要压在立体展示窗上：先尝试换到另一侧，仍重叠则淡化
+    let dim = 1;
+    const A = this.avoid;
+    if (A && !o.pin) {
+      const hh = (it.hgt || 34) / 2 + 4, hit = (d) => { const x0 = d > 0 ? ax + d : ax + d - w, x1 = d > 0 ? ax + d + w : ax + d; return x1 > A.left && x0 < A.right && ay + dy + hh > A.top && ay + dy - hh < A.bottom; };
+      if (hit(dx)) { if (!hit(-dx) && (dx > 0 ? ax - dx - w > 6 : ax - dx + w < this.W - 6)) dx = -dx; else dim = 0.18; }
+    }
     const kx = o.pin ? 0 : Math.sign(dx) * Math.min(Math.abs(dy), Math.abs(dx) * 0.6);
     const K = [ax + kx, ay + dy], L = [ax + dx, ay + dy];
     const d = `M${ax.toFixed(1)} ${ay.toFixed(1)}L${K[0].toFixed(1)} ${K[1].toFixed(1)}L${L[0].toFixed(1)} ${L[1].toFixed(1)}`;
@@ -14824,7 +14866,7 @@ class AnnoLayer {
     if (it.side !== side) { it.side = side; it.el.classList.toggle('l', side === 'l'); }
     const lx = o.pin ? L[0] : L[0] + (dx < 0 ? -4 : 4), ly = L[1];
     const tr = o.pin ? `translate(${lx.toFixed(1)}px,${(ly - 2).toFixed(1)}px) translate(-50%,-100%)` : `translate(${lx.toFixed(1)}px,${ly.toFixed(1)}px) translate(${dx < 0 ? '-100%' : '0'},-50%)`;
-    it.el.style.transform = tr; it.el.style.opacity = (a * smooth01(kt * 3)).toFixed(3);
+    it.el.style.transform = tr; it.el.style.opacity = (a * dim * smooth01(kt * 3)).toFixed(3);
   }
   // 尺寸线：两端点 (x0,y0)-(x1,y1)，向一侧偏移 off 像素；o = { t, off, a, r }
   dim(id, x0, y0, x1, y1, o) {
@@ -14936,7 +14978,7 @@ function typeInto(el, text, k) { const n = Math.ceil(text.length * clamp(k, 0, 1
 
 // ==== app_55_demo.js ====
 /* =====================================================================
- * 10. 讲解演示：自动运镜 + 字幕 + 语音解说（11 节，约 4 分钟）
+ * 10. 讲解演示：自动运镜 + 字幕 + 语音解说（11 节，约 5 分钟）
  *     固定使用 audio/narration.mp3，以录音播放位置驱动章节与画面。
  *     场景内的历史场景、动画标注、资料卡片与立体展示见 10a–10d。
  * ===================================================================== */
@@ -14946,12 +14988,15 @@ const TILT_SHOW = 10 * 1.0105 / 64.5;                           // 1996 年倾�
 const ease = easeInOut, S = smooth01;
 
 /* ---------- 构件特效：建造动画（逐件落下）、倾斜示意、外层高亮 ---------- */
+// 建造进度 build（0–10）→ 第 i 件的完成度；相邻构件的动画相互重叠，整体连贯
+const BUILD_SPAN = 1.8, BUILD_STEP = (10 - BUILD_SPAN) / 9;
+const partBuilt = (i) => clamp((DEMO_FX.build - i * BUILD_STEP) / BUILD_SPAN, 0, 1);
 function applyPartFx() {
   let changed = false;
   for (const p of parts) {
-    const i = p.userData.idx, a = clamp(DEMO_FX.build - i, 0, 1), e = 1 - Math.pow(1 - a, 3);
-    if (a < 1) p.position.y += (1 - e) * 24;
-    let op = S(a / 0.6), vis = a > 0.002;
+    const i = p.userData.idx, a = partBuilt(i), e = 1 - Math.pow(1 - a, 4);
+    if (a < 1) p.position.y += (1 - e) * 14;
+    let op = S(a / 0.55), vis = a > 0.002;
     // 塔刹：地震中倾倒坠落（绕刹座转动），重修时从上方落回
     if (p.userData.id === 'finial') {
       const f = DEMO_FX.fin, y0 = PG.top - PG.finialH;
@@ -14982,56 +15027,94 @@ function applyPartFx() {
     for (const p of parts) {
       if (p.userData.id === 'base' || p.userData.id === 'finial') continue;
       const m = p.userData.mats.brick;
-      if (selected !== p.userData.id) { m.emissive.setRGB(1.0, 0.42, 0.1); m.emissiveIntensity = 0.32 * DEMO_FX.hl; }
+      if (selected !== p.userData.id) { m.emissive.setRGB(1.0, 0.4, 0.08); m.emissiveIntensity = 0.16 * DEMO_FX.hl; }
     }
   }
-  if (changed) { updateCastBounds(); renderer.shadowMap.needsUpdate = true; }
+  // 构件动画时阴影每两帧重绘一次（阴影贴图很大），动画停下的那一帧一定重绘
+  if (changed) { updateCastBounds(); DEMO_FX.shDirty = true; }
+  if (DEMO_FX.shDirty && (!changed || (DEMO_FX.shN = (DEMO_FX.shN || 0) + 1) % 2 === 0)) { renderer.shadowMap.needsUpdate = true; DEMO_FX.shDirty = false; }
   return changed;
 }
 
-/* ---------- 讲解内容 ---------- */
+/* ---------- 讲解内容 ----------
+ * 每节的画面事件都锚定在解说词里的某个词上（cue），按字数估算这个词被念到的时刻；
+ * 动画关键词位置归一化后，由录音的章节进度驱动。 */
 const PGT = (h, x, z) => [x === undefined ? PG.x : x, h, z === undefined ? PG.z : z];
 const COURT_T = [0, 18, -19];
+// 朗读进度：按字数计，标点处另加停顿
+const PAUSE_RE = /[，。；：、！？—“”《》]/;
+function textWeights(txt) { const w = []; for (const ch of txt) w.push(PAUSE_RE.test(ch) ? 1.6 : 1); return w; }
+function textPos(txt, idx) {
+  const w = textWeights(txt); let a = 0, tot = 0;
+  for (let i = 0; i < w.length; i++) { if (i < idx) a += w[i]; tot += w[i]; }
+  return tot ? a / tot : 0;
+}
+// 新版视觉脚本中 word 的归一化位置（0–1）；找不到时用 d
+function cue(i, word, d) {
+  const txt = CHAPTERS[i].text, k = txt.indexOf(word);
+  const f = k < 0 ? (d === undefined ? 0.5 : d) : textPos(txt, k);
+  return f;
+}
+const Q = (i) => (w, d) => cue(i, w, d);
+// 镜头关键帧路径：在各关键帧之间做三次 Hermite 插值（Catmull-Rom 切线），首尾速度为零——起落都是缓起缓停
+const P_ = (t, az, pitch, dist, zoom) => ({ t, az, pitch, dist, zoom: zoom === undefined ? 1 : zoom });
+function camPath(keys, u) {
+  const K = keys.slice().sort((a, b) => a[0] - b[0]);
+  // 关键帧时刻限定在 [0, 1] 内且彼此至少相隔 0.03（解说词改动导致关键词位置挤在一起时也不会出现急动）
+  for (let j = K.length - 1; j >= 0; j--) K[j] = [clamp(Math.min(K[j][0], 1 - 0.03 * (K.length - 1 - j)), 0, 1), K[j][1]];
+  for (let j = 1; j < K.length; j++) if (K[j][0] < K[j - 1][0] + 0.03) K[j] = [K[j - 1][0] + 0.03, K[j][1]];
+  const n = K.length;
+  if (u <= K[0][0]) return K[0][1];
+  if (u >= K[n - 1][0]) return K[n - 1][1];
+  const P = K.map(([, p]) => [p.t[0], p.t[1], p.t[2], p.az, p.pitch, Math.log(p.dist), p.zoom]);
+  for (let j = 1; j < n; j++) { let d = P[j][3] - P[j - 1][3]; d = ((d + 540) % 360) - 180; P[j][3] = P[j - 1][3] + d; }
+  let i = 0; while (i < n - 2 && K[i + 1][0] < u) i++;
+  const u0 = K[i][0], h = K[i + 1][0] - u0, s = (u - u0) / h;
+  const tan = (j) => (j === 0 || j === n - 1 ? P[j].map(() => 0) : P[j].map((_, c) => (P[j + 1][c] - P[j - 1][c]) / (K[j + 1][0] - K[j - 1][0]) * 0.85));
+  const m0 = tan(i), m1 = tan(i + 1), s2 = s * s, s3 = s2 * s;
+  const h00 = 2 * s3 - 3 * s2 + 1, h10 = s3 - 2 * s2 + s, h01 = -2 * s3 + 3 * s2, h11 = s3 - s2;
+  const r = P[i].map((p0, c) => h00 * p0 + h10 * h * m0[c] + h01 * P[i + 1][c] + h11 * h * m1[c]);
+  return { t: [r[0], r[1], r[2]], az: r[3], pitch: r[4], dist: Math.exp(r[5]), zoom: r[6] };
+}
+const sstep = (a, b, x) => smooth01((x - a) / Math.max(1e-4, b - a));
 const CHAPTERS = [
-  { title: '大慈恩寺与大雁塔', note: '',
-    text: '这里是西安城南的大慈恩寺，寺中这座方形砖塔，就是大雁塔。它始建于唐高宗永徽三年，也就是公元652年，是现存最早、规模最大的唐代四方楼阁式砖塔。2014年，大雁塔作为丝绸之路“长安—天山廊道”的组成部分，列入《世界遗产名录》。',
-    trees: true, shot: (u) => ({ t: COURT_T, az: -24 + 44 * u, pitch: 31 - 6 * u, dist: 330 - 70 * u, zoom: 1 }) },
-  { title: '缘起：玄奘建塔', note: '全息影像据文献记载示意（唐尺按约 0.3 m 折算），并非唐初原貌',
-    text: '贞观十九年，玄奘从天竺取经归来，带回了大量梵文经典和佛像。为了妥善保存这些经像，永徽三年，他奏请在慈恩寺建塔。原计划建一座石塔，唐高宗考虑工程浩大，改用砖砌。最初的塔仿照西域窣堵坡的形制，砖表土心，据记载共有五层。',
-    build: (t, u, k0) => lerp(k0, 0, ease(t / 2.4)),
-    shot: (u) => ({ t: PGT(24), az: -32 + 18 * u, pitch: 12, dist: 158, zoom: 1 }) },
-  { title: '改建为楼阁式', note: '坍损、重建为示意动画',
-    text: '砖表土心的塔体经不住风雨侵蚀，没过多久便逐渐坍损。一般认为，武周长安年间，塔被重新营建，改为中原传统的楼阁式样，并且加高。唐天宝年间，诗人岑参登上此塔，留下了“七层摩苍穹”的诗句。',
-    build: (t, u, k0) => (u < 0.3 ? lerp(k0, 0, ease(t / 1.5)) : 10 * S((u - 0.3) / 0.4)),
-    shot: (u) => ({ t: PGT(16 + 16 * u), az: -14 + 22 * u, pitch: 13 + 3 * u, dist: 150 + 35 * u, zoom: 1 }) },
-  { title: '明代包砌', note: '亮起的外层表示明代包砌的砖墙（示意）',
-    text: '此后，五代和宋代都曾修缮过这座塔。明代嘉靖年间的大地震震落了塔刹；万历年间重修时，在唐塔外表包砌了一层约六十厘米厚的青砖，又重新安装了木梯，形成了我们今天看到的样子。',
-    hl: (t, u) => S((u - 0.35) / 0.1) * (1 - S((u - 0.9) / 0.08)) * (0.8 + 0.2 * Math.sin(t * 2.6)),
-    shot: (u) => ({ t: PGT(32), az: -86 + 70 * u, pitch: 14, dist: 168, zoom: 0.95 }) },
-  { title: '方锥形的塔身', note: '',
-    text: '今天的大雁塔坐落在高约4.2米的方形台基上，塔身七层，通高约64.5米，底层边长约25.5米。各层面宽自下而上逐层收小，整座塔呈方锥形，稳重而挺拔。',
-    shot: (u) => ({ t: PGT(32), az: -44 + 28 * u, pitch: 8.6, dist: 182, zoom: 1 }) },
-  { title: '以砖仿木', note: '',
-    text: '塔身全部用砖砌成，外观却处处模仿木结构：墙面用砖隐出倚柱和阑额，柱头上砌出栌斗，把每一面分成若干开间。一、二层九间，三、四层七间，五到七层五间；每层四面的正中，各开一道券门。',
-    shot: (u) => blendPose({ t: PGT(15, 0, -29.6), az: -14 + 28 * u, pitch: 18, dist: 100, zoom: 0.48 },
-      { t: PGT(31, 0, -36), az: 6, pitch: 9, dist: 172, zoom: 1 }, ease(S((u - 0.54) / 0.12))) },
-  { title: '叠涩出檐', note: '',
-    text: '塔檐不用木椽，而是把砖一层一层向外挑出，这种做法叫做“叠涩”，中间还夹砌着斜放的菱角牙子。檐上再用砖逐层向内收回，形成上一层的平台。',
-    shot: (u) => ({ t: PGT(27.6, -11.2, -30.8), az: -54 + 20 * u, pitch: 10, dist: 96, zoom: 0.3 }) },
-  { title: '塔内结构', note: '拆解为示意，塔内楼梯与房间为示意建模',
-    text: '塔的内部是方形的塔室，每层架设木楼板，木梯盘旋而上，可以一直登到顶层。塔的重量主要由砖土结构承担，木楼板和木梯并不承重。登塔的人可以从四面的券门远眺西安城。',
-    explode: 1, shot: (u) => ({ t: PGT(66), az: -44 + 30 * u, pitch: 16, dist: 215, zoom: 1 }) },
-  { title: '圣教序碑与门楣线刻', note: '碑文与门楣图案为示意纹理',
-    text: '底层南面券门两侧的砖龛里，立着两通唐碑：西龛是唐太宗撰文的《大唐三藏圣教序》，东龛是唐高宗撰文的《圣教序记》，都由书法家褚遂良书写。四面券门的石门楣上还保留着唐代线刻，其中西门楣上刻画的佛殿，是研究唐代木构建筑的珍贵图像。',
-    shot: (u) => blendPose({ t: PGT(6.8, 0, -29.6), az: -8 + 10 * u, pitch: 22, dist: 92, zoom: 0.34 },
-      { t: PGT(8.4, -12.9, -42), az: -90 + 8 * (u - 0.5), pitch: 16, dist: 96, zoom: 0.3 }, ease(S((u - 0.57) / 0.1))) },
-  { title: '倾斜与回倾', note: '倾斜幅度放大约 10 倍示意',
-    text: '由于过量开采地下水，大雁塔曾逐渐向西北方向倾斜，1996年倾斜量达到1010.5毫米。此后，周边四百多眼自备井被封停，并开展地下水回灌，塔身开始以每年约1毫米的速度缓慢回倾。',
-    tilt: (t, u) => TILT_SHOW * S((u - 0.12) / 0.22) * (1 - S((u - 0.72) / 0.2)),
-    shot: (u) => ({ t: PGT(32), az: -24 + 3 * u, pitch: 10, dist: 200, zoom: 1 }) },
+  { title: '城南的地标', note: '',
+    text: '如果只能选一样东西代表西安，很多人会选它——大雁塔。一千三百多年前，它在长安城南的大慈恩寺里拔地而起；今天，它依然站在这里，看着这座城市一圈圈长大。2014年，它作为丝绸之路上的重要遗迹，列入了《世界遗产名录》。',
+    trees: true, shot(u) { const C = Q(0); return camPath([[0, P_(COURT_T, -30, 38, 420)], [C('一千三百多年前'), P_([0, 20, -24], -18, 31, 340)], [C('看着这座城市'), P_([0, 24, -32], -2, 24, 275)], [1, P_([0, 30, -38], 14, 18, 228)]], u); } },
+  { title: '玄奘与一座塔', note: '全息影像据文献记载示意（唐尺按约 0.3 m 折算），并非唐初原貌',
+    text: '故事要从一位僧人说起。唐代高僧玄奘西行求法，翻雪山、过沙漠，往返十七年，带回了六百多部经书。这么珍贵的经书，放在哪儿才安心？永徽三年，玄奘请求在慈恩寺建一座塔。他本想用石头，唐高宗担心工程太大，让他改用砖砌。最初的塔仿照西域的样式，外面砌砖、里面填土，一共五层。',
+    build(t, u, k0) { const c = cue(1, '永徽三年'); return lerp(k0, 0, sstep(c - 0.02, c + 0.09, u)); },
+    shot(u) { const C = Q(1); return camPath([[0, P_(PGT(27), 10, 18, 232)], [C('这么珍贵'), P_(PGT(25), 0, 16, 212)], [C('永徽三年'), P_(PGT(24), -6, 15, 198)], [C('最初的塔'), P_(PGT(21), -14, 12, 172)], [C('一共五层'), P_(PGT(28), -21, 11, 160)], [1, P_(PGT(30), -26, 12, 166)]], u); } },
+  { title: '从五层到七层', note: '坍损、重建为示意动画',
+    text: '可惜，土心的塔经不住长安的风吹雨淋，没过几十年就开始坍塌。到了武则天的时代，人们把它拆掉重建，改成中原人熟悉的楼阁样式，也比原来更高了。天宝年间，诗人岑参登上这座塔，写下“四角碍白日，七层摩苍穹”——塔角挡住了太阳，七层塔身仿佛擦着天空。',
+    build(t, u) { const C = Q(2); return 10 * sstep(C('武则天'), C('天宝年间') - 0.02, u); },
+    shot(u) { const C = Q(2); return camPath([[0, P_(PGT(28), -24, 13, 172)], [C('武则天'), P_(PGT(24), -8, 12, 186)], [C('更高'), P_(PGT(34), 6, 10, 186)], [C('岑参'), P_(PGT(40), 18, 4, 152)], [1, P_(PGT(44), 26, -3, 138)]], u); } },
+  { title: '穿上一件“外套”', note: '亮起的外层表示明代包砌的砖墙（示意）',
+    text: '此后几百年，大雁塔历经修补。明朝嘉靖年间，关中发生大地震，塔顶的塔刹被震落了。到了万历年间，人们给这座唐塔穿上了一件“外套”——在外面包砌了一层约六十厘米厚的青砖。所以，今天我们看到的砖面大多是明代的，真正的唐塔，就藏在里面。',
+    hl(t, u) { const C = Q(3); return sstep(C('外套') - 0.04, C('外套') + 0.04, u) * (1 - sstep(0.9, 0.98, u)) * (0.82 + 0.18 * Math.sin(t * 2.2)); },
+    shot(u) { const C = Q(3); return camPath([[0, P_(PGT(34), 12, 12, 176)], [C('大地震'), P_(PGT(48), 2, 10, 146)], [C('震落'), P_(PGT(56), -6, 9, 124, 0.82)], [C('万历') + 0.05, P_(PGT(38), -20, 12, 160)], [C('外套'), P_(PGT(32), -34, 12, 170)], [1, P_(PGT(30), -44, 13, 176)]], u); } },
+  { title: '稳稳的方锥', note: '右侧二十层楼的全息体块按每层约 3.2 米示意',
+    text: '仔细看它的轮廓：塔身坐在四米多高的台基上，七层一层比一层收窄，像一座被拉高的方锥。下宽上窄，重心压得低低的，站得格外稳当。从台基到塔尖大约六十四米，差不多有二十层楼那么高。',
+    shot(u) { const C = Q(4); return camPath([[0, P_(PGT(30), -46, 9, 190)], [C('收窄'), P_(PGT(32), -36, 8.5, 186)], [C('重心'), P_(PGT(32), -27, 8.5, 190)], [C('六十四米') - 0.03, P_(PGT(32), -22, 8.5, 194)], [1, P_([13, 32, -38], -10, 9, 220)]], u); } },
+  { title: '砖头扮成的木房子', note: '',
+    text: '大雁塔有个有趣的“小心思”：它明明是砖砌的，却处处在模仿木头房子。墙面上用砖做出柱子和横梁，柱头上还顶着砖砌的“斗”，把每一面分成一格一格的开间。越往上开间越少，下面九间，中间七间，最上面五间。每层四面的正中，都开着一道拱门。',
+    shot(u) { const C = Q(5); return camPath([[0, P_(PGT(17, 0, -29.6), -18, 16, 108, 0.5)], [C('柱子'), P_(PGT(16, 0, -29.6), -7, 15, 101, 0.46)], [C('“斗”'), P_(PGT(17, 0, -29.6), 4, 15, 98, 0.45)], [C('中间七间'), P_(PGT(31, 0, -36), 7, 9, 172)], [C('拱门'), P_(PGT(30, 0, -36), 3, 9, 175)], [1, P_(PGT(30, 0, -36), -2, 9, 178)]], u); } },
+  { title: '一层层探出来的屋檐', note: '',
+    text: '再抬头看看塔檐。木房子的屋檐靠木椽挑出去，砖可做不到。古代工匠想了个巧办法：把砖一层层往外探，每层只多出一点点，屋檐就慢慢伸了出来，这叫“叠涩”。中间还夹着斜砌的砖，露出一排小牙齿似的尖角，叫“菱角牙子”。檐上的砖再一层层收回来，就成了上一层的平台。',
+    shot(u) { const C = Q(6); const T0 = PGT(27.6, -11.2, -30.8); return camPath([[0, P_(T0, -34, 11, 102, 0.34)], [C('叠涩'), P_(T0, -44, 10, 96, 0.3)], [C('菱角牙子'), P_(T0, -51, 9, 95, 0.28)], [1, P_(T0, -58, 10, 97, 0.3)]], u); } },
+  { title: '塔里面藏着什么', note: '拆解为示意，塔内楼梯与房间为示意建模',
+    text: '塔的里面并不是实心的。每一层都有一间方方正正的塔室，铺着木楼板，木梯一层层通到顶层。真正扛起整座塔的，是四周厚厚的砖墙，楼板和木梯并不承重。爬到高处，从四面的拱门望出去，整个西安城都在脚下。',
+    explode: 1, shot(u) { const C = Q(7); return camPath([[0, P_(PGT(48), -52, 14, 232)], [C('木梯'), P_(PGT(60), -42, 15, 222)], [C('砖墙'), P_(PGT(70), -30, 16, 216)], [1, P_(PGT(74), -18, 17, 222)]], u); } },
+  { title: '两块碑与一幅“图纸”', note: '碑文与门楣图案为示意纹理',
+    text: '来到塔的南门，两边的砖龛里各立着一块唐碑：西边那块的文章出自唐太宗，东边那块出自唐高宗，碑上的字都是大书法家褚遂良写的。西门的石门楣上还藏着一件宝贝——一幅线刻的唐代佛殿，屋顶、斗栱一笔一画清清楚楚。建筑学家梁思成就曾拿它当“图纸”，研究唐代建筑的模样。',
+    shot(u) { const C = Q(8); return camPath([[0, P_(PGT(7.4, 0, -29.6), -14, 20, 112, 0.38)], [C('唐太宗'), P_(PGT(6.8, -3, -29.6), -10, 21, 96, 0.34)], [C('唐高宗'), P_(PGT(6.8, 3, -29.6), 2, 21, 96, 0.34)], [C('褚遂良') + 0.02, P_(PGT(7, 0, -29.6), -4, 21, 100, 0.36)], [C('一件宝贝') + 0.1, P_(PGT(8.4, -12.9, -42), -80, 17, 100, 0.32)], [C('梁思成'), P_(PGT(8.6, -12.9, -42), -90, 16, 96, 0.3)], [1, P_(PGT(8.6, -12.9, -42), -97, 16, 98, 0.31)]], u); } },
+  { title: '斜塔“站直”了', note: '倾斜幅度放大约 10 倍示意',
+    text: '你可能想不到，大雁塔也曾是一座“斜塔”。由于过量抽取地下水，地面不均匀下沉，塔身慢慢向西北倾斜，最严重的时候，塔顶偏出去一米多。后来，周边的自备井陆续关停，又往地下回灌水，大雁塔竟一点点“站直”了，每年大约回正一毫米。',
+    tilt(t, u) { const C = Q(9); return TILT_SHOW * sstep(C('慢慢向西北'), C('一米多') + 0.04, u) * (1 - sstep(C('站直') - 0.04, C('每年') + 0.06, u)); },
+    shot(u) { const C = Q(9); return camPath([[0, P_(PGT(30), -30, 11, 218)], [C('西北倾斜'), P_(PGT(32), -24, 10, 200)], [C('关停'), P_(PGT(32), -22, 10, 196)], [1, P_(PGT(30), -20, 10.5, 206)]], u); } },
   { title: '月下雁塔', note: '月亮高度与大小为示意；月相按 2026 年 10 月 22 日推算',
-    text: '夜幕降临，塔身亮起金色的灯光，一轮盈凸月挂在东南方的天空。一千三百多年来，大雁塔见证了这座城市的兴衰，也成为西安最为人熟知的地标。',
-    trees: true, night: true, shot: (u) => ({ t: COURT_T, az: -146.9 + 6 * u, pitch: 8.5 + 0.6 * u, dist: 262 - 8 * u, zoom: 1 }) },
+    text: '夜色降临，塔身亮起金色的灯光，月亮升上东南的天空。一千三百多年前，玄奘在这里译经；如今，人们在塔下散步、看喷泉、拍照留念。大雁塔就这样静静站着，陪着这座城市，也等着下一个抬头看它的人。',
+    trees: true, night: true, cut: true, shot(u) { const C = Q(10); return camPath([[0, P_(COURT_T, -158, 12, 292)], [C('月亮'), P_(COURT_T, -150, 9, 266)], [C('如今'), P_(COURT_T, -145, 9.5, 256)], [1, P_(COURT_T, -139, 11.5, 300)]], u); } },
 ];
 const DEMO_DAY = 870;      // 演示白天用 14:30 的光线：太阳在西南，塔的南面、西面受光
 
@@ -15055,11 +15138,11 @@ function applyPose(P) {
 
 const LS = { get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }, set(k, v) { try { localStorage.setItem(k, v); } catch (e) { /* 忽略 */ } } };
 /* ---------- 固定解说录音 ----------
- * 当前录音来自 narration_v2.mp3，章节起点取十处段间停顿的中点。
+ * 当前录音来自新版 narration.mp3，章节起点取十处段间停顿的中点。
  * 使用同一个播放器连续播放；切章不重新加载音频，所有进度以 currentTime 为准。 */
 const NARRATION = {
-  url: 'audio/narration.mp3?v=7103fd05',
-  starts: [0, 28.149, 57.169, 84.468, 104.172, 126.192, 149.173, 168.246, 188.325, 217.031, 240.337],
+  url: 'audio/narration.mp3?v=1d48d990',
+  starts: [0, 23.787, 57.134, 83.728, 110.195, 133.204, 161.175, 194.528, 221.659, 252.470, 278.915],
   duration: 0, loading: null,
 };
 const AUDIO = new Audio();
@@ -15106,7 +15189,7 @@ function playNarration() {
   });
 }
 function scriptText() {
-  return `大雁塔讲解演示 · 固定录音讲解词（共 ${CHAPTERS.length} 节）\n\n` +
+  return `大雁塔讲解演示 · 新版讲解词（共 ${CHAPTERS.length} 节）\n\n` +
     CHAPTERS.map((c, i) => `第 ${i + 1} 节 · ${c.title}\n${c.text}\n`).join('\n');
 }
 const splitSentences = (s) => s.match(/[^。！？；]+[。！？；]?/g) || [s];
@@ -15124,21 +15207,46 @@ function makeNarration(text, idx) {
   };
 }
 
+const estDur = (s) => s.length * 0.215 + (s.match(/[，。；：！？—]/g) || []).length * 0.12 + 1.0;
+
 /* ---------- 演示引擎 ---------- */
-const DEMO = { speed: 1, on: false, dialog: false, i: -1, t: 0, paused: false, narr: null, from: null, k0: 10, tilt0: 0, time0: DEMO_DAY, saved: null, exiting: false, exitT: 0, finished: false, status: '', treesHidden: false, resumeAfterDialog: false };
-const TR = 3.2;      // 镜头从上一节过渡到本节的时间（秒）
+const DEMO = { speed: 1, on: false, dialog: false, i: -1, t: 0, tStart: 0, paused: false, narr: null, from: null, k0: 10, tilt0: 0, time0: DEMO_DAY, saved: null, exiting: false, exitT: 0, finished: false, status: '', treesHidden: false, resumeAfterDialog: false };
+const TR = 3.2;      // 镜头从上一节过渡到本节的基准时间（秒），按移动幅度加长
+// 运镜：平滑过渡用五次缓动（起止加速度为零）；再叠加临界阻尼弹簧，消除任何速度突变
+const smoother = (x) => { x = clamp(x, 0, 1); return x * x * x * (x * (x * 6 - 15) + 10); };
+const CAM_SPRING = { x: null, v: null, w: 4.0 };
+const poseVec = (P) => [P.t[0], P.t[1], P.t[2], P.az, P.pitch, Math.log(P.dist), P.zoom === undefined ? 1 : P.zoom];
+const vecPose = (x) => ({ t: [x[0], x[1], x[2]], az: x[3], pitch: x[4], dist: Math.exp(x[5]), zoom: x[6] });
+function springPose(goal, dt, snap) {
+  const g = poseVec(goal), S = CAM_SPRING;
+  if (!S.x || snap) { S.x = g.slice(); S.v = g.map(() => 0); return goal; }
+  g[3] = S.x[3] + ((((g[3] - S.x[3]) % 360) + 540) % 360 - 180);
+  const w = S.w, e = Math.exp(-w * dt);
+  for (let c = 0; c < 7; c++) { const d = S.x[c] - g[c], tmp = (S.v[c] + w * d) * dt; S.x[c] = g[c] + (d + tmp) * e; S.v[c] = (S.v[c] - w * tmp) * e; }
+  return vecPose(S.x);
+}
+// 两个镜头之间的“距离”：决定过渡时长
+function poseGap(a, b) {
+  let dAz = Math.abs(((b.az - a.az) % 360 + 540) % 360 - 180);
+  const dt = Math.hypot(a.t[0] - b.t[0], a.t[1] - b.t[1], a.t[2] - b.t[2]);
+  return dAz / 55 + Math.abs(Math.log(b.dist / a.dist)) * 1.6 + dt / 70 + Math.abs(b.pitch - a.pitch) / 25 + Math.abs((b.zoom || 1) - (a.zoom || 1)) * 1.5;
+}
 function demoStatus(s) { DEMO.status = s; $('demoStatus').textContent = s; }
 function setTreesHidden(on) { if (DEMO.treesHidden === on) return; DEMO.treesHidden = on; hideTreesNearPagoda(on); }
 function enterChapter(i, followAudio = false) {
   if (!DEMO.on || DEMO.exiting) return;
   i = clamp(Math.trunc(i), 0, CHAPTERS.length - 1);
-  DEMO.i = i; DEMO.t = 0; DEMO.finished = false;
-  DEMO.from = currentPose(); DEMO.k0 = DEMO_FX.build; DEMO.tilt0 = DEMO_FX.tilt; DEMO.time0 = timeMin;
+  DEMO.i = i; DEMO.t = 0; DEMO.tStart = 0; DEMO.finished = false;
+  DEMO.from = DEMO.lastGoal || (CAM_SPRING.x ? vecPose(CAM_SPRING.x) : currentPose()); DEMO.k0 = DEMO_FX.build; DEMO.tilt0 = DEMO_FX.tilt; DEMO.time0 = timeMin;
   const ch = CHAPTERS[i];
+  DEMO.narr = makeNarration(ch.text, i);
+  DEMO.TRi = clamp(3.0 + 1.3 * poseGap(DEMO.from, ch.shot(0)), 3.2, 8.5);
+  // 时间跳转的一节（入夜）用“淡出—淡入”转场，不做长距离甩镜
+  DEMO.cutT = ch.cut ? 0.55 : 0;
+  if (ch.cut && !DEMO.previewing) $('fader').classList.add('on', 'soft');
   explodeGoal = ch.explode ? 1 : 0;
   setTreesHidden(!ch.trees);
   if (wxKey !== 'clear') setWeather('clear');
-  DEMO.narr = makeNarration(ch.text, i);
   if (!followAudio) {
     AUDIO.currentTime = DEMO.narr.start;
     if (!DEMO.paused && !DEMO.dialog) playNarration();
@@ -15165,31 +15273,34 @@ function finishDemo() {
 function stepDemo(dt) {
   if (!DEMO.on) return false;
   if (DEMO.exiting) {
-    DEMO.exitT = Math.min(1, DEMO.exitT + dt / 2.2);
+    DEMO.exitT = Math.min(1, DEMO.exitT + dt / 3.0);
     const I = MODES.court.init, to = { t: MODES.court.target.toArray(), az: I.az / DEG, pitch: I.pitch / DEG, dist: I.dist, zoom: 1 };
-    applyPose(blendPose(DEMO.from, to, ease(DEMO.exitT)));
+    applyPose(DEMO.exitT >= 1 ? to : springPose(blendPose(DEMO.from, to, smoother(DEMO.exitT)), dt));
     if (DEMO.exitT >= 1) endDemo();
     return true;
   }
   if (DEMO.finished) return false;
-  // 自然切章只更新画面；音频保持连续。掉帧或后台恢复也直接跟上录音的位置。
+  // 章节、字幕与画面共用固定录音时钟，切章不重新加载音频。
   const audioChapter = chapterAt(AUDIO.currentTime);
   if (audioChapter !== DEMO.i) enterChapter(audioChapter, true);
   const ch = CHAPTERS[DEMO.i], N = DEMO.narr;
   DEMO.t = clamp(AUDIO.currentTime - N.start, 0, N.dur);
   const Dn = N.dur, u = N.progress();
   // 场景：建造 / 倾斜 / 高亮 / 时间
-  DEMO_FX.build = ch.build ? ch.build(DEMO.t, u, DEMO.k0) : lerp(DEMO.k0, 10, ease(Math.min(1, DEMO.t / 2)));
-  DEMO_FX.tilt = ch.tilt ? ch.tilt(DEMO.t, u) : lerp(DEMO.tilt0, 0, ease(Math.min(1, DEMO.t / 1.5)));
+  DEMO_FX.build = ch.build ? ch.build(DEMO.t, u, DEMO.k0) : lerp(DEMO.k0, 10, smoother(DEMO.t / 2.6));
+  DEMO_FX.tilt = ch.tilt ? ch.tilt(DEMO.t, u) : lerp(DEMO.tilt0, 0, smoother(DEMO.t / 2));
   DEMO_FX.hl = ch.hl ? ch.hl(DEMO.t, u) : 0;
   const goalTime = ch.night ? 1230 : DEMO_DAY;
   if (Math.abs(timeMin - goalTime) > 0.01) {
-    const dur = ch.night ? clamp(Dn * 0.6, 3, 8) : 3, k = ease(Math.min(1, DEMO.t / dur));
+    const dur = ch.night ? clamp(Dn * 0.55, 4, 9) : 3, k = smoother(DEMO.t / dur);
     setTime(lerp(DEMO.time0, goalTime, k), k >= 1);
     $('time').value = String(Math.round(timeMin)); $('timeOut').textContent = fmtTime(Math.round(timeMin));
   }
-  // 镜头（地震时轻微晃动）
-  applyPose(blendPose(DEMO.from, ch.shot(u), ease(Math.min(1, DEMO.t / TR))));
+  // 镜头：本节关键帧路径 + 与上一节之间的平滑过渡 + 弹簧平滑；地震时轻微晃动
+  if (DEMO.cutT && DEMO.t >= DEMO.cutT) { DEMO.cutT = 0; DEMO.from = ch.shot(0); DEMO.TRi = 0.01; DEMO.snapCam = true; $('fader').classList.remove('on'); setTimeout(() => $('fader').classList.remove('soft'), 900); }
+  DEMO.lastGoal = DEMO.cutT ? DEMO.from : blendPose(DEMO.from, ch.shot(u), smoother(DEMO.t / (DEMO.TRi || TR)));
+  applyPose(springPose(DEMO.lastGoal, dt, DEMO.snapCam));
+  DEMO.snapCam = false;
   if (DEMO_FX.quake > 0.001) {
     const q = DEMO_FX.quake, s = simTime;
     camera.position.x += q * 0.9 * (Math.sin(s * 41) + 0.6 * Math.sin(s * 67)); camera.position.y += q * 0.55 * Math.sin(s * 53 + 1); camera.position.z += q * 0.9 * Math.sin(s * 47 + 2);
@@ -15229,8 +15340,9 @@ function startDemo(fromChapter) {
   leaveDetailState();
   camTween = null; killInertia(); controls.enabled = false;
   mode = 'court';
+  CAM_SPRING.x = null; DEMO.lastGoal = null; dfxPrewarm();
   DEMO.on = true; DEMO.exiting = false; DEMO.paused = false;
-  EXH.instant = false; $("demo").classList.remove("instant");
+  EXH.instant = false; $('demo').classList.remove('instant');
   document.body.classList.add('demo'); $('demo').hidden = false;
   updateViewOffset(false);
   enterChapter(fromChapter || 0);
@@ -15239,7 +15351,8 @@ function startDemo(fromChapter) {
 function stopDemo() {
   if (!DEMO.on || DEMO.exiting) return;
   if (DEMO.narr) DEMO.narr.stop();
-  DEMO.exiting = true; DEMO.exitT = 0; DEMO.from = currentPose();
+  $('fader').classList.remove('on', 'soft');
+  DEMO.exiting = true; DEMO.exitT = 0; DEMO.from = DEMO.lastGoal || (CAM_SPRING.x ? vecPose(CAM_SPRING.x) : currentPose());
   explodeGoal = 0; DEMO_FX.build = 10; DEMO_FX.tilt = 0; DEMO_FX.hl = 0;
   dfxClear();
   setTreesHidden(false);
@@ -15247,8 +15360,8 @@ function stopDemo() {
   if (sv) { applyTime(sv.time); if (wxKey !== sv.wx) setWeather(sv.wx); }
 }
 function endDemo() {
-  DEMO.on = false; DEMO.exiting = false;
-  dfxClear(); $("demo").classList.remove("instant");
+  DEMO.on = false; DEMO.exiting = false; CAM_SPRING.x = null; DEMO.lastGoal = null;
+  dfxClear(); $('demo').classList.remove('instant');
   document.body.classList.remove('demo'); $('demo').hidden = true;
   camera.fov = fovFor(camera.aspect) / DEG; camera.updateProjectionMatrix();
   controls.target.copy(MODES.court.target); applyLimits('court'); controls.enabled = true; killInertia(); controls.update(); killInertia();
@@ -15333,17 +15446,51 @@ function demoApi() {
     fx: { build: DEMO_FX.build, tilt: DEMO_FX.tilt, hl: DEMO_FX.hl }, sub: $('demoSub').textContent, chapters: CHAPTERS.length,
     start: async (i) => { await probeAudio(); startDemo(i || 0); }, go: (i) => enterChapter(i), pause: (on) => demoPause(on), exit: () => stopDemo(),
     speed: (k) => { DEMO.speed = clamp(k, 0.25, 4); AUDIO.playbackRate = DEMO.speed; }, script: () => scriptText(),
-    // 截图：按第 i 节在进度 u 处的状态摆放场景，返回镜头参数
+    // 运镜检查：不渲染，按估计时长把 11 节的镜头轨迹整段算一遍，统计速度、加速度与转向角速度
+    simCam: (dt) => {
+      dt = dt || 1 / 30; const out = [], saveS = { x: CAM_SPRING.x, v: CAM_SPRING.v };
+      CAM_SPRING.x = null;
+      let from = CHAPTERS[0].shot(0), prev = null, pv = null, pd = null, T = 0;
+      const eyeOf = (P) => poseEye(P), dirOf = (e) => e.target.clone().sub(e.eye).normalize();
+      for (let i = 0; i < CHAPTERS.length; i++) {
+        const ch = CHAPTERS[i], dur = estDur(ch.text), Dn = dur + 1.2, TRi = clamp(3.0 + 1.3 * poseGap(from, ch.shot(0)), 3.2, 8.5);
+        let goal = from;
+        if (ch.cut) { from = ch.shot(0); goal = from; CAM_SPRING.x = null; }
+        const st = { i, TRi: +TRi.toFixed(2), dur: +Dn.toFixed(1), vMax: 0, aMax: 0, wMax: 0, aT: 0 };
+        for (let t = 0; t <= Dn; t += dt) {
+          const u = clamp(t / Dn, 0, 1); goal = blendPose(from, ch.shot(u), smoother(t / TRi));
+          const P = springPose(goal, dt, prev === null || CAM_SPRING.x === null);
+          const e = eyeOf(P), d = dirOf(e);
+          if (prev && !(ch.cut && t < dt * 1.5)) {
+            const v = e.eye.clone().sub(prev).divideScalar(dt), sp = v.length();
+            const w = Math.acos(clamp(d.dot(pd), -1, 1)) / DEG / dt;
+            st.vMax = Math.max(st.vMax, sp); st.wMax = Math.max(st.wMax, w);
+            if (pv) { const acc = v.clone().sub(pv).length() / dt; if (acc > st.aMax) { st.aMax = acc; st.aT = +t.toFixed(2); } }
+            pv = v;
+          }
+          prev = e.eye.clone(); pd = d; T += dt;
+        }
+        from = goal;
+        st.vMax = +st.vMax.toFixed(1); st.aMax = +st.aMax.toFixed(1); st.wMax = +st.wMax.toFixed(1);
+        out.push(st);
+      }
+      CAM_SPRING.x = saveS.x; CAM_SPRING.v = saveS.v;
+      return { total: +T.toFixed(0), chapters: out };
+    },
     dbg: () => { const m = NIGHT.moon, c = camera.position; return { sky: NIGHT.sky, moon: m ? m.disp.toArray() : null, scr: m ? projW([c.x + m.disp.x * 3000, c.y + m.disp.y * 3000, c.z + m.disp.z * 3000]) : null }; },
+    // 截图：按第 i 节在进度 u 处的状态摆放场景，返回镜头参数
+    // 预览：进入第 i 节并停在进度 u（暂停，供截图检查标注与立体展示）
     preview: async (i, u) => {
       await probeAudio();
+      DEMO.previewing = true;
       if (!DEMO.on) startDemo(i); else enterChapter(i);
+      DEMO.previewing = false; DEMO.cutT = 0; $('fader').classList.remove('on', 'soft');
       AUDIO.pause(); DEMO.paused = true; setPlayIcon();
       $("demo").classList.add("instant");
       const ch = CHAPTERS[DEMO.i], N = DEMO.narr;
       u = clamp(u, 0, 0.999999);
       AUDIO.currentTime = N.start + u * N.dur; DEMO.t = u * N.dur;
-      DEMO.from = ch.shot(u); DEMO.k0 = ch.build ? 0 : 10; DEMO.time0 = ch.night ? 1230 : DEMO_DAY;
+      DEMO.from = ch.shot(u); DEMO.k0 = DEMO.i === 1 ? 10 : ch.build ? 0 : 10; DEMO.snapCam = true; DEMO.time0 = ch.night ? 1230 : DEMO_DAY;
       if (ch.night) setTime(1230, true);
       explodeGoal = explodeK = ch.explode ? 1 : 0; fadeK = 1 - explodeK; setCompoundOpacity(fadeK);
       EXH.instant = true;
@@ -15352,7 +15499,7 @@ function demoApi() {
     },
     shot: (i, u) => {
       const ch = CHAPTERS[i], t = 30;
-      DEMO_FX.build = ch.build ? ch.build(t, u, 10) : 10; DEMO_FX.tilt = ch.tilt ? ch.tilt(t, u) : 0; DEMO_FX.hl = ch.hl ? ch.hl(1.7, u) : 0;
+      DEMO_FX.build = ch.build ? ch.build(t, u, i === 1 ? 10 : 0) : 10; DEMO_FX.tilt = ch.tilt ? ch.tilt(t, u) : 0; DEMO_FX.hl = ch.hl ? ch.hl(1.7, u) : 0;
       explodeGoal = explodeK = ch.explode ? 1 : 0; fadeK = 1 - explodeK; setCompoundOpacity(fadeK); stepExplode(0);
       hideTreesNearPagoda(!ch.trees);
       const P = ch.shot(u), { eye, target } = poseEye(P);
@@ -15623,9 +15770,9 @@ const EX_DEFS = {
       return g;
     },
     labels: [
-      { p: [0, 0.02, -3.1], t: '木楼板', s: '各层架设，中留楼梯井', dx: 56, dy: 50, u0: 0.32 },
-      { p: [0, 4.6, 0.3], t: '木梯', s: '绕中柱盘旋而上', dx: -50, dy: -62, u0: 0.42 },
-      { p: [0, 2.6, -2.6], t: '塔心室', s: '方形塔室', dx: 54, dy: -62, u0: 0.52 },
+      { p: [0, 0.02, -3.1], t: '木楼板', s: '各层架设，中留楼梯井', dx: 56, dy: 50, u0: 0.4 },
+      { p: [0, 4.6, 0.3], t: '木梯', s: '通向上层（示意）', dx: -50, dy: -62, u0: 0.5 },
+      { p: [0, 2.6, -2.6], t: '塔室', s: '方方正正，每层一间', dx: 54, dy: -62, u0: 0.3 },
       { p: [0, 2.0, 7.0], t: '券洞', s: '贯通厚墙，四面各一', dx: -56, dy: 46, u0: 0.62 },
     ],
     update(p) {
@@ -15638,7 +15785,7 @@ const EX_DEFS = {
     },
   },
   // 圣教序碑：两通唐碑并列
-  stele: { title: '圣教序碑', sub: '两通唐碑，均为褚遂良书', foot: '永徽四年（653）立 · 碑文为示意纹理', target: [0, 2.2, 0], dist: 11.5, pitch: 8, camAz: 16, rot0: 0, rotA: 15, rotS: 0.25, R: 2.9,
+  stele: { title: '圣教序碑', sub: '两通唐碑，均为褚遂良书', foot: '永徽四年（653）立 · 碑文为示意纹理', target: [0, 2.75, 0], dist: 12.5, pitch: 8, camAz: 16, rot0: 0, rotA: 15, rotS: 0.25, R: 2.9,
     build() {
       const g = new T.Group(), gb = new GB();
       for (const x of [-1.05, 1.05]) {
@@ -15650,8 +15797,8 @@ const EX_DEFS = {
       return g;
     },
     labels: [
-      { p: [-1.05, 3.0, 0.13], t: '《圣教序》', s: '西龛 · 唐太宗撰文', dx: -34, dy: -34, u0: 0.2 },
-      { p: [1.05, 2.2, 0.13], t: '《圣教序记》', s: '东龛 · 唐高宗撰文', dx: 34, dy: -40, u0: 0.4 },
+      { p: [-1.05, 3.675, 0], t: '《圣教序》', s: '西龛 · 唐太宗撰文', pin: true, dy: -18, u0: 0.2 },
+      { p: [1.05, 3.675, 0], t: '《圣教序记》', s: '东龛 · 唐高宗撰文', pin: true, dy: -18, u0: 0.4 },
     ],
     dims: [{ a: [1.72, 0.3, 0], b: [1.72, 3.675, 0], t: '碑身高约 3.4 m', off: -30, u0: 0.6 }],
     update() {},
@@ -15755,7 +15902,7 @@ function exhFrame(time) {
   (it.labels || []).forEach((lb, i) => {
     const p = lb.p.slice(); if (id === 'bay' && i === 3) p[2] += (it.lblZ || 0) - 0.9;
     const [x, y] = pr(p);
-    L.call(`x${i}`, x, y, { t: lb.t, s: lb.s, dx: lb.dx * (r.w < 420 ? 0.7 : 1), dy: lb.dy * (r.w < 420 ? 0.75 : 1), a: show, r: rev(EXH.p, lb.u0, 0.14), amber: lb.amber });
+    L.call(`x${i}`, x, y, { t: lb.t, s: lb.s, pin: lb.pin, dx: (lb.dx || 0) * (r.w < 420 ? 0.7 : 1), dy: lb.dy * (r.w < 420 ? 0.75 : 1), a: show, r: rev(EXH.p, lb.u0, 0.14), amber: lb.amber });
   });
   (it.dims || []).forEach((d, i) => {
     const off = it.dimOff || 0, a0 = d.a.slice(), b0 = d.b.slice();
@@ -15833,7 +15980,8 @@ function visK(id, p) {
 function partPt(idx, x, y, z) { const p = parts[idx]; return PGW(x, y + (p ? p.position.y : 0), z); }
 
 /* ---------- 资料卡片 ---------- */
-function cardLoc(u, show, extra) {
+function cardLoc(u, show, extra, wh) {
+  wh = wh === undefined ? 0.62 : wh;
   const c = hudCard('loc', '', `<div class="hk">LOCATION<i>定位</i></div><div class="ht">大雁塔 · 大慈恩寺</div>
     <p class="mono" data-k="c"></p><p data-k="a"></p><p data-k="b"></p><p data-k="w"></p><p class="src" data-k="s"></p>`);
   hudShow(c, show > 0);
@@ -15843,8 +15991,8 @@ function cardLoc(u, show, extra) {
   const txt = `N ${lat}°  E ${lon}°`; if (q('c').textContent !== txt) q('c').textContent = txt;
   typeInto(q('a'), '陕西省西安市雁塔区', k * 2 - 0.3);
   typeInto(q('b'), extra || '始建于唐永徽三年（652 年）', k * 2 - 0.6);
-  typeInto(q('w'), '2014 年列入《世界遗产名录》', (u - 0.62) * 6);
-  typeInto(q('s'), '丝绸之路：长安—天山廊道的路网', (u - 0.68) * 5);
+  typeInto(q('w'), '2014 年列入《世界遗产名录》', (u - wh) * 6);
+  typeInto(q('s'), '丝绸之路：长安—天山廊道的路网', (u - wh - 0.06) * 5);
   return c;
 }
 // 玄奘西行求法路线（示意）
@@ -15852,7 +16000,8 @@ const XZ_PTS = { 长安: [108.94, 34.26], 凉州: [102.64, 37.93], 瓜州: [95.7
   缚喝: [66.9, 36.76], 犍陀罗: [71.58, 34.01], 那烂陀: [85.44, 25.14], 葱岭: [75.23, 37.77], 于阗: [79.92, 37.11], 敦煌: [94.66, 40.14] };
 const xzXY = (n) => { const [lo, la] = XZ_PTS[n]; return [14 + (lo - 64) * 5.6, 10 + (46 - la) * 6.2]; };
 const xzD = (names) => names.map((n, i) => `${i ? 'L' : 'M'}${xzXY(n)[0].toFixed(1)} ${xzXY(n)[1].toFixed(1)}`).join('');
-function cardMap(u, show) {
+function cardMap(u, show, k0, k1) {
+  k0 = k0 === undefined ? 0.03 : k0; k1 = k1 === undefined ? 0.27 : k1;
   const out = xzD(['长安', '凉州', '瓜州', '高昌', '龟兹', '碎叶', '飒秣建', '缚喝', '犍陀罗', '那烂陀']);
   const back = xzD(['那烂陀', '犍陀罗', '葱岭', '于阗', '敦煌', '长安']);
   const lab = (n, t, dx, dy, cls) => { const [x, y] = xzXY(n); return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${n === '长安' ? 3.4 : 2.2}" fill="${n === '长安' ? AMBER_C : HOLO_C}"/><text x="${(x + dx).toFixed(1)}" y="${(y + dy).toFixed(1)}" class="${cls || ''}">${t}</text>`; };
@@ -15878,13 +16027,13 @@ function cardMap(u, show) {
   hudShow(c, show > 0);
   const bp = c.el.querySelector('[data-k=back]'), bg = c.el.querySelector('[data-k=bg]');
   if (!c.data.len) c.data.len = bp.getTotalLength();
-  const len = c.data.len, k = smooth01((u - 0.03) / 0.24);
+  const len = c.data.len, k = smooth01((u - k0) / Math.max(0.02, k1 - k0));
   for (const e of [bp, bg]) { e.setAttribute('stroke-dasharray', `${len} ${len + 2}`); e.setAttribute('stroke-dashoffset', String(len * (1 - k))); }
   const pt = bp.getPointAtLength(len * k), d1 = c.el.querySelector('[data-k=dot]'), d2 = c.el.querySelector('[data-k=dot2]');
   for (const d of [d1, d2]) { d.setAttribute('cx', pt.x.toFixed(1)); d.setAttribute('cy', pt.y.toFixed(1)); }
   const ph = (simTime * 0.9) % 1; d2.setAttribute('r', (4 + 9 * ph).toFixed(1)); d2.setAttribute('opacity', ((1 - ph) * (k > 0 ? 1 : 0)).toFixed(2));
   d1.setAttribute('opacity', k > 0.001 ? '1' : '0');
-  typeInto(c.el.querySelector('[data-k=t1]'), '贞观十九年（645 年）回到长安，带回经论 657 部', (u - 0.18) * 5);
+  typeInto(c.el.querySelector('[data-k=t1]'), '贞观十九年（645 年）回到长安，带回经论 657 部', (u - k1 + 0.06) * 5);
   return c;
 }
 function cardQuote(u, show) {
@@ -15913,7 +16062,8 @@ function cardPoem(u, show) {
 }
 // 倾斜量折线图（单一数据序列：标题即说明，不需图例；关键点直接标注数值）
 const TILT_DATA = [[1719, 198], [1941, 413], [1964, 873], [1983, 998], [1996, 1010.5]];
-function cardTilt(u, show) {
+function cardTilt(u, show, cs) {
+  cs = cs || { d0: 0.08, d1: 0.42, rb: 0.55, tx: 0.5 };
   const X = (y) => 36 + (y - 1700) / (2030 - 1700) * 252, Y = (v) => 122 - v / 1100 * 106;
   const pts = TILT_DATA.map(([y, v]) => [X(y), Y(v)]);
   const d = pts.map((p, i) => `${i ? 'L' : 'M'}${p[0].toFixed(1)} ${p[1].toFixed(1)}`).join('');
@@ -15934,165 +16084,198 @@ function cardTilt(u, show) {
   hudShow(c, show > 0);
   const ln = c.el.querySelector('[data-k=ln]');
   if (!c.data.len) c.data.len = ln.getTotalLength();
-  const k = smooth01((u - 0.08) / 0.34), len = c.data.len;
+  const k = smooth01((u - cs.d0) / Math.max(0.02, cs.d1 - cs.d0)), len = c.data.len;
   ln.setAttribute('stroke-dasharray', `${len} ${len + 2}`); ln.setAttribute('stroke-dashoffset', String(len * (1 - k)));
   // 各点在线画到时出现
   let acc = 0; const seg = [0]; for (let i = 1; i < pts.length; i++) { acc += Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]); seg.push(acc); }
   pts.forEach((_, i) => c.el.querySelector(`[data-k=m${i}]`).setAttribute('opacity', k * acc >= seg[i] - 0.5 ? '1' : '0'));
   c.el.querySelector('[data-k=l0]').setAttribute('opacity', k > 0.02 ? '1' : '0');
   c.el.querySelector('[data-k=l4]').setAttribute('opacity', k > 0.99 ? '1' : '0');
-  c.el.querySelector('[data-k=rb]').setAttribute('opacity', u > 0.55 ? '1' : '0');
-  typeInto(c.el.querySelector('[data-k=t]'), u < 0.5 ? '1996 年达到最大值 1010.5 mm' : '封井、回灌后，每年回倾约 1 mm', u < 0.5 ? (u - 0.38) * 6 : (u - 0.52) * 5);
+  c.el.querySelector('[data-k=rb]').setAttribute('opacity', u > cs.rb ? '1' : '0');
+  typeInto(c.el.querySelector('[data-k=t]'), u < cs.tx ? '1996 年达到最大值 1010.5 mm' : '封井、回灌后，每年回倾约 1 mm', u < cs.tx ? (u - cs.d1 + 0.04) * 6 : (u - cs.tx) * 5);
   return c;
 }
 
-/* ---------- 分节编排 ---------- */
+/* ---------- 分节编排（时间点用 C('词') 取解说念到该词的时刻） ---------- */
 const COURT_PINS = ['大雄宝殿', '法堂', '钟楼', '鼓楼', '山门', '玄奘三藏院'];
+// 分段线性映射：把本节进度 u 映射到展品自身的进度 p
+function pmap(u, pairs) {
+  if (u <= pairs[0][0]) return pairs[0][1];
+  for (let i = 1; i < pairs.length; i++) if (u <= pairs[i][0]) { const [a, pa] = pairs[i - 1], [b, pb] = pairs[i]; return lerp(pa, pb, clamp((u - a) / Math.max(1e-4, b - a), 0, 1)); }
+  return pairs[pairs.length - 1][1];
+}
 const DFX_CH = [
-  // 1 大慈恩寺与大雁塔
+  // 1 城南的地标
   { frame(u, t, L) {
+    const C = Q(0), c0 = C('大慈恩寺') - 0.05;
     let k = 0;
     for (const name of COURT_PINS) {
       const lb = COURT_LABELS.find((x) => x.t === name); if (!lb) continue;
-      wCall(L, 'pin' + name, lb.p, { t: name, pin: true, tag: true, dy: -26, a: win(u, 0.04 + k * 0.035, 0.97) * visK(name, lb.p), r: rev(u, 0.04 + k * 0.035, 0.12) }); k++;
+      const u0 = c0 + k * 0.025;
+      wCall(L, 'pin' + name, lb.p, { t: name, pin: true, tag: true, dy: -26, a: win(u, u0, 0.97, 0.06) * visK(name, lb.p), r: rev(u, u0, 0.12) }); k++;
     }
-    wCall(L, 'pg', PGW(0, PG.top + 1.5, 0), { t: '大雁塔', s: '唐代四方楼阁式砖塔', dx: 86, dy: -34, a: win(u, 0.22, 0.98), r: rev(u, 0.22, 0.14) });
-    HOLO.gridU.uAlpha.value = 0.75 * win(u, 0.3, 0.92, 0.08); HOLO.gridU.uR.value = 90;
-    cardLoc(u, win(u, 0.02, 1.2) * rev(u, 0.02, 0.2));
+    wCall(L, 'pg', PGW(0, PG.top + 1.5, 0), { t: '大雁塔', s: '始建于公元 652 年', dx: 86, dy: -34, a: win(u, C('大雁塔') - 0.02, 0.98), r: rev(u, C('大雁塔') - 0.02, 0.14) });
+    HOLO.gridU.uAlpha.value = 0.75 * win(u, C('拔地而起') - 0.04, 0.95, 0.1); HOLO.gridU.uR.value = 90;
+    cardLoc(u, win(u, 0.02, 1.2) * rev(u, 0.02, 0.2), undefined, C('2014'));
   } },
-  // 2 缘起：玄奘建塔（全息：唐初五级塔，示意）
+  // 2 玄奘与一座塔：西行路线 → 原塔隐去 → 全息复原唐初五级塔
   { frame(u, t, L) {
-    cardMap(u, win(u, 0.0, 0.5));
-    cardQuote(u, rev(u, 0.58, 0.3));
-    const U = HOLO.U; U.uAlpha.value = 1; U.uDis.value = 0; U.uReveal.value = smooth01((u - 0.3) / 0.26);
-    HOLO.gridU.uAlpha.value = 0.6 * win(u, 0.27, 1.2, 0.08); HOLO.gridU.uR.value = 70;
+    const C = Q(1);
+    cardMap(u, win(u, 0.0, C('这么珍贵') + 0.03), C('西行求法'), C('带回') + 0.06);
+    cardQuote(u, rev(u, C('一共五层') + 0.02, 0.25));
+    const U = HOLO.U; U.uAlpha.value = 1; U.uDis.value = 0; U.uReveal.value = sstep(C('最初的塔') - 0.04, C('外面砌砖') + 0.02, u);
+    HOLO.gridU.uAlpha.value = 0.6 * win(u, C('永徽三年'), 1.2, 0.08); HOLO.gridU.uR.value = 70;
+    const site = PGW(0, 12, 0);
+    wCall(L, 'stone', site, { t: '石塔？', s: '玄奘最初的设想', tag: false, pin: true, dy: -40, a: win(u, C('本想用石头') - 0.01, C('改用砖砌') + 0.02), r: rev(u, C('本想用石头') - 0.01, 0.06) });
+    wCall(L, 'brick', site, { t: '改用砖砌', s: '唐高宗担心工程太大', amber: true, pin: true, dy: -40, a: win(u, C('改用砖砌') + 0.02, C('最初的塔') + 0.04), r: rev(u, C('改用砖砌') + 0.02, 0.06) });
     const A = HOLO.anchors;
-    wCall(L, 'spire', A.spire, { t: '相轮 · 露槃', s: '塔顶刹杆与相轮', dx: 76, dy: -26, a: win(u, 0.6, 1.2), r: rev(u, 0.6, 0.12) });
-    wCall(L, 'tier', A.tier, { t: '塔有五级', s: '仿西域窣堵坡形制', dx: 74, dy: 26, a: win(u, 0.7, 1.2), r: rev(u, 0.7, 0.12) });
-    wCall(L, 'shell', A.shell, { t: '砖表', s: '外表砌砖', dx: 70, dy: 40, a: win(u, 0.8, 1.2), r: rev(u, 0.8, 0.1) });
-    wCall(L, 'core', A.core, { t: '土心', s: '内为夯土', dx: -70, dy: 46, amber: true, a: win(u, 0.85, 1.2), r: rev(u, 0.85, 0.1) });
-    wDim(L, 'h', A.dimA, A.dimB, { t: '约 180 尺 ≈ 54 m', off: 22, a: win(u, 0.62, 1.2), r: rev(u, 0.62, 0.16) });
+    wCall(L, 'spire', A.spire, { t: '相轮 · 露槃', s: '塔顶的刹杆与圆轮', dx: 76, dy: -26, a: win(u, C('西域的样式'), 1.2), r: rev(u, C('西域的样式'), 0.1) });
+    wCall(L, 'shell', A.shell, { t: '外面砌砖', s: '砖表', dx: 70, dy: 40, a: win(u, C('外面砌砖'), 1.2), r: rev(u, C('外面砌砖'), 0.08) });
+    wCall(L, 'core', A.core, { t: '里面填土', s: '土心', dx: -70, dy: 46, amber: true, a: win(u, C('里面填土'), 1.2), r: rev(u, C('里面填土'), 0.08) });
+    wCall(L, 'tier', A.tier, { t: '一共五层', s: '据记载“塔有五级”', dx: 74, dy: 26, a: win(u, C('一共五层'), 1.2), r: rev(u, C('一共五层'), 0.08) });
+    wDim(L, 'h', A.dimA, A.dimB, { t: '约 180 尺 ≈ 54 m', off: 22, a: win(u, C('一共五层') + 0.03, 1.2), r: rev(u, C('一共五层') + 0.03, 0.14) });
   } },
-  // 3 改建为楼阁式：原塔坍损（风雨），长安年间重建为七层
+  // 3 从五层到七层：风雨中坍损 → 武周时重建为楼阁式 → 岑参登塔
   { enter() { setWeather('rain'); DFX.st.rain = true; },
     frame(u, t, L) {
-      if (DFX.st.rain && u > 0.27) { DFX.st.rain = false; setWeather('clear'); }
-      const U = HOLO.U; U.uAlpha.value = 1; U.uReveal.value = 1; U.uDis.value = smooth01((u - 0.05) / 0.24);
-      HOLO.gridU.uAlpha.value = 0.55 * (1 - smooth01((u - 0.75) / 0.15)); HOLO.gridU.uR.value = 70;
-      wCall(L, 'crumble', HOLO.anchors.tier, { t: '风雨侵蚀，逐渐坍损', s: '砖表土心的塔体', amber: true, dx: 76, dy: -30, a: win(u, 0.06, 0.27), r: rev(u, 0.06, 0.08) });
-      // 逐层落成：左侧依次标出层数
-      const b = DEMO_FX.build;
+      const C = Q(2);
+      if (DFX.st.rain && u > C('武则天') - 0.03) { DFX.st.rain = false; setWeather('clear'); }
+      const U = HOLO.U; U.uAlpha.value = 1; U.uReveal.value = 1; U.uDis.value = sstep(C('风吹雨淋') - 0.04, C('坍塌') + 0.06, u);
+      HOLO.gridU.uAlpha.value = 0.55 * (1 - sstep(C('天宝年间'), C('天宝年间') + 0.12, u)); HOLO.gridU.uR.value = 70;
+      wCall(L, 'crumble', HOLO.anchors.tier, { t: '风吹雨淋，逐渐坍塌', s: '土心的塔不耐侵蚀', amber: true, dx: 76, dy: -30, a: win(u, C('风吹雨淋'), C('武则天') - 0.02), r: rev(u, C('风吹雨淋'), 0.08) });
       for (let i = 0; i < 7; i++) {
-        const landed = clamp(b - (i + 1), 0, 1);
-        if (landed >= 1) wCall(L, 'lv' + i, PGW(-PG.S[i] / 2 - 0.6, stY0(i) + stWallH(i) * 0.5, PG.S[i] / 2), { t: CN_NUM[i], tag: true, dx: -34, dy: 0, a: win(u, 0.3, 0.97), r: 1 });
+        if (partBuilt(i + 1) >= 0.999) wCall(L, 'lv' + i, PGW(-PG.S[i] / 2 - 0.6, stY0(i) + stWallH(i) * 0.5, PG.S[i] / 2), { t: CN_NUM[i], tag: true, dx: -34, dy: 0, a: win(u, 0.2, 0.97), r: 1 });
       }
-      if (b >= 8.2) wCall(L, 'seven', PGW(PG.S[6] / 2 + 0.8, stY0(6) + 3, PG.S[6] / 2), { t: '七层楼阁式砖塔', s: '武周长安年间改建（一般认为）', dx: 80, dy: -36, a: win(u, 0.5, 1.2), r: rev(u, 0.6, 0.12) });
-      cardTimeline('tl1', [{ y: '652', t: '永徽三年建塔，五级', u0: 0 }, { y: '701–704', t: '长安年间改建，七层', u0: 0.3, u1: 0.68 }, { y: '752', t: '岑参登塔赋诗', u0: 0.68 }], u);
-      cardPoem(u, rev(u, 0.7, 0.24));
+      wCall(L, 'seven', PGW(PG.S[6] / 2 + 0.8, stY0(6) + 3, PG.S[6] / 2), { t: '七层楼阁式砖塔', s: '武周时重建（一般认为在长安年间）', dx: 80, dy: -36, a: win(u, C('更高'), 1.2) * (partBuilt(8) > 0.9 ? 1 : 0), r: rev(u, C('更高'), 0.1) });
+      cardTimeline('tl1', [{ y: '652', t: '永徽三年建塔，五层', u0: 0 }, { y: '701–704', t: '武周长安年间重建，楼阁式', u0: C('武则天') }, { y: '752', t: '岑参登塔赋诗', u0: C('天宝年间') }], u);
+      cardPoem(u, rev(u, C('写下'), 0.2));
     } },
-  // 4 明代包砌：嘉靖大地震震落塔刹，万历年间外包青砖
+  // 4 穿上一件“外套”：嘉靖大地震震落塔刹 → 万历重修，外包青砖
   { frame(u, t, L) {
-    DEMO_FX.quake = win(u, 0.22, 0.31, 0.02);
-    if (u < 0.44) { DEMO_FX.fin = 1 - smooth01((u - 0.24) / 0.08); DEMO_FX.finMode = 'fall'; }
-    else { DEMO_FX.fin = smooth01((u - 0.46) / 0.07); DEMO_FX.finMode = 'drop'; }
-    cardTimeline('tl2', [{ y: '五代、宋', t: '多次修缮', u0: 0, u1: 0.21 }, { y: '1556', t: '嘉靖年间关中大地震，塔刹震落', u0: 0.21, u1: 0.4 }, { y: '1604', t: '万历三十二年重修，外包青砖', u0: 0.4 }], u);
-    wCall(L, 'fin', PGW(0, PG.top - 2, 0), { t: '塔刹震落', s: '嘉靖年间大地震', amber: true, dx: 70, dy: -24, a: win(u, 0.23, 0.44), r: rev(u, 0.23, 0.08) });
-    wCall(L, 'fin2', PGW(0, PG.top - 2, 0), { t: '重修塔刹', s: '万历年间', dx: 70, dy: -24, a: win(u, 0.5, 0.97), r: rev(u, 0.5, 0.1) });
-    wCall(L, 'case', PGW(-PG.S[1] / 2 - 0.1, stY0(1) + 3.2, 4.5), { t: '明代包砌青砖', s: '厚约 60 cm', amber: true, dx: -74, dy: 30, a: win(u, 0.42, 0.97), r: rev(u, 0.42, 0.12) });
-    exhSet('section', win(u, 0.5, 1.2, 0.04), clamp((u - 0.5) / 0.48, 0, 1));
+    const C = Q(3);
+    DEMO_FX.quake = win(u, C('大地震') - 0.01, C('震落') + 0.03, 0.02);
+    if (u < C('万历') - 0.01) { DEMO_FX.fin = 1 - sstep(C('震落') - 0.03, C('震落') + 0.05, u); DEMO_FX.finMode = 'fall'; }
+    else { DEMO_FX.fin = sstep(C('万历'), C('万历') + 0.07, u); DEMO_FX.finMode = 'drop'; }
+    cardTimeline('tl2', [{ y: '五代、宋', t: '多次修缮', u0: 0 }, { y: '1556', t: '嘉靖年间关中大地震，塔刹震落', u0: C('嘉靖') }, { y: '1604', t: '万历三十二年重修，外包青砖', u0: C('万历') }], u);
+    wCall(L, 'fin', PGW(0, PG.top - 2, 0), { t: '塔刹震落', s: '嘉靖年间关中大地震', amber: true, dx: 70, dy: -24, a: win(u, C('震落') - 0.02, C('万历') - 0.01), r: rev(u, C('震落') - 0.02, 0.06) });
+    wCall(L, 'fin2', PGW(0, PG.top - 2, 0), { t: '重修塔刹', s: '万历年间', dx: 70, dy: -24, a: win(u, C('万历') + 0.05, 0.97), r: rev(u, C('万历') + 0.05, 0.08) });
+    wCall(L, 'case', PGW(-PG.S[1] / 2 - 0.1, stY0(1) + 3.2, 4.5), { t: '明代包砌的青砖', s: '厚约 60 cm', amber: true, dx: -74, dy: 30, a: win(u, C('六十厘米') - 0.03, 0.97), r: rev(u, C('六十厘米') - 0.03, 0.1) });
+    const c0 = C('外套') - 0.03;
+    exhSet('section', win(u, c0, 1.2, 0.04), clamp((u - c0) / (1 - c0), 0, 1));
   } },
-  // 5 方锥形的塔身：尺寸标注 + 扫描框逐层上移
+  // 5 稳稳的方锥：轮廓、收分、重心与“二十层楼”
   { frame(u, t, L) {
+    const C = Q(4), c20 = C('二十层楼');
     HOLO.gridU.uAlpha.value = 0.6 * win(u, 0.02, 0.97, 0.06); HOLO.gridU.uR.value = 75;
-    wDim(L, 'base', PGW(-PG.PW - 0.3, 0, -PG.PD - 0.3), PGW(-PG.PW - 0.3, PG.PH, -PG.PD - 0.3), { t: '台基高约 4.2 m', off: -18, lab: -50, a: win(u, 0.06, 0.66), r: rev(u, 0.06, 0.14) });
-    wDim(L, 'h', PGW(PG.PW + 2.5, 0, PG.PD - 6), PGW(PG.PW + 2.5, PG.top, PG.PD - 6), { t: '通高约 64.5 m', off: 20, lab: 0, a: win(u, 0.3, 0.66), r: rev(u, 0.3, 0.16) });
-    const hs = PG.S[0] / 2;
-    wDim(L, 'w', PGW(-hs, stY0(0), hs + 0.75), PGW(hs, stY0(0), hs + 0.75), { t: '底层边长约 25.5 m', off: 22, lab: 14, a: win(u, 0.44, 0.66), r: rev(u, 0.44, 0.14) });
-    const top6 = stY0(6) + stWallH(6), h6 = PG.S[6] / 2;
-    for (const [id, sx, sz] of [['tSE', 1, 1], ['tNW', -1, -1]]) {
-      wPath(L, id, [PGW(sx * hs, stY0(0), sz * hs), PGW(sx * h6, top6, sz * h6)], { dash: '6 5', a: win(u, 0.64, 0.98), r: rev(u, 0.64, 0.12) });
-    }
-    wCall(L, 'taper', PGW(lerp(hs, h6, 0.55), lerp(stY0(0), top6, 0.55), lerp(hs, h6, 0.55)), { t: '逐层收分', s: '整座塔呈方锥形', dx: 78, dy: -20, a: win(u, 0.7, 0.98), r: rev(u, 0.7, 0.12) });
-    const sk = smooth01((u - 0.64) / 0.3), sy = lerp(0.6, PG.top - 1, sk);
-    placeScan(sy, win(u, 0.64, 0.95, 0.03));
-    for (let i = 0; i < 7; i++) {
-      const y = stY0(i) + stWallH(i) * 0.45;
-      wCall(L, 'n' + i, PGW(-PG.S[i] / 2 - 0.4, y, PG.S[i] / 2), { t: `第${CN_NUM[i]}层`, tag: true, dx: -30, dy: 0, a: win(u, 0.64, 0.98) * (sy > y ? 1 : 0), r: sy > y ? 1 : 0 });
-    }
+    wDim(L, 'base', PGW(-PG.PW - 0.3, 0, -PG.PD - 0.3), PGW(-PG.PW - 0.3, PG.PH, -PG.PD - 0.3), { t: '台基高 4 米多', off: -18, lab: -50, a: win(u, C('台基') - 0.03, C('收窄') + 0.1), r: rev(u, C('台基') - 0.03, 0.12) });
+    const hs = PG.S[0] / 2, top6 = stY0(6) + stWallH(6), h6 = PG.S[6] / 2;
+    for (const [id, sx, sz] of [['tSE', 1, 1], ['tNW', -1, -1]]) wPath(L, id, [PGW(sx * hs, stY0(0), sz * hs), PGW(sx * h6, top6, sz * h6)], { dash: '6 5', a: win(u, C('收窄') - 0.02, C('六十四米') - 0.02), r: rev(u, C('收窄') - 0.02, 0.12) });
+    wCall(L, 'taper', PGW(lerp(hs, h6, 0.55), lerp(stY0(0), top6, 0.55), lerp(hs, h6, 0.55)), { t: '一层比一层收窄', s: '像一座拉高的方锥', dx: 78, dy: -20, a: win(u, C('方锥') - 0.04, C('六十四米') - 0.02), r: rev(u, C('方锥') - 0.04, 0.1) });
+    const sk = sstep(C('收窄') - 0.04, C('方锥') + 0.12, u), sy = lerp(0.6, PG.top - 1, sk);
+    placeScan(sy, win(u, C('收窄') - 0.04, C('方锥') + 0.12, 0.03));
+    for (let i = 0; i < 7; i++) { const y = stY0(i) + stWallH(i) * 0.45; wCall(L, 'n' + i, PGW(-PG.S[i] / 2 - 0.4, y, PG.S[i] / 2), { t: `第${CN_NUM[i]}层`, tag: true, dx: -30, dy: 0, a: win(u, C('收窄') - 0.04, C('重心') - 0.02) * (sy > y ? 1 : 0), r: sy > y ? 1 : 0 }); }
+    wRing(L, 'cg', PGW(0, 19, PG.S[1] / 2 + 0.2), { a: win(u, C('重心') - 0.02, C('六十四米') - 0.02), r: rev(u, C('重心') - 0.02, 0.06), R: 10, amber: true });
+    wCall(L, 'cgt', PGW(0, 19, PG.S[1] / 2 + 0.2), { t: '下宽上窄，重心低', s: '站得格外稳当', amber: true, dx: 74, dy: 26, a: win(u, C('重心') - 0.01, C('六十四米') - 0.02), r: rev(u, C('重心') - 0.01, 0.08) });
+    wDim(L, 'h', PGW(-PG.PW - 2.5, 0, PG.PD - 6), PGW(-PG.PW - 2.5, PG.top, PG.PD - 6), { t: '约 64.5 m', off: -20, lab: 0, a: win(u, C('六十四米') - 0.03, 0.98), r: rev(u, C('六十四米') - 0.03, 0.14) });
+    // 二十层楼的全息体块（每层约 3.2 m）
+    const bk = sstep(c20 - 0.03, Math.min(0.98, c20 + 0.14), u);
+    HOLO.bU.uAlpha.value = win(u, c20 - 0.04, 1.2, 0.03); HOLO.bU.uReveal.value = bk;
+    const floors = Math.min(20, Math.floor(bk * 20.6));
+    if (bk > 0.02) wCall(L, 'b20', [HOLO.bAnchor[0], Math.max(3, floors * 3.2), HOLO.bAnchor[2]], { t: floors >= 20 ? '≈ 20 层楼' : `${floors} 层`, s: floors >= 20 ? '每层约 3.2 m' : '', dx: 64, dy: -18, a: win(u, c20 - 0.03, 1.2), r: 1 });
   } },
-  // 6 以砖仿木：立体展示（木构对照）→ 立面标注 → 各层开间与券门
+  // 6 砖头扮成的木房子：木构对照 → 柱、梁、斗 → 开间 → 拱门
   { frame(u, t, L) {
-    exhSet('bay', win(u, 0.04, 0.55, 0.04), clamp((u - 0.04) / 0.5, 0, 1));
+    const C = Q(5), e0 = C('模仿木头房子') - 0.05, e1 = C('越往上') - 0.02;
+    exhSet('bay', win(u, e0, e1, 0.04), pmap(u, [[e0, 0], [C('柱子'), 0.42], [C('“斗”'), 0.6], [e1, 0.8]]));
     const hs = PG.S[1] / 2, z = hs + 0.13, y0 = stY0(1), wh = stWallH(1), bw = 2 * hs / 9;
-    wCall(L, 'col', PGW(-hs + 2 * bw, y0 + 2.6, z), { t: '倚柱', s: '砖砌，仿木柱', dx: -64, dy: 34, a: win(u, 0.24, 0.55), r: rev(u, 0.24, 0.1) });
-    wCall(L, 'beam', PGW(-hs + 3.5 * bw, y0 + wh - 0.75, z), { t: '阑额', s: '仿木额', dx: -66, dy: -40, a: win(u, 0.31, 0.55), r: rev(u, 0.31, 0.1) });
-    wCall(L, 'dou', PGW(-hs + 5 * bw, y0 + wh - 0.37, z + 0.1), { t: '栌斗', s: '柱头上的斗形砖', dx: 66, dy: -40, a: win(u, 0.38, 0.55), r: rev(u, 0.38, 0.1) });
-    // 开间：每层倚柱高亮 + 间数
+    wCall(L, 'col', PGW(-hs + 2 * bw, y0 + 2.6, z), { t: '柱子', s: '砖砌的倚柱', dx: -64, dy: 34, a: win(u, C('柱子') - 0.01, e1), r: rev(u, C('柱子') - 0.01, 0.08) });
+    wCall(L, 'beam', PGW(-hs + 3.5 * bw, y0 + wh - 0.75, z), { t: '横梁', s: '砖砌的阑额', dx: -66, dy: -40, a: win(u, C('横梁') - 0.01, e1), r: rev(u, C('横梁') - 0.01, 0.08) });
+    wCall(L, 'dou', PGW(-hs + 5 * bw, y0 + wh - 0.37, z + 0.1), { t: '“斗”', s: '柱头上的栌斗', dx: 66, dy: -40, a: win(u, C('“斗”') - 0.01, e1), r: rev(u, C('“斗”') - 0.01, 0.08) });
+    const cn = [C('下面九间'), C('下面九间'), C('中间七间'), C('中间七间'), C('最上面五间'), C('最上面五间'), C('最上面五间')];
     for (let i = 0; i < 7; i++) {
-      const s = PG.S[i] / 2, n = PG.BAYS[i], yb = stY0(i), lt = stWallH(i) - 0.95, a = win(u, 0.58 + i * 0.022, 0.98, 0.03), r = rev(u, 0.58 + i * 0.022, 0.08);
-      for (let j = 0; j <= n; j++) {
-        const x = j === 0 ? -s + 0.23 : j === n ? s - 0.23 : -s + j * (2 * s / n);
-        wPath(L, `b${i}_${j}`, [PGW(x, yb, s + 0.13), PGW(x, yb + lt, s + 0.13)], { a, r, w: 1.6 });
-      }
-      wCall(L, 'bn' + i, PGW(s + 0.3, yb + lt * 0.5, s), { t: `${['九', '九', '七', '七', '五', '五', '五'][i]}间`, tag: true, dx: 36, dy: 0, a, r: rev(u, 0.6 + i * 0.022, 0.08) });
+      const s = PG.S[i] / 2, n = PG.BAYS[i], yb = stY0(i), lt = stWallH(i) - 0.95, u0 = cn[i] - 0.02 + (i % 2) * 0.012, a = win(u, u0, 0.98, 0.03), r = rev(u, u0, 0.07);
+      for (let j = 0; j <= n; j++) { const x = j === 0 ? -s + 0.23 : j === n ? s - 0.23 : -s + j * (2 * s / n); wPath(L, `b${i}_${j}`, [PGW(x, yb, s + 0.13), PGW(x, yb + lt, s + 0.13)], { a, r, w: 1.6 }); }
+      wCall(L, 'bn' + i, PGW(s + 0.3, yb + lt * 0.5, s), { t: `${['九', '九', '七', '七', '五', '五', '五'][i]}间`, tag: true, dx: 36, dy: 0, a, r: rev(u, u0 + 0.02, 0.07) });
     }
-    for (let i = 0; i < 7; i++) wRing(L, 'dr' + i, PGW(0, stY0(i) + stApex(i) * 0.5, PG.S[i] / 2 + 0.1), { a: win(u, 0.78 + i * 0.01, 0.99), r: rev(u, 0.78 + i * 0.01, 0.06), R: 7, ph: i * 0.13 });
-    wCall(L, 'door', PGW(PG.R[2] + 0.2, stY0(2) + stApex(2) * 0.6, PG.S[2] / 2 + 0.1), { t: '券门', s: '每层四面正中各开一道', dx: 70, dy: -26, a: win(u, 0.8, 0.99), r: rev(u, 0.8, 0.1) });
+    for (let i = 0; i < 7; i++) wRing(L, 'dr' + i, PGW(0, stY0(i) + stApex(i) * 0.5, PG.S[i] / 2 + 0.1), { a: win(u, C('拱门') - 0.03 + i * 0.008, 0.99), r: rev(u, C('拱门') - 0.03 + i * 0.008, 0.06), R: 7, ph: i * 0.13 });
+    wCall(L, 'door', PGW(PG.R[2] + 0.2, stY0(2) + stApex(2) * 0.6, PG.S[2] / 2 + 0.1), { t: '拱门', s: '每层四面正中各一道', dx: 70, dy: -26, a: win(u, C('拱门'), 0.99), r: rev(u, C('拱门'), 0.08) });
   } },
-  // 7 叠涩出檐：檐口立体展示（逐皮砌筑）+ 实景标注
+  // 7 一层层探出来的屋檐：叠涩、菱角牙子、反叠涩
   { frame(u, t, L) {
-    exhSet('corbel', win(u, 0.03, 1.2, 0.04), clamp((u - 0.03) / 0.9, 0, 1));
+    const C = Q(6);
+    exhSet('corbel', win(u, C('巧办法') - 0.06, 1.2, 0.04), pmap(u, [[C('巧办法') - 0.04, 0.02], [C('叠涩'), 0.44], [C('菱角牙子'), 0.62], [C('收回来'), 0.76], [1, 1]]));
     const i = 2, hs = PG.S[i] / 2, y0 = stY0(i) + stWallH(i), lay = PG.LAY;
-    wCall(L, 'die', PGW(-hs - PG.OUT[3] - 0.05, y0 + 3.5 * lay, hs - 3.2), { t: '叠涩出檐', s: '砖层逐皮挑出', dx: -70, dy: -34, a: win(u, 0.4, 0.98), r: rev(u, 0.4, 0.1) });
-    wCall(L, 'tooth', PGW(-hs - PG.OUT[1] - 0.15, y0 + 1.5 * lay, hs - 5.5), { t: '菱角牙子', s: '斜砌的砖', dx: -66, dy: 40, a: win(u, 0.56, 0.98), r: rev(u, 0.56, 0.1) });
-    wCall(L, 'back', PGW(-PG.S[i + 1] / 2 - 0.38, y0 + 7.5 * lay, hs - 4.2), { t: '反叠涩', s: '逐层收回，形成平台', dx: 60, dy: -46, a: win(u, 0.72, 0.98), r: rev(u, 0.72, 0.1) });
+    wCall(L, 'die', PGW(-hs - PG.OUT[3] - 0.05, y0 + 3.5 * lay, hs - 3.2), { t: '叠涩', s: '砖一层层往外探', dx: -70, dy: -34, a: win(u, C('叠涩') - 0.02, 0.98), r: rev(u, C('叠涩') - 0.02, 0.08) });
+    wCall(L, 'tooth', PGW(-hs - PG.OUT[1] - 0.15, y0 + 1.5 * lay, hs - 5.5), { t: '菱角牙子', s: '一排小牙齿似的尖角', dx: -66, dy: 40, a: win(u, C('菱角牙子') - 0.02, 0.98), r: rev(u, C('菱角牙子') - 0.02, 0.08) });
+    wCall(L, 'back', PGW(-PG.S[i + 1] / 2 - 0.38, y0 + 7.5 * lay, hs - 4.2), { t: '一层层收回来', s: '成为上一层的平台', dx: 60, dy: -46, a: win(u, C('收回来') - 0.02, 0.98), r: rev(u, C('收回来') - 0.02, 0.08) });
     const o5 = hs + PG.OUT[5] - 0.12;
-    wCall(L, 'bell', PGW(-o5, y0 + 5 * lay - 1.3, o5), { t: '檐角铜铃', tag: true, dx: 50, dy: 30, a: win(u, 0.84, 0.98), r: rev(u, 0.84, 0.1) });
+    wCall(L, 'bell', PGW(-o5, y0 + 5 * lay - 1.3, o5), { t: '檐角铜铃', tag: true, dx: 50, dy: 30, a: win(u, C('平台') - 0.02, 0.98), r: rev(u, C('平台') - 0.02, 0.08) });
   } },
-  // 8 塔内结构：拆解标注 + 剖切展示
+  // 8 塔里面藏着什么：拆解标注 + 剖切展示
   { frame(u, t, L) {
-    const ex = explodeK;
-    const a = (u0) => win(u, u0, 0.98) * smooth01((ex - 0.7) / 0.3);
-    wCall(L, 'room', partPt(4, -1.5, FLOOR[3] + 3.0, 0), { t: '塔心室', s: '每层一间方形塔室', dx: -88, dy: -20, a: a(0.1), r: rev(u, 0.1, 0.1) });
-    wCall(L, 'slab', partPt(3, -3.0, FLOOR[2] + 0.02, -3.0), { t: '木楼板', s: '中央留出楼梯井', dx: -80, dy: 18, a: a(0.2), r: rev(u, 0.2, 0.1) });
-    wCall(L, 'stair', partPt(2, -1.2, FLOOR[1] + 3.6, -0.6), { t: '木梯', s: '盘旋而上，可登至顶层', dx: -84, dy: 26, a: a(0.3), r: rev(u, 0.3, 0.1) });
-    wCall(L, 'wall', partPt(5, -PG.S[4] / 2, FLOOR[4] + 3.4, 0), { t: '砖土结构承重', s: '木楼板、木梯不承重', amber: true, dx: -70, dy: -30, a: a(0.47), r: rev(u, 0.47, 0.1) });
-    wCall(L, 'door', partPt(6, 0, FLOOR[5] + 1.6, PG.S[5] / 2), { t: '券门', s: '四面远眺西安城', dx: 70, dy: -30, a: a(0.78), r: rev(u, 0.78, 0.1) });
-    exhSet('storey', win(u, 0.08, 1.2, 0.04), clamp((u - 0.08) / 0.8, 0, 1));
+    const C = Q(7), ex = explodeK, a = (u0) => win(u, u0, 0.98) * smooth01((ex - 0.7) / 0.3);
+    wCall(L, 'room', partPt(4, -1.5, FLOOR[3] + 3.0, 0), { t: '方方正正的塔室', s: '每层一间', dx: -88, dy: -20, a: a(C('塔室') - 0.02), r: rev(u, C('塔室') - 0.02, 0.08) });
+    wCall(L, 'slab', partPt(3, -3.0, FLOOR[2] + 0.02, -3.0), { t: '木楼板', s: '中央留出楼梯井', dx: -80, dy: 18, a: a(C('木楼板') - 0.02), r: rev(u, C('木楼板') - 0.02, 0.08) });
+    wCall(L, 'stair', partPt(2, -1.2, FLOOR[1] + 3.6, -0.6), { t: '木梯', s: '一层层通到顶层', dx: -84, dy: 26, a: a(C('木梯') - 0.02), r: rev(u, C('木梯') - 0.02, 0.08) });
+    wCall(L, 'wall', partPt(5, -PG.S[4] / 2, FLOOR[4] + 3.4, 0), { t: '厚厚的砖墙扛起全塔', s: '楼板、木梯并不承重', amber: true, dx: -70, dy: -30, a: a(C('砖墙') - 0.02), r: rev(u, C('砖墙') - 0.02, 0.08) });
+    wCall(L, 'door', partPt(6, 0, FLOOR[5] + 1.6, PG.S[5] / 2), { t: '四面拱门', s: '登高远望西安城', dx: 70, dy: -30, a: a(C('拱门') - 0.02), r: rev(u, C('拱门') - 0.02, 0.08) });
+    const s0 = C('塔室') - 0.08;
+    exhSet('storey', win(u, s0, 1.2, 0.04), pmap(u, [[s0, 0], [C('塔室'), 0.3], [C('木楼板'), 0.4], [C('木梯'), 0.5], [C('拱门'), 0.62], [1, 1]]));
   } },
-  // 9 圣教序碑与门楣线刻
+  // 9 两块碑与一幅“图纸”
   { frame(u, t, L) {
-    const hs = PG.S[0] / 2, nz = hs - 0.95, ny = stY0(0) + 2.4;
-    wCall(L, 'sw', PGW(-2 * hs / 9 * 2, ny, nz), { t: '《大唐三藏圣教序》碑', s: '西龛 · 唐太宗撰文', dx: -70, dy: -44, a: win(u, 0.2, 0.56), r: rev(u, 0.2, 0.12) });
-    wCall(L, 'se', PGW(2 * hs / 9 * 2, ny, nz), { t: '《圣教序记》碑', s: '东龛 · 唐高宗撰文', dx: 70, dy: -44, a: win(u, 0.36, 0.56), r: rev(u, 0.36, 0.12) });
-    wCall(L, 'chu', PGW(0, stY0(0) + 5.3, hs + 0.1), { t: '均由褚遂良书写', tag: true, pin: true, dy: -30, a: win(u, 0.48, 0.56), r: rev(u, 0.48, 0.06) });
-    wCall(L, 'lin', PGW(-hs + 0.36, stY0(0) + 3.75 + 0.5, 0.3), { t: '西门楣线刻', s: '唐代佛殿图像', dx: 70, dy: -40, a: win(u, 0.68, 0.98), r: rev(u, 0.68, 0.1) });
-    exhSet(u < 0.59 ? 'stele' : 'lintel', u < 0.59 ? win(u, 0.1, 0.56, 0.03) : win(u, 0.62, 1.2, 0.04), u < 0.59 ? clamp((u - 0.1) / 0.46, 0, 1) : clamp((u - 0.62) / 0.36, 0, 1));
+    const C = Q(8), hs = PG.S[0] / 2, nz = hs - 0.95, ny = stY0(0) + 2.4, sw = C('一件宝贝') - 0.02;
+    wCall(L, 'sw', PGW(-2 * hs / 9 * 2, ny, nz), { t: '《大唐三藏圣教序》碑', s: '西边 · 唐太宗撰文', dx: -70, dy: -44, a: win(u, C('西边那块') - 0.02, sw), r: rev(u, C('西边那块') - 0.02, 0.1) });
+    wCall(L, 'se', PGW(2 * hs / 9 * 2, ny, nz), { t: '《圣教序记》碑', s: '东边 · 唐高宗撰文', dx: 70, dy: -44, a: win(u, C('东边那块') - 0.02, sw), r: rev(u, C('东边那块') - 0.02, 0.1) });
+    wCall(L, 'chu', PGW(0, stY0(0) + 5.3, hs + 0.1), { t: '字出自褚遂良', tag: true, pin: true, dy: -30, a: win(u, C('褚遂良') - 0.02, sw), r: rev(u, C('褚遂良') - 0.02, 0.06) });
+    wCall(L, 'lin', PGW(-hs + 0.36, stY0(0) + 3.75 + 0.5, 0.3), { t: '西门门楣上的线刻', s: '一座唐代佛殿', dx: 70, dy: -40, a: win(u, C('一幅线刻'), 0.98), r: rev(u, C('一幅线刻'), 0.08) });
+    wCall(L, 'liang', PGW(-hs + 0.36, stY0(0) + 3.0, -1.2), { t: '梁思成的“图纸”', s: '据此研究唐代木构建筑', amber: true, dx: 70, dy: 40, a: win(u, C('梁思成') - 0.01, 0.98), r: rev(u, C('梁思成') - 0.01, 0.08) });
+    if (u < sw) exhSet('stele', win(u, C('唐碑') - 0.04, sw, 0.03), pmap(u, [[C('唐碑') - 0.05, 0], [C('西边那块'), 0.2], [C('东边那块'), 0.4], [C('褚遂良'), 0.6], [sw, 0.9]]));
+    else exhSet('lintel', win(u, C('一幅线刻') - 0.02, 1.2, 0.04), pmap(u, [[C('一幅线刻') - 0.03, 0], [C('佛殿'), 0.26], [1, 1]]));
   } },
-  // 10 倾斜与回倾：竖直参考线、倾斜后的塔轴（放大约 10 倍示意）、监测数据
+  // 10 斜塔“站直”了
   { frame(u, t, L) {
-    const base = PGW(0, 0, 0), up = PGW(0, 74, 0);
+    const C = Q(9), base = PGW(0, 0, 0), up = PGW(0, 74, 0);
     const q = new T.Quaternion().setFromAxisAngle(TILT_AXIS, DEMO_FX.tilt), tv = new T.Vector3(0, 74, 0).applyQuaternion(q);
     const tip = [base[0] + tv.x, tv.y, base[2] + tv.z];
-    wPath(L, 'ref', [base, up], { dash: '5 6', color: '#e9f3f6', a: win(u, 0.06, 0.98) * 0.8, r: rev(u, 0.06, 0.12) });
-    wPath(L, 'axis', [base, tip], { amber: true, w: 2, a: win(u, 0.1, 0.98), r: rev(u, 0.1, 0.12) });
+    wPath(L, 'ref', [base, up], { dash: '5 6', color: '#e9f3f6', a: win(u, C('斜塔') - 0.02, 0.98) * 0.8, r: rev(u, C('斜塔') - 0.02, 0.1) });
+    wPath(L, 'axis', [base, tip], { amber: true, w: 2, a: win(u, C('慢慢向西北') - 0.02, 0.98), r: rev(u, C('慢慢向西北') - 0.02, 0.1) });
     const arc = []; for (let k = 0; k <= 8; k++) { const qq = new T.Quaternion().setFromAxisAngle(TILT_AXIS, DEMO_FX.tilt * k / 8), v = new T.Vector3(0, 70, 0).applyQuaternion(qq); arc.push([base[0] + v.x, v.y, base[2] + v.z]); }
-    wPath(L, 'arc', arc, { amber: true, a: win(u, 0.16, 0.98) * smooth01(DEMO_FX.tilt / TILT_SHOW * 3), r: 1 });
-    wCall(L, 'tip', tip, { t: '塔顶向西北偏移', s: '倾斜幅度放大约 10 倍示意', amber: true, dx: 80, dy: 20, a: win(u, 0.2, 0.8), r: rev(u, 0.2, 0.1) });
-    wCall(L, 'nw', PGW(-34, 0.4, -34), { t: '西北', tag: true, pin: true, dy: -22, amber: true, a: win(u, 0.22, 0.7), r: rev(u, 0.22, 0.08) });
-    cardTilt(u, win(u, 0.03, 1.2));
+    wPath(L, 'arc', arc, { amber: true, a: win(u, C('慢慢向西北'), 0.98) * smooth01(DEMO_FX.tilt / TILT_SHOW * 3), r: 1 });
+    wCall(L, 'tip', tip, { t: '塔顶偏出去一米多', s: '倾斜幅度放大约 10 倍示意', amber: true, dx: 80, dy: 20, a: win(u, C('一米多') - 0.04, C('站直')), r: rev(u, C('一米多') - 0.04, 0.08) });
+    wCall(L, 'tip2', tip, { t: '一点点“站直”', s: '每年回正约 1 mm', dx: 80, dy: 20, a: win(u, C('站直') + 0.01, 0.98), r: rev(u, C('站直') + 0.01, 0.08) });
+    wCall(L, 'nw', PGW(-34, 0.4, -34), { t: '西北', tag: true, pin: true, dy: -22, amber: true, a: win(u, C('西北') - 0.02, C('关停')), r: rev(u, C('西北') - 0.02, 0.06) });
+    cardTilt(u, win(u, C('斜塔') - 0.02, 1.2), { d0: C('过量抽取'), d1: C('一米多') + 0.04, rb: C('站直'), tx: C('关停') });
   } },
   // 11 月下雁塔
   { frame(u, t, L) {
+    const C = Q(10);
     if (NIGHT.moon && NIGHT.moon.disp) {
       const d = NIGHT.moon.disp, c = camera.position;
-      wCall(L, 'moon', [c.x + d.x * 3000, c.y + d.y * 3000, c.z + d.z * 3000], { t: '盈凸月', s: '东南方天空', dx: -70, dy: 34, a: win(u, 0.32, 0.97) * smooth01((NIGHT.sky - 0.5) / 0.3), r: rev(u, 0.32, 0.1) });
+      wCall(L, 'moon', [c.x + d.x * 3000, c.y + d.y * 3000, c.z + d.z * 3000], { t: '月亮升上东南的天空', s: '盈凸月', dx: -70, dy: 34, a: win(u, C('月亮') - 0.02, C('如今') + 0.06) * smooth01((NIGHT.sky - 0.5) / 0.3), r: rev(u, C('月亮') - 0.02, 0.08) });
     }
-    wCall(L, 'tang', [0, 24, 760], { t: '大唐不夜城', s: '示意街区', tag: true, pin: true, dy: -24, a: win(u, 0.5, 0.97), r: rev(u, 0.5, 0.08) });
-    wCall(L, 'fur', [905, 30, 640], { t: '大唐芙蓉园', s: '示意园林', tag: true, pin: true, dy: -24, a: win(u, 0.58, 0.97), r: rev(u, 0.58, 0.08) });
-    cardLoc(1, rev(u, 0.62, 0.3), '始建于公元 652 年，迄今一千三百余年');
+    const hall = COURT_LABELS.find((x) => x.t === '大雄宝殿');
+    if (hall) wCall(L, 'xz', hall.p, { t: '玄奘曾在寺中译经', tag: true, pin: true, dy: -26, a: win(u, C('玄奘') - 0.02, C('如今') + 0.08), r: rev(u, C('玄奘') - 0.02, 0.06) });
+    wCall(L, 'tang', [0, 24, 760], { t: '大唐不夜城', s: '示意街区', tag: true, pin: true, dy: -24, a: win(u, C('如今'), 0.97), r: rev(u, C('如今'), 0.08) });
+    wCall(L, 'fur', [905, 30, 640], { t: '大唐芙蓉园', s: '示意园林', tag: true, pin: true, dy: -24, a: win(u, C('如今') + 0.04, 0.97), r: rev(u, C('如今') + 0.04, 0.08) });
+    cardLoc(1, rev(u, C('静静站着') - 0.04, 0.3), '始建于公元 652 年，迄今一千三百余年');
   } },
 ];
+// 进入演示时预先编译全息、立体展示用到的着色器并建好全部展品，避免播放中途卡顿
+function dfxPrewarm() {
+  dfxInit(); exhInit();
+  for (const id of Object.keys(EX_DEFS)) exItem(id);
+  try {
+    const vis = [HOLO.stupa, HOLO.scan, HOLO.grid, HOLO.bldg].map((o) => o.visible);
+    [HOLO.stupa, HOLO.scan, HOLO.grid, HOLO.bldg].forEach((o) => { o.visible = true; });
+    renderer.compile(HOLO.group, camera, scene);
+    [HOLO.stupa, HOLO.scan, HOLO.grid, HOLO.bldg].forEach((o, i) => { o.visible = vis[i]; });
+    const ev = Object.values(EXH.items).map((it) => it.grp.visible);
+    Object.values(EXH.items).forEach((it) => { it.grp.visible = true; });
+    renderer.compile(EXH.scene, EXH.cam);
+    Object.values(EXH.items).forEach((it, i) => { it.grp.visible = ev[i]; });
+  } catch (e) { console.warn('prewarm', e); }
+}
 function dfxInit() { if (!DFX.layer) DFX.layer = new AnnoLayer($('annoSvg'), $('annoLbl')); holoInit(); }
 function dfxEnter(i) {
   dfxInit();
@@ -16104,8 +16287,9 @@ function dfxFrame(i, u, t) {
   dfxInit();
   const L = DFX.layer;
   L.begin(simTime, canvas.clientWidth, canvas.clientHeight); hudBegin();
+  L.avoid = EXH.vis && !EXH.hiding && EXH.rect ? { left: EXH.rect.left - 6, right: EXH.rect.left + EXH.rect.w + 6, top: EXH.rect.top - 6, bottom: EXH.rect.top + EXH.rect.h + 6 } : null;
   // 默认关闭全部场景特效，由本节脚本按需打开
-  HOLO.U.uAlpha.value = 0; HOLO.scanU.uAlpha.value = 0; HOLO.gridU.uAlpha.value = 0;
+  HOLO.U.uAlpha.value = 0; HOLO.scanU.uAlpha.value = 0; HOLO.gridU.uAlpha.value = 0; HOLO.bU.uAlpha.value = 0;
   DEMO_FX.quake = 0;
   const S = DFX_CH[i]; if (S && S.frame) S.frame(u, t, L);
   L.end(); hudEnd();
